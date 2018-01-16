@@ -9,12 +9,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap bmp;
     private Canvas canvas;
     private LinearLayout ll;
+
+    private Bitmap poro, scuttler;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -50,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
     private float downX, downY;
 
     private Paint title;
+    private int river = Color.rgb(35,66,94);
+
+
+    private Poro player;
+    private float shift, //pixels translated down
+        shiftSpeed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
         ll = (LinearLayout) findViewById(R.id.draw_area);
         ll.setBackgroundDrawable(new BitmapDrawable(bmp));
 
+        poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro);
+        scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
+
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         editor = sharedPref.edit();
@@ -80,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
         //initialize fonts
         trebuchetms = Typeface.createFromAsset(getAssets(), "fonts/TrebuchetMS.ttf");
 
-        canvas.drawColor(Color.BLACK);
+        //background
+        canvas.drawColor(river);
 
         //pre-defined paints
         title = newPaint(Color.WHITE);
@@ -99,7 +113,23 @@ public class MainActivity extends AppCompatActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            if (!paused) {
+                                if (menu.equals("game")) {
+                                    //background
+                                    canvas.drawColor(river);
 
+                                    canvas.save();
+                                    canvas.translate(0, -shift);
+
+                                    player.draw();
+                                    player.drawHitbox(); //debugging purposes
+
+                                    canvas.restore();
+
+                                    shiftSpeed = convert854((float)(1 + frameCount / 60. * 0.03));
+                                    shift += shiftSpeed;
+                                }
+                            }
 
                             //update canvas
                             ll.invalidate();
@@ -138,6 +168,15 @@ public class MainActivity extends AppCompatActivity {
         float X = event.getX();
         float Y = event.getY();
         int action = event.getAction();
+
+        if (menu.equals("start")) {
+            if (action == MotionEvent.ACTION_UP) {
+                menu = "game";
+                player = new Poro(canvas, poro);
+                shift = 0;
+                frameCount = 0;
+            }
+        }
 
         return true;
     }
