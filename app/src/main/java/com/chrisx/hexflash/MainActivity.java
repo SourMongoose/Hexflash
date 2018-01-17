@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private long nanosecondsPerFrame;
     private long millisecondsPerFrame;
 
-    private float downX, downY;
+    private float lastX, lastY;
 
     private Paint title;
     private int river = Color.rgb(35,66,94);
@@ -130,11 +130,12 @@ public class MainActivity extends AppCompatActivity {
                                     canvas.translate(0, -shift);
 
                                     player.draw();
-                                    player.drawHitbox(); //debugging purposes
+                                    //player.drawHitbox(); //debugging purposes
+                                    if (player.isChanneling()) player.update(FRAMES_PER_SECOND, lastX, lastY+shift);
 
                                     canvas.restore();
 
-                                    shiftSpeed = c854((float)(1 + frameCount / 60. * 0.03));
+                                    shiftSpeed = c854((float)(1 + 0.03 * frameCount / FRAMES_PER_SECOND));
                                     shift += shiftSpeed;
                                 }
                             }
@@ -183,6 +184,14 @@ public class MainActivity extends AppCompatActivity {
                 player = new Poro(canvas, poro);
                 shift = 0;
                 frameCount = 0;
+            }
+        } else if (menu.equals("game")) {
+            lastX = X;
+            lastY = Y;
+            if (action == MotionEvent.ACTION_DOWN) {
+                player.startChannel((float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.3));
+            } else if (action == MotionEvent.ACTION_UP) {
+                if (player.isChanneling()) player.stopChannel();
             }
         }
 
