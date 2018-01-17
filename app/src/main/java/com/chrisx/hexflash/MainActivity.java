@@ -34,12 +34,12 @@ public class MainActivity extends AppCompatActivity {
     private Canvas canvas;
     private LinearLayout ll;
 
-    private Bitmap poro, scuttler;
+    private Bitmap poro, scuttler, porosnax;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
 
-    private Typeface trebuchetms;
+    private Typeface cd, cd_i, cd_b, cd_bi;
 
     private boolean paused = false;
     private long frameCount = 0;
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private Poro player;
     private float shift, //pixels translated down
         shiftSpeed;
+    private float maxRange, secToMaxRange;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
+        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -91,13 +93,19 @@ public class MainActivity extends AppCompatActivity {
         millisecondsPerFrame = (long)1e3 / FRAMES_PER_SECOND;
 
         //initialize fonts
-        trebuchetms = Typeface.createFromAsset(getAssets(), "fonts/TrebuchetMS.ttf");
+        cd = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams.ttf");
+        cd_b = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams_Bold.ttf");
+        cd_i = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams_Italic.ttf");
+        cd_bi = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams_BoldItalic.ttf");
 
         //background
         canvas.drawColor(river);
 
         //pre-defined paints
         title = newPaint(Color.WHITE);
+        title.setTextAlign(Paint.Align.CENTER);
+        title.setTextSize(c854(80));
+        title.setTypeface(cd_b);
 
         //title screen
         drawTitleMenu();
@@ -126,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     canvas.restore();
 
-                                    shiftSpeed = convert854((float)(1 + frameCount / 60. * 0.03));
+                                    shiftSpeed = c854((float)(1 + frameCount / 60. * 0.03));
                                     shift += shiftSpeed;
                                 }
                             }
@@ -193,12 +201,12 @@ public class MainActivity extends AppCompatActivity {
     private Paint newPaint(int color) {
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         p.setColor(color);
-        p.setTypeface(trebuchetms);
+        p.setTypeface(cd);
 
         return p;
     }
 
-    private float convert854(float f) {
+    private float c854(float f) {
         return h() / (854 / f);
     }
 
@@ -210,7 +218,15 @@ public class MainActivity extends AppCompatActivity {
         return Math.PI/180*deg;
     }
 
-    private void drawTitleMenu() {
+    private void drawBmp(Bitmap bmp, RectF rectF) {
+        canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight()), rectF, null);
+    }
 
+    private void drawTitleMenu() {
+        canvas.drawText("HEXFLASH", w()/2, h()/2+w()*3/8-c854(46), title);
+        drawBmp(porosnax, new RectF(w()/8, h()/2-w()*3/8-c854(30), w()*7/8, h()/2+w()*3/8-c854(30)));
+        title.setTypeface(cd);
+        title.setTextSize(c854(40));
+        canvas.drawText("tap to start", w()/2, h()/2+w()/2, title);
     }
 }
