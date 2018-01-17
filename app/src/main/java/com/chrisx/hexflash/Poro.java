@@ -56,6 +56,21 @@ class Poro {
         angle = Math.PI / 2;
     }
 
+    public float getW() {
+        return w;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+    public void setY(float y) {
+        this.y = y;
+    }
+
     public float getMaxRange() {
         return maxRange;
     }
@@ -89,11 +104,14 @@ class Poro {
     public void draw() {
         c.save();
         c.translate(x, y);
-        c.rotate((float)(angle * 180/Math.PI - 90)); //convert to degrees and shift by 90deg
 
+        if (channel) {
+            drawRange();
+            drawIndicator();
+        }
+        c.rotate((float)(angle * 180/Math.PI - 90)); //convert to degrees and shift by 90deg
         //c.drawText(currRange + " / " + maxRange, 0,0,indicator); //debugging purposes
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
-        if (channel) drawRange();
 
         c.restore();
     }
@@ -106,5 +124,13 @@ class Poro {
         c.drawCircle(0, 0, maxRange, rangeGradient);
         c.drawCircle(0, 0, currRange, currRangeCircle);
         c.drawCircle(0, 0, maxRange, maxRangeCircle);
+    }
+
+    public void drawIndicator() {
+        double tempAngle = Math.atan2(targetY - y, targetX - x);
+        float tempX = currRange * (float)Math.cos(tempAngle),
+                tempY = currRange * (float)Math.sin(tempAngle);
+        c.drawCircle(tempX, tempY, maxRange*3/40, currRangeCircle);
+        c.drawCircle(tempX, tempY, maxRange/40, indicator);
     }
 }

@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Canvas canvas;
     private LinearLayout ll;
 
-    private Bitmap poro, scuttler, porosnax;
+    private Bitmap poro, scuttler, porosnax, hook;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -58,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Poro player;
+    private float playerY;
     private float shift, //pixels translated down
         shiftSpeed;
+    private int hookAnimation;
     private float maxRange, secToMaxRange;
 
     @Override
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
+        hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -133,10 +136,42 @@ public class MainActivity extends AppCompatActivity {
                                     //player.drawHitbox(); //debugging purposes
                                     if (player.isChanneling()) player.update(FRAMES_PER_SECOND, lastX, lastY+shift);
 
+                                    if (!player.isChanneling() && player.getY()-shift < h()/10) {
+                                        menu = "hook";
+                                        hookAnimation = 0;
+                                        playerY = player.getY();
+                                    }
+
                                     canvas.restore();
 
-                                    shiftSpeed = c854((float)(1 + 0.03 * frameCount / FRAMES_PER_SECOND));
+                                    shiftSpeed = c854((float)(0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
                                     shift += shiftSpeed;
+                                } else if (menu.equals("hook")) {
+                                    //background
+                                    canvas.drawColor(river);
+
+                                    canvas.save();
+                                    canvas.translate(0, -shift);
+                                    player.draw();
+                                    canvas.restore();
+
+                                    int hookDuration = FRAMES_PER_SECOND * 5/6;
+                                    if (hookAnimation < hookDuration / 2) {
+                                        float hookY = (playerY+player.getW()-shift)*(hookAnimation/(hookDuration/2f));
+                                        drawBmp(hook, new RectF(player.getX()-w()/16,-w()/8*7.5f,player.getX()+w()/16,hookY));
+                                    } else {
+                                        float hookY = (playerY+player.getW()-shift)*((hookDuration-hookAnimation)/(hookDuration/2f));
+                                        drawBmp(hook, new RectF(player.getX()-w()/16,-w()/8*7.5f,player.getX()+w()/16,hookY));
+                                        player.setY(hookY-player.getW());
+                                    }
+
+                                    if (hookAnimation > hookDuration) {
+                                        menu = "gameover";
+                                    }
+                                    hookAnimation++;
+                                } else if (menu.equals("gameover")) {
+                                    drawGameoverScreen();
+                                    menu = "limbo";
                                 }
                             }
 
@@ -182,16 +217,21 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_UP) {
                 menu = "game";
                 player = new Poro(canvas, poro);
-                shift = 0;
-                frameCount = 0;
+                shift = frameCount = 0;
             }
         } else if (menu.equals("game")) {
             lastX = X;
             lastY = Y;
             if (action == MotionEvent.ACTION_DOWN) {
-                player.startChannel((float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.3));
+                player.startChannel((float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5));
             } else if (action == MotionEvent.ACTION_UP) {
                 if (player.isChanneling()) player.stopChannel();
+            }
+        } else if (menu.equals("limbo")) {
+            if (action == MotionEvent.ACTION_UP) {
+                menu = "game";
+                player.reset();
+                shift = frameCount = 0;
             }
         }
 
@@ -237,5 +277,9 @@ public class MainActivity extends AppCompatActivity {
         title.setTypeface(cd);
         title.setTextSize(c854(40));
         canvas.drawText("tap to start", w()/2, h()/2+w()/2, title);
+    }
+
+    private void drawGameoverScreen() {
+        canvas.drawColor(river);
     }
 }
