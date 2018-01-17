@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Canvas canvas;
     private LinearLayout ll;
 
-    private Bitmap poro, scuttler, porosnax, hook;
+    private Bitmap poro, scuttler, porosnax, hook, blitzwithporo;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
+        blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -281,5 +282,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawGameoverScreen() {
         canvas.drawColor(river);
+        canvas.drawBitmap(blitzwithporo, new Rect(3,3,blitzwithporo.getWidth()-2,blitzwithporo.getHeight()-2),
+                new RectF(w()/8,h()/2-w()*3/8,w()*7/8,h()/2+w()*3/8), null);
     }
 }
