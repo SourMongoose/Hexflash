@@ -180,11 +180,13 @@ public class MainActivity extends AppCompatActivity {
                                         }
 
                                         //reaches top of screen
-                                        if (!player.isChanneling() && player.getY() - shift < h() / 10) {
+                                        if (player.getY() - shift < h() / 10) {
+                                            player.interruptChannel();
+                                            playerY = player.getY();
+
                                             goToMenu("hook");
                                             gameoverBmp = blitzwithporo;
                                             hookAnimation = 0;
-                                            playerY = player.getY();
                                         }
 
                                         canvas.restore();
@@ -314,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_DOWN) {
                 player.startChannel((float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5));
             } else if (action == MotionEvent.ACTION_UP) {
-                if (player.isChanneling()) player.stopChannel();
+                if (player.isChanneling()) player.endChannel();
             }
         } else if (menu.equals("limbo")) {
             if (action == MotionEvent.ACTION_UP) {

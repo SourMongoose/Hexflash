@@ -91,7 +91,10 @@ class Poro {
         this.currRange = 0;
         this.secToMaxRange = secToMaxRange;
     }
-    void stopChannel() {
+    void interruptChannel() {
+        channel = false;
+    }
+    void endChannel() {
         channel = false;
         angle = Math.atan2(targetY - y, targetX - x);
         x += currRange * Math.cos(angle);
@@ -108,7 +111,7 @@ class Poro {
         //hits max range
         if (currRange >= maxRange) {
             currRange = maxRange;
-            stopChannel();
+            endChannel();
         }
     }
     void update() {
