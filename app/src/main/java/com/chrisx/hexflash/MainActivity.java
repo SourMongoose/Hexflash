@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title, sink, scoreTitle, scoreText;
+    private Paint title_bold, title, sink, scoreTitle, scoreText;
     private int river = Color.rgb(35,66,94);
 
 
@@ -120,10 +120,14 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawColor(river);
 
         //pre-defined paints
-        title = newPaint(Color.WHITE);
-        title.setTextAlign(Paint.Align.CENTER);
-        title.setTextSize(c854(80));
-        title.setTypeface(cd_b);
+        title_bold = newPaint(Color.WHITE);
+        title_bold.setTextAlign(Paint.Align.CENTER);
+        title_bold.setTextSize(c854(80));
+        title_bold.setTypeface(cd_b);
+
+        title = new Paint(title_bold);
+        title.setTextSize(c854(40));
+        title.setTypeface(cd);
 
         sink = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -381,10 +385,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void drawTitleMenu() {
-        canvas.drawText("HEXFLASH", w()/2, c854(561), title);
+        canvas.drawText("HEXFLASH", w()/2, c854(561), title_bold);
         drawBmp(porosnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
-        title.setTypeface(cd);
-        title.setTextSize(c854(40));
         canvas.drawText("tap to start", w()/2, c854(667), title);
     }
 
@@ -392,6 +394,10 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawColor(river);
         canvas.drawBitmap(gameoverBmp, new Rect(3,3,gameoverBmp.getWidth()-2,gameoverBmp.getHeight()-2),
                 new RectF(w()/2-c854(180),h()/2-c854(180),w()/2+c854(180),h()/2+c854(180)), null);
+        title_bold.setTextSize(c854(70));
+        canvas.drawText("GAME OVER", w()/2, c854(160), title_bold);
+        canvas.drawText("you scored: " + score, w()/2, c854(200), title);
+        canvas.drawText("play again?", w()/2, c854(700), title);
     }
 
     private void drawScores() {
