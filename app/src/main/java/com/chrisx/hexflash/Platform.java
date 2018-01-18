@@ -1,22 +1,84 @@
 package com.chrisx.hexflash;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 
-public class Platform {
-    private float x, y, width;
+class Platform {
+    private float x, y, w;
     private boolean moving; //true=scuttle, false=lilypad
     private float speed; //in x-direction
-    private int dir; //-1=left, 1=right
+    private int angle;
 
     private Canvas c;
+    private Bitmap bmp;
 
-    public Platform(Canvas c) {
-        width = c.getWidth() / 5;
-
+    //constructor for lilypad
+    Platform(Canvas c, float x, float y) {
         this.c = c;
+
+        this.x = x;
+        this.y = y;
+        w = c.getWidth() / 5;
+        moving = false;
+        speed = 0;
+
+        angle = (int)(Math.random()*360);
+        bmp = MainActivity.lilypad;
+    }
+    //constructor for scuttle
+    Platform(Canvas c, float x, float y, float speed) {
+        this.c = c;
+
+        this.x = x;
+        this.y = y;
+        this.w = c.getWidth() / 5;
+        this.speed = speed;
+
+        if (speed > 0) {
+            angle = Math.random() < 0.5 ? 90 : 270;
+            bmp = MainActivity.scuttler;
+        } else {
+            angle = (int)(Math.random()*360);
+            bmp = MainActivity.lilypad;
+        }
     }
 
-    public void draw() {
+    float getX() {
+        return x;
+    }
+    float getY() {
+        return y;
+    }
+    float getW() {
+        return w;
+    }
+    float getAngle() {
+        return angle;
+    }
 
+    boolean visible() {
+        return y+w/2 > 0 || y-w/2 < c.getHeight();
+    }
+
+    void update() {
+        if (moving) {
+            if (x + w/2 > c.getWidth() || x - w/2 < 0)
+                angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
+
+            if (angle == 90) x += speed;
+            if (angle == 270) x -= speed;
+        }
+    }
+
+    void draw() {
+        c.save();
+        c.translate(x, y);
+
+        c.rotate(angle); //convert to degrees and shift by 90deg
+        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
+
+        c.restore();
     }
 }

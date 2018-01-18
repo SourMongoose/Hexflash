@@ -16,13 +16,17 @@ class Poro {
     private double angle;
     private boolean channel;
 
+    private Platform platform;
+    private float offsetX, offsetY; //distance away from center of platform
+    private float offsetAngle;
+
     private Canvas c;
     private Bitmap bmp;
     private Paint hitbox, indicator, maxRangeCircle, currRangeCircle, rangeGradient;
 
-    public Poro(Canvas c, Bitmap bmp) {
+    Poro(Canvas c) {
         this.c = c;
-        this.bmp = bmp;
+        this.bmp = MainActivity.poro;
 
         maxRange = c.getHeight() / 4;
 
@@ -50,49 +54,56 @@ class Poro {
         reset();
     }
 
-    public void reset() {
+    void reset() {
         x = c.getWidth() / 2;
         y = c.getHeight() / 2;
         angle = Math.PI / 2;
     }
 
-    public float getW() {
+    float getW() {
         return w;
     }
 
-    public float getX() {
+    float getX() {
         return x;
     }
 
-    public float getY() {
+    float getY() {
         return y;
     }
-    public void setY(float y) {
+    void setY(float y) {
         this.y = y;
     }
 
-    public float getMaxRange() {
+    float getMaxRange() {
         return maxRange;
     }
 
-    public void startChannel(float secToMaxRange) {
+    void setPlatform(Platform p) {
+        this.platform = p;
+        offsetX = p.getX() - x;
+        offsetY = p.getY() - y;
+        offsetAngle = (float)(p.getAngle()*Math.PI/180 - angle);
+    }
+
+    void startChannel(float secToMaxRange) {
         channel = true;
         this.currRange = 0;
         this.secToMaxRange = secToMaxRange;
     }
-    public void stopChannel() {
+    void stopChannel() {
         channel = false;
         angle = Math.atan2(targetY - y, targetX - x);
         x += currRange * Math.cos(angle);
         y += currRange * Math.sin(angle);
     }
-    public boolean isChanneling() {
+    boolean isChanneling() {
         return channel;
     }
-    public void update(int fps, float x, float y) {
+    void update(float x, float y) {
         this.targetX = x;
         this.targetY = y;
-        currRange += maxRange / secToMaxRange / fps;
+        currRange += maxRange / secToMaxRange / MainActivity.FRAMES_PER_SECOND;
 
         //hits max range
         if (currRange >= maxRange) {
@@ -100,8 +111,13 @@ class Poro {
             stopChannel();
         }
     }
+    void update() {
+        x = platform.getX() - offsetX;
+        y = platform.getY() - offsetY;
+        angle = platform.getAngle()*Math.PI/180 - offsetAngle;
+    }
 
-    public void draw() {
+    void draw() {
         c.save();
         c.translate(x, y);
 
@@ -116,17 +132,17 @@ class Poro {
         c.restore();
     }
 
-    public void drawHitbox() {
+    void drawHitbox() {
         c.drawCircle(x, y, w/2, hitbox);
     }
 
-    public void drawRange() {
+    void drawRange() {
         c.drawCircle(0, 0, maxRange, rangeGradient);
         c.drawCircle(0, 0, currRange, currRangeCircle);
         c.drawCircle(0, 0, maxRange, maxRangeCircle);
     }
 
-    public void drawIndicator() {
+    void drawIndicator() {
         double tempAngle = Math.atan2(targetY - y, targetX - x);
         float tempX = currRange * (float)Math.cos(tempAngle),
                 tempY = currRange * (float)Math.sin(tempAngle);

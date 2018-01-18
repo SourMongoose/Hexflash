@@ -29,12 +29,16 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     private Bitmap bmp;
     private Canvas canvas;
     private LinearLayout ll;
 
-    private Bitmap poro, scuttler, porosnax, hook, blitzwithporo;
+    static Bitmap poro, scuttler, porosnax, hook, blitzwithporo, lilypad, sadporo;
+    private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -47,21 +51,25 @@ public class MainActivity extends AppCompatActivity {
     private String menu = "start";
 
     //frame data
-    private static final int FRAMES_PER_SECOND = 60;
+    static final int FRAMES_PER_SECOND = 60;
     private long nanosecondsPerFrame;
     private long millisecondsPerFrame;
 
     private float lastX, lastY;
 
-    private Paint title;
+    private Paint title, sink;
     private int river = Color.rgb(35,66,94);
 
 
     private Poro player;
+    private boolean channeling;
     private float playerY;
+
+    private List<Platform> platforms;
+
     private float shift, //pixels translated down
         shiftSpeed;
-    private int hookAnimation;
+    private int hookAnimation, sinkAnimation;
     private float maxRange, secToMaxRange;
 
     @Override
@@ -88,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
+        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad);
+        sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -111,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
         title.setTextSize(c854(80));
         title.setTypeface(cd_b);
 
+        sink = new Paint(Paint.ANTI_ALIAS_FLAG);
+
         //title screen
         drawTitleMenu();
 
@@ -133,12 +145,31 @@ public class MainActivity extends AppCompatActivity {
                                     canvas.save();
                                     canvas.translate(0, -shift);
 
+                                    for (Platform p : platforms) {
+                                        if (p.visible()) p.draw();
+                                    }
+
                                     player.draw();
                                     //player.drawHitbox(); //debugging purposes
-                                    if (player.isChanneling()) player.update(FRAMES_PER_SECOND, lastX, lastY+shift);
+
+                                    if (player.isChanneling()) {
+                                        channeling = true;
+                                        player.update(lastX, lastY+shift);
+                                    }
+
+                                    if (channeling && !player.isChanneling()) {
+                                        if (!checkForPlatform()) {
+                                            menu = "sink";
+                                            gameoverBmp = sadporo;
+                                            sinkAnimation = 0;
+                                        }
+                                    } else {
+                                        player.update(); //moving platform
+                                    }
 
                                     if (!player.isChanneling() && player.getY()-shift < h()/10) {
                                         menu = "hook";
+                                        gameoverBmp = blitzwithporo;
                                         hookAnimation = 0;
                                         playerY = player.getY();
                                     }
@@ -153,6 +184,9 @@ public class MainActivity extends AppCompatActivity {
 
                                     canvas.save();
                                     canvas.translate(0, -shift);
+                                    for (Platform p : platforms) {
+                                        if (p.visible()) p.draw();
+                                    }
                                     player.draw();
                                     canvas.restore();
 
@@ -170,6 +204,29 @@ public class MainActivity extends AppCompatActivity {
                                         menu = "gameover";
                                     }
                                     hookAnimation++;
+                                } else if (menu.equals("sink")) {
+                                    //background
+                                    canvas.drawColor(river);
+
+                                    canvas.save();
+                                    canvas.translate(0, -shift);
+                                    for (Platform p : platforms) {
+                                        if (p.visible()) p.draw();
+                                    }
+                                    player.draw();
+
+                                    int sinkDuration = FRAMES_PER_SECOND * 3/2;
+                                    int alpha = (int)(255. * Math.min(1, sinkAnimation/(sinkDuration*2./3)));
+                                    sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW()/2,
+                                            Color.argb(alpha,35,66,94), river, Shader.TileMode.CLAMP));
+                                    canvas.drawCircle(player.getX(), player.getY(), player.getW()/2, sink);
+
+                                    canvas.restore();
+
+                                    if (sinkAnimation > sinkDuration) {
+                                        menu = "gameover";
+                                    }
+                                    sinkAnimation++;
                                 } else if (menu.equals("gameover")) {
                                     drawGameoverScreen();
                                     menu = "limbo";
@@ -217,7 +274,8 @@ public class MainActivity extends AppCompatActivity {
         if (menu.equals("start")) {
             if (action == MotionEvent.ACTION_UP) {
                 menu = "game";
-                player = new Poro(canvas, poro);
+                player = new Poro(canvas);
+                resetPlatforms();
                 shift = frameCount = 0;
             }
         } else if (menu.equals("game")) {
@@ -232,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_UP) {
                 menu = "game";
                 player.reset();
+                resetPlatforms();
                 shift = frameCount = 0;
             }
         }
@@ -282,7 +341,23 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawGameoverScreen() {
         canvas.drawColor(river);
-        canvas.drawBitmap(blitzwithporo, new Rect(3,3,blitzwithporo.getWidth()-2,blitzwithporo.getHeight()-2),
+        canvas.drawBitmap(gameoverBmp, new Rect(3,3,gameoverBmp.getWidth()-2,gameoverBmp.getHeight()-2),
                 new RectF(w()/8,h()/2-w()*3/8,w()*7/8,h()/2+w()*3/8), null);
+    }
+
+    private void resetPlatforms() {
+        platforms = new ArrayList<>();
+        platforms.add(new Platform(canvas,w()/2,h()/2));
+        player.setPlatform(platforms.get(0));
+    }
+    private boolean checkForPlatform() {
+        for (Platform p : platforms) {
+            double dist = Math.sqrt(Math.pow(player.getX()-p.getX(),2) + Math.pow(player.getY()-p.getY(),2));
+            if (dist < (player.getW() + p.getW()) / 2) {
+                player.setPlatform(p);
+                return true;
+            }
+        }
+        return false;
     }
 }
