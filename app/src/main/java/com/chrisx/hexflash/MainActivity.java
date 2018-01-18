@@ -57,13 +57,14 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title, sink;
+    private Paint title, sink, scoreTitle, scoreText;
     private int river = Color.rgb(35,66,94);
 
 
     private Poro player;
     private boolean channeling;
     private float playerY;
+    private int score;
 
     private List<Platform> platforms;
 
@@ -123,6 +124,11 @@ public class MainActivity extends AppCompatActivity {
 
         sink = new Paint(Paint.ANTI_ALIAS_FLAG);
 
+        scoreTitle = newPaint(Color.WHITE);
+        scoreTitle.setTextSize(c854(20));
+        scoreText = newPaint(Color.WHITE);
+        scoreText.setTextSize(c854(30));
+
         //title screen
         drawTitleMenu();
 
@@ -152,12 +158,15 @@ public class MainActivity extends AppCompatActivity {
                                     player.draw();
                                     //player.drawHitbox(); //debugging purposes
 
+                                    //mid-channel
                                     if (player.isChanneling()) {
                                         channeling = true;
                                         player.update(lastX, lastY+shift);
                                     }
 
+                                    //just hexflashed
                                     if (channeling && !player.isChanneling()) {
+                                        //if the player doesn't land on a platform
                                         if (!checkForPlatform()) {
                                             menu = "sink";
                                             gameoverBmp = sadporo;
@@ -167,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
                                         player.update(); //moving platform
                                     }
 
+                                    //reaches top of screen
                                     if (!player.isChanneling() && player.getY()-shift < h()/10) {
                                         menu = "hook";
                                         gameoverBmp = blitzwithporo;
@@ -175,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
 
                                     canvas.restore();
+
+                                    drawScores();
 
                                     shiftSpeed = c854((float)(0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
                                     shift += shiftSpeed;
@@ -200,7 +212,9 @@ public class MainActivity extends AppCompatActivity {
                                         player.setY(hookY-player.getW());
                                     }
 
-                                    if (hookAnimation > hookDuration) {
+                                    drawScores();
+
+                                    if (hookAnimation > hookDuration + FRAMES_PER_SECOND/3) {
                                         menu = "gameover";
                                     }
                                     hookAnimation++;
@@ -215,19 +229,25 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     player.draw();
 
-                                    int sinkDuration = FRAMES_PER_SECOND * 3/2;
-                                    int alpha = (int)(255. * Math.min(1, sinkAnimation/(sinkDuration*2./3)));
+                                    int sinkDuration = FRAMES_PER_SECOND;
+                                    int alpha = (int)(255. * Math.min(1, 1.*sinkAnimation/sinkDuration));
                                     sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW()/2,
                                             Color.argb(alpha,35,66,94), river, Shader.TileMode.CLAMP));
                                     canvas.drawCircle(player.getX(), player.getY(), player.getW()/2, sink);
 
                                     canvas.restore();
 
-                                    if (sinkAnimation > sinkDuration) {
+                                    drawScores();
+
+                                    if (sinkAnimation > sinkDuration + FRAMES_PER_SECOND/3) {
                                         menu = "gameover";
                                     }
                                     sinkAnimation++;
                                 } else if (menu.equals("gameover")) {
+                                    if (score > getHighScore()) {
+                                        editor.putInt("high_score", score);
+                                        editor.apply();
+                                    }
                                     drawGameoverScreen();
                                     menu = "limbo";
                                 }
@@ -276,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
                 menu = "game";
                 player = new Poro(canvas);
                 resetPlatforms();
-                shift = frameCount = 0;
+                shift = frameCount = score = 0;
             }
         } else if (menu.equals("game")) {
             lastX = X;
@@ -291,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                 menu = "game";
                 player.reset();
                 resetPlatforms();
-                shift = frameCount = 0;
+                shift = frameCount = score = 0;
             }
         }
 
@@ -315,6 +335,9 @@ public class MainActivity extends AppCompatActivity {
         return p;
     }
 
+    private float c480(float f) {
+        return w() / (450 / f);
+    }
     private float c854(float f) {
         return h() / (854 / f);
     }
@@ -345,6 +368,17 @@ public class MainActivity extends AppCompatActivity {
                 new RectF(w()/8,h()/2-w()*3/8,w()*7/8,h()/2+w()*3/8), null);
     }
 
+    private void drawScores() {
+        scoreTitle.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("score", c480(10), c854(25), scoreTitle);
+        scoreTitle.setTextAlign(Paint.Align.RIGHT);
+        canvas.drawText("high", w()-c480(10), c854(25), scoreTitle);
+        scoreText.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText(score+"", c480(10), c854(60), scoreText);
+        scoreText.setTextAlign(Paint.Align.RIGHT);
+        canvas.drawText(getHighScore()+"", w()-c480(10), c854(60), scoreText);
+    }
+
     private void resetPlatforms() {
         platforms = new ArrayList<>();
         platforms.add(new Platform(canvas,w()/2,h()/2));
@@ -355,6 +389,7 @@ public class MainActivity extends AppCompatActivity {
             double dist = Math.sqrt(Math.pow(player.getX()-p.getX(),2) + Math.pow(player.getY()-p.getY(),2));
             if (dist < (player.getW() + p.getW()) / 2) {
                 player.setPlatform(p);
+                score = (int)Math.max(score, (player.getY()-h()/2)/h()*1000); //number of screens travelled * 1000
                 return true;
             }
         }
