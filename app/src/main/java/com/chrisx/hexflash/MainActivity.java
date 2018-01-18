@@ -381,17 +381,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void drawTitleMenu() {
-        canvas.drawText("HEXFLASH", w()/2, h()/2+w()*3/8-c854(46), title);
-        drawBmp(porosnax, new RectF(w()/8, h()/2-w()*3/8-c854(30), w()*7/8, h()/2+w()*3/8-c854(30)));
+        canvas.drawText("HEXFLASH", w()/2, c854(561), title);
+        drawBmp(porosnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
         title.setTypeface(cd);
         title.setTextSize(c854(40));
-        canvas.drawText("tap to start", w()/2, h()/2+w()/2, title);
+        canvas.drawText("tap to start", w()/2, c854(667), title);
     }
 
     private void drawGameoverScreen() {
         canvas.drawColor(river);
         canvas.drawBitmap(gameoverBmp, new Rect(3,3,gameoverBmp.getWidth()-2,gameoverBmp.getHeight()-2),
-                new RectF(w()/8,h()/2-w()*3/8,w()*7/8,h()/2+w()*3/8), null);
+                new RectF(w()/2-c854(180),h()/2-c854(180),w()/2+c854(180),h()/2+c854(180)), null);
     }
 
     private void drawScores() {
