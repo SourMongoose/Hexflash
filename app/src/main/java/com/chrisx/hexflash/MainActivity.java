@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String menu = "start";
 
+    private int transition = 0;
+    private final int TRANSITION_MAX = 40;
+
     //frame data
     static final int FRAMES_PER_SECOND = 60;
     private long nanosecondsPerFrame;
@@ -144,112 +147,123 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if (!paused) {
-                                if (menu.equals("game")) {
-                                    //background
-                                    canvas.drawColor(river);
+                                if (transition < TRANSITION_MAX / 2) {
+                                    if (menu.equals("game")) {
+                                        //background
+                                        canvas.drawColor(river);
 
-                                    canvas.save();
-                                    canvas.translate(0, -shift);
+                                        canvas.save();
+                                        canvas.translate(0, -shift);
 
-                                    for (Platform p : platforms) {
-                                        if (p.visible()) p.draw();
-                                    }
-
-                                    player.draw();
-                                    //player.drawHitbox(); //debugging purposes
-
-                                    //mid-channel
-                                    if (player.isChanneling()) {
-                                        channeling = true;
-                                        player.update(lastX, lastY+shift);
-                                    }
-
-                                    //just hexflashed
-                                    if (channeling && !player.isChanneling()) {
-                                        //if the player doesn't land on a platform
-                                        if (!checkForPlatform()) {
-                                            menu = "sink";
-                                            gameoverBmp = sadporo;
-                                            sinkAnimation = 0;
+                                        for (Platform p : platforms) {
+                                            if (p.visible()) p.draw();
                                         }
+
+                                        player.draw();
+                                        //player.drawHitbox(); //debugging purposes
+
+                                        //mid-channel
+                                        if (player.isChanneling()) {
+                                            channeling = true;
+                                            player.update(lastX, lastY + shift);
+                                        }
+
+                                        //just hexflashed
+                                        if (channeling && !player.isChanneling()) {
+                                            //if the player doesn't land on a platform
+                                            if (!checkForPlatform()) {
+                                                goToMenu("sink");
+                                                gameoverBmp = sadporo;
+                                                sinkAnimation = 0;
+                                            }
+                                        } else {
+                                            player.update(); //moving platform
+                                        }
+
+                                        //reaches top of screen
+                                        if (!player.isChanneling() && player.getY() - shift < h() / 10) {
+                                            goToMenu("hook");
+                                            gameoverBmp = blitzwithporo;
+                                            hookAnimation = 0;
+                                            playerY = player.getY();
+                                        }
+
+                                        canvas.restore();
+
+                                        drawScores();
+
+                                        shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
+                                        if (transition == 0) shift += shiftSpeed;
+                                    } else if (menu.equals("hook")) {
+                                        //background
+                                        canvas.drawColor(river);
+
+                                        canvas.save();
+                                        canvas.translate(0, -shift);
+                                        for (Platform p : platforms) {
+                                            if (p.visible()) p.draw();
+                                        }
+                                        player.draw();
+                                        canvas.restore();
+
+                                        int hookDuration = FRAMES_PER_SECOND * 5 / 6;
+                                        if (hookAnimation < hookDuration / 2) {
+                                            float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
+                                            drawBmp(hook, new RectF(player.getX() - w() / 16, -w() / 8 * 7.5f, player.getX() + w() / 16, hookY));
+                                        } else {
+                                            float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
+                                            drawBmp(hook, new RectF(player.getX() - w() / 16, -w() / 8 * 7.5f, player.getX() + w() / 16, hookY));
+                                            player.setY(hookY - player.getW());
+                                        }
+
+                                        drawScores();
+
+                                        if (hookAnimation > hookDuration + FRAMES_PER_SECOND / 3)
+                                            goToMenu("gameover");
+
+                                        hookAnimation++;
+                                    } else if (menu.equals("sink")) {
+                                        //background
+                                        canvas.drawColor(river);
+
+                                        canvas.save();
+                                        canvas.translate(0, -shift);
+                                        for (Platform p : platforms) {
+                                            if (p.visible()) p.draw();
+                                        }
+                                        player.draw();
+
+                                        int sinkDuration = FRAMES_PER_SECOND;
+                                        int alpha = (int) (255. * Math.min(1, Math.pow(1. * sinkAnimation / sinkDuration, 2)));
+                                        sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW() / 2,
+                                                Color.argb(alpha, Color.red(river), Color.green(river), Color.blue(river)),
+                                                river, Shader.TileMode.CLAMP));
+                                        canvas.drawCircle(player.getX(), player.getY(), player.getW() / 2, sink);
+
+                                        canvas.restore();
+
+                                        drawScores();
+
+                                        if (sinkAnimation > sinkDuration + FRAMES_PER_SECOND / 3)
+                                            goToMenu("gameover");
+
+                                        sinkAnimation++;
+                                    } else if (menu.equals("gameover")) {
+                                        drawGameoverScreen();
+
+                                        if (transition == 0) goToMenu("limbo");
+                                    }
+                                }
+
+                                if (transition > 0) {
+                                    int t = TRANSITION_MAX / 2, alpha;
+                                    if (transition > t) {
+                                        alpha = 255 - 255*(transition-t)/t;
                                     } else {
-                                        player.update(); //moving platform
+                                        alpha = 255 - 255*(t-transition)/t;
                                     }
-
-                                    //reaches top of screen
-                                    if (!player.isChanneling() && player.getY()-shift < h()/10) {
-                                        menu = "hook";
-                                        gameoverBmp = blitzwithporo;
-                                        hookAnimation = 0;
-                                        playerY = player.getY();
-                                    }
-
-                                    canvas.restore();
-
-                                    drawScores();
-
-                                    shiftSpeed = c854((float)(0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
-                                    shift += shiftSpeed;
-                                } else if (menu.equals("hook")) {
-                                    //background
-                                    canvas.drawColor(river);
-
-                                    canvas.save();
-                                    canvas.translate(0, -shift);
-                                    for (Platform p : platforms) {
-                                        if (p.visible()) p.draw();
-                                    }
-                                    player.draw();
-                                    canvas.restore();
-
-                                    int hookDuration = FRAMES_PER_SECOND * 5/6;
-                                    if (hookAnimation < hookDuration / 2) {
-                                        float hookY = (playerY+player.getW()-shift)*(hookAnimation/(hookDuration/2f));
-                                        drawBmp(hook, new RectF(player.getX()-w()/16,-w()/8*7.5f,player.getX()+w()/16,hookY));
-                                    } else {
-                                        float hookY = (playerY+player.getW()-shift)*((hookDuration-hookAnimation)/(hookDuration/2f));
-                                        drawBmp(hook, new RectF(player.getX()-w()/16,-w()/8*7.5f,player.getX()+w()/16,hookY));
-                                        player.setY(hookY-player.getW());
-                                    }
-
-                                    drawScores();
-
-                                    if (hookAnimation > hookDuration + FRAMES_PER_SECOND/3) {
-                                        menu = "gameover";
-                                    }
-                                    hookAnimation++;
-                                } else if (menu.equals("sink")) {
-                                    //background
-                                    canvas.drawColor(river);
-
-                                    canvas.save();
-                                    canvas.translate(0, -shift);
-                                    for (Platform p : platforms) {
-                                        if (p.visible()) p.draw();
-                                    }
-                                    player.draw();
-
-                                    int sinkDuration = FRAMES_PER_SECOND;
-                                    int alpha = (int)(255. * Math.min(1, 1.*sinkAnimation/sinkDuration));
-                                    sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW()/2,
-                                            Color.argb(alpha,35,66,94), river, Shader.TileMode.CLAMP));
-                                    canvas.drawCircle(player.getX(), player.getY(), player.getW()/2, sink);
-
-                                    canvas.restore();
-
-                                    drawScores();
-
-                                    if (sinkAnimation > sinkDuration + FRAMES_PER_SECOND/3) {
-                                        menu = "gameover";
-                                    }
-                                    sinkAnimation++;
-                                } else if (menu.equals("gameover")) {
-                                    if (score > getHighScore()) {
-                                        editor.putInt("high_score", score);
-                                        editor.apply();
-                                    }
-                                    drawGameoverScreen();
-                                    menu = "limbo";
+                                    canvas.drawColor(Color.argb(alpha,
+                                            Color.red(river), Color.green(river), Color.blue(river)));
                                 }
                             }
 
@@ -258,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
+                    if (transition > 0) transition--;
                     frameCount++;
 
                     //wait until frame is done
@@ -293,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (menu.equals("start")) {
             if (action == MotionEvent.ACTION_UP) {
-                menu = "game";
+                goToMenu("game");
                 player = new Poro(canvas);
                 resetPlatforms();
                 shift = frameCount = score = 0;
@@ -308,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (menu.equals("limbo")) {
             if (action == MotionEvent.ACTION_UP) {
-                menu = "game";
+                goToMenu("game");
                 player.reset();
                 resetPlatforms();
                 shift = frameCount = score = 0;
@@ -352,6 +367,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawBmp(Bitmap bmp, RectF rectF) {
         canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight()), rectF, null);
+    }
+
+    private void goToMenu(String s) {
+        menu = s;
+
+        if (menu.equals("game") || menu.equals("gameover"))
+            transition = TRANSITION_MAX;
+
+        if (menu.equals("gameover")) {
+            if (score > getHighScore()) {
+                editor.putInt("high_score", score);
+                editor.apply();
+            }
+        }
     }
 
     private void drawTitleMenu() {
