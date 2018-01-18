@@ -7,7 +7,6 @@ import android.graphics.RectF;
 
 class Platform {
     private float x, y, w;
-    private boolean moving; //true=scuttle, false=lilypad
     private float speed; //in x-direction
     private int angle;
 
@@ -21,7 +20,6 @@ class Platform {
         this.x = x;
         this.y = y;
         w = c.getWidth() / 5;
-        moving = false;
         speed = 0;
 
         angle = (int)(Math.random()*360);
@@ -36,13 +34,8 @@ class Platform {
         this.w = c.getWidth() / 5;
         this.speed = speed;
 
-        if (speed > 0) {
-            angle = Math.random() < 0.5 ? 90 : 270;
-            bmp = MainActivity.scuttler;
-        } else {
-            angle = (int)(Math.random()*360);
-            bmp = MainActivity.lilypad;
-        }
+        angle = Math.random() < 0.5 ? 90 : 270;
+        bmp = MainActivity.scuttler;
     }
 
     float getX() {
@@ -63,7 +56,7 @@ class Platform {
     }
 
     void update() {
-        if (moving) {
+        if (speed > 0) {
             if (x + w/2 > c.getWidth() || x - w/2 < 0)
                 angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
 
@@ -76,7 +69,7 @@ class Platform {
         c.save();
         c.translate(x, y);
 
-        c.rotate(angle); //convert to degrees and shift by 90deg
+        c.rotate(angle + 90); //convert to degrees and shift by 90deg
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
 
         c.restore();

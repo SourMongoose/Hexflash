@@ -155,9 +155,8 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.save();
                                         canvas.translate(0, -shift);
 
-                                        for (Platform p : platforms) {
-                                            if (p.visible()) p.draw();
-                                        }
+                                        drawPlatforms();
+                                        if (transition == 0) movePlatforms();
 
                                         player.draw();
                                         //player.drawHitbox(); //debugging purposes
@@ -200,9 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         canvas.save();
                                         canvas.translate(0, -shift);
-                                        for (Platform p : platforms) {
-                                            if (p.visible()) p.draw();
-                                        }
+                                        drawPlatforms();
                                         player.draw();
                                         canvas.restore();
 
@@ -228,9 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         canvas.save();
                                         canvas.translate(0, -shift);
-                                        for (Platform p : platforms) {
-                                            if (p.visible()) p.draw();
-                                        }
+                                        drawPlatforms();
                                         player.draw();
 
                                         int sinkDuration = FRAMES_PER_SECOND;
@@ -410,8 +405,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void resetPlatforms() {
         platforms = new ArrayList<>();
-        platforms.add(new Platform(canvas,w()/2,h()/2));
+        platforms.add(new Platform(canvas,w()/2,h()/2/*,2*/));
         player.setPlatform(platforms.get(0));
+    }
+    private void drawPlatforms() {
+        for (Platform p : platforms)
+            if (p.visible()) p.draw();
+    }
+    private void movePlatforms() {
+        for (Platform p : platforms)
+            if (p.visible()) p.update();
     }
     private boolean checkForPlatform() {
         for (Platform p : platforms) {
