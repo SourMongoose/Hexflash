@@ -2,7 +2,11 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
- * @TODO everything
+ * @TODO platform generation
+ * @TODO instructions menu
+ * @TODO porosnax
+ *
+ * @TODO shop with different poro skins?
  */
 
 import android.content.Context;
