@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
-        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad);
+        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lowerres); //lilypad, lilypad_lowres
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
 
         //initializes SharedPreferences
