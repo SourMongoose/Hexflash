@@ -101,12 +101,12 @@ public class MainActivity extends AppCompatActivity {
         ll = (LinearLayout) findViewById(R.id.draw_area);
         ll.setBackgroundDrawable(new BitmapDrawable(bmp));
 
-        poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro);
+        poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
-        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lowerres); //lilypad, lilypad_lowres
+        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
 
         //initializes SharedPreferences
