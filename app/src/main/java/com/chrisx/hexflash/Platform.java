@@ -47,12 +47,15 @@ class Platform {
     float getW() {
         return w;
     }
+    float getSpeed() {
+        return speed;
+    }
     float getAngle() {
         return angle;
     }
 
-    boolean visible() {
-        return y+w/2 > 0 || y-w/2 < c.getHeight();
+    boolean visible(float shift) {
+        return y-shift+w/2 > 0 && y-shift-w/2 < c.getHeight();
     }
 
     void update() {

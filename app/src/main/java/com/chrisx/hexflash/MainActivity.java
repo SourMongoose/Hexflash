@@ -3,6 +3,7 @@ package com.chrisx.hexflash;
 /**
  * Organized in order of priority:
  * @TODO platform generation
+ * @TODO prevent hexflashing off the screen
  * @TODO instructions menu
  * @TODO porosnax
  *
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private long frameCount = 0;
 
     private String menu = "start";
+    private boolean pressedDuringLimbo = false;
 
     private int transition = 0;
     private final int TRANSITION_MAX = 40;
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private float playerY;
     private int score;
 
-    private List<Platform> platforms;
+    private List<Platform> platforms = new ArrayList<>();
 
     private float shift, //pixels translated down
         shiftSpeed;
@@ -165,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         drawPlatforms();
                                         if (transition == 0) movePlatforms();
+                                        generatePlatforms();
 
                                         player.draw();
                                         //player.drawHitbox(); //debugging purposes
@@ -183,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                                                 gameoverBmp = sadporo;
                                                 sinkAnimation = 0;
                                             }
+                                            channeling = false;
                                         } else {
                                             player.update(); //moving platform
                                         }
@@ -313,10 +317,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (menu.equals("start")) {
             if (action == MotionEvent.ACTION_UP) {
-                goToMenu("game");
                 player = new Poro(canvas);
-                resetPlatforms();
-                shift = frameCount = score = 0;
+                goToMenu("game");
             }
         } else if (menu.equals("game")) {
             lastX = X;
@@ -327,11 +329,12 @@ public class MainActivity extends AppCompatActivity {
                 if (player.isChanneling()) player.endChannel();
             }
         } else if (menu.equals("limbo")) {
-            if (action == MotionEvent.ACTION_UP) {
-                goToMenu("game");
+            if (action == MotionEvent.ACTION_DOWN) pressedDuringLimbo = true;
+            if (pressedDuringLimbo && action == MotionEvent.ACTION_UP) {
                 player.reset();
-                resetPlatforms();
-                shift = frameCount = score = 0;
+                goToMenu("game");
+
+                pressedDuringLimbo = false;
             }
         }
 
@@ -370,22 +373,32 @@ public class MainActivity extends AppCompatActivity {
         return Math.PI/180*deg;
     }
 
+    private double distance(float x1, float y1, float x2, float y2) {
+        return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+    }
+
     private void drawBmp(Bitmap bmp, RectF rectF) {
         canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight()), rectF, null);
     }
 
     private void goToMenu(String s) {
-        menu = s;
-
-        if (menu.equals("game") || menu.equals("gameover"))
+        if (s.equals("game") || s.equals("gameover"))
             transition = TRANSITION_MAX;
 
-        if (menu.equals("gameover")) {
+        if (s.equals("game") && (menu.equals("start") || menu.equals("limbo"))) {
+            shift = frameCount = score = 0;
+            resetPlatforms();
+            generatePlatforms();
+        }
+
+        if (s.equals("gameover")) {
             if (score > getHighScore()) {
                 editor.putInt("high_score", score);
                 editor.apply();
             }
         }
+
+        menu = s;
     }
 
     private void drawTitleMenu() {
@@ -416,21 +429,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void resetPlatforms() {
-        platforms = new ArrayList<>();
-        platforms.add(new Platform(canvas,w()/2,h()/2/*,2*/));
+        platforms.clear();
+        platforms.add(new Platform(canvas,w()/2,h()/2));
         player.setPlatform(platforms.get(0));
+    }
+    private void generatePlatforms() {
+        if (platforms.isEmpty()) resetPlatforms();
+
+        //remove platforms that have gone past the top of the screen
+        while (!platforms.get(0).visible(shift)) platforms.remove(0);
+
+        while (platforms.get(platforms.size()-1).visible(shift)) {
+            Platform prev = platforms.get(platforms.size()-1);
+            float platformW = prev.getW();
+
+            float dist = (float)(platformW*2 +
+                    Math.random() * Math.min(0.5+score/1000.,4) * w());
+            dist += prev.getX() - platformW/2;
+
+            int rows = (int)(dist / (w()-platformW));
+            dist %= (w()-platformW);
+
+            if (platforms.get(platforms.size()-1).getSpeed() > 0) rows++;
+
+            float newX = platformW/2 + dist;
+            float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
+            if (distance(prev.getX(),prev.getY(),newX,newY) < player.getMaxRange()) {
+                if (rows > 0 && Math.random() < (0.5*score/1000/15))
+                    platforms.add(new Platform(canvas, newX, newY, 2));
+                else
+                    platforms.add(new Platform(canvas, newX, newY));
+            }
+        }
     }
     private void drawPlatforms() {
         for (Platform p : platforms)
-            if (p.visible()) p.draw();
+            if (p.visible(shift)) p.draw();
     }
     private void movePlatforms() {
         for (Platform p : platforms)
-            if (p.visible()) p.update();
+            if (p.visible(shift)) p.update();
     }
+
     private boolean checkForPlatform() {
         for (Platform p : platforms) {
-            double dist = Math.sqrt(Math.pow(player.getX()-p.getX(),2) + Math.pow(player.getY()-p.getY(),2));
+            double dist = distance(player.getX(),player.getY(),p.getX(),p.getY());
             if (dist < (player.getW() + p.getW()) / 2) {
                 player.setPlatform(p);
                 score = (int)Math.max(score, (player.getY()-h()/2)/h()*1000); //number of screens travelled * 1000
