@@ -244,10 +244,10 @@ public class MainActivity extends AppCompatActivity {
 
                                         int sinkDuration = FRAMES_PER_SECOND;
                                         int alpha = (int) (255. * Math.min(1, Math.pow(1. * sinkAnimation / sinkDuration, 2)));
-                                        sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW() / 2,
+                                        sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW()/2+c480(3),
                                                 Color.argb(alpha, Color.red(river), Color.green(river), Color.blue(river)),
                                                 river, Shader.TileMode.CLAMP));
-                                        canvas.drawCircle(player.getX(), player.getY(), player.getW() / 2, sink);
+                                        canvas.drawCircle(player.getX(), player.getY(), player.getW()/2+c480(3), sink);
 
                                         canvas.restore();
 
