@@ -2,7 +2,6 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
- * @TODO platform generation
  * @TODO prevent hexflashing off the screen
  * @TODO instructions menu
  * @TODO porosnax
@@ -17,9 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
