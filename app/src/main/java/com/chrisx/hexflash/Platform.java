@@ -61,7 +61,7 @@ class Platform {
     void update() {
         if (speed > 0) {
             if (x + w/2 > c.getWidth() || x - w/2 < 0)
-                angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
+                angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND * 2) % 360;
 
             if (angle == 90) x += speed;
             if (angle == 270) x -= speed;

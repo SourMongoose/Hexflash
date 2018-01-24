@@ -2,7 +2,8 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
- * @TODO prevent hexflashing off the screen
+ * @TODO *optional* prevent hexflashing off the screen
+ * @TODO bugfix: blitz hooks poro after hexflashing backwards
  * @TODO instructions menu
  * @TODO porosnax
  *
@@ -71,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean channeling;
     private float playerY;
     private int score;
+
+    private double ev_scuttle; //expected value
+    private int num_scuttle; //actual
 
     private List<Platform> platforms = new ArrayList<>();
 
@@ -320,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (menu.equals("game")) {
             lastX = X;
             lastY = Y;
-            if (action == MotionEvent.ACTION_DOWN) {
+            if (action == MotionEvent.ACTION_DOWN && !channeling) {
                 player.startChannel((float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5));
             } else if (action == MotionEvent.ACTION_UP) {
                 if (player.isChanneling()) player.endChannel();
@@ -452,10 +456,16 @@ public class MainActivity extends AppCompatActivity {
             float newX = platformW/2 + dist;
             float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
             if (distance(prev.getX(),prev.getY(),newX,newY) < player.getMaxRange()) {
-                if (rows > 0 && Math.random() < (0.5*score/1000/15))
-                    platforms.add(new Platform(canvas, newX, newY, 2));
-                else
+                double prob = 0.5 * score/1000 / 15;
+                ev_scuttle += prob;
+                double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/2);
+
+                if (rows > 0 && Math.random() < adjProb) {
+                    platforms.add(new Platform(canvas, newX, newY, (float) (3 + 0.5 * Math.random())));
+                    num_scuttle++;
+                } else {
                     platforms.add(new Platform(canvas, newX, newY));
+                }
             }
         }
     }
