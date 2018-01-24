@@ -2,10 +2,9 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
- * @TODO *optional* prevent hexflashing off the screen
- * @TODO bugfix: blitz hooks poro after hexflashing backwards
  * @TODO instructions menu
  * @TODO porosnax
+ * @TODO *optional* prevent hexflashing off the screen
  *
  * @TODO shop with different poro skins?
  */
@@ -195,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                                         }
 
                                         //reaches top of screen
-                                        if (player.getY() - shift < h() / 10) {
+                                        if (menu.equals("game") && player.getY() - shift < h() / 10) {
                                             player.interruptChannel();
                                             playerY = player.getY();
 
