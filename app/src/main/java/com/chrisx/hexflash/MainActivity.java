@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         ll = (LinearLayout) findViewById(R.id.draw_area);
         ll.setBackgroundDrawable(new BitmapDrawable(bmp));
 
+        //initialize bitmaps
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
@@ -164,8 +165,9 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawColor(river);
 
                                         canvas.save();
-                                        canvas.translate(0, -shift);
+                                        canvas.translate(0, -shift); //screen shift
 
+                                        //draw and update platforms
                                         drawPlatforms();
                                         if (transition == 0) movePlatforms();
                                         generatePlatforms();
@@ -213,16 +215,18 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawColor(river);
 
                                         canvas.save();
-                                        canvas.translate(0, -shift);
+                                        canvas.translate(0, -shift); //screen shift
                                         drawPlatforms();
                                         player.draw();
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 5 / 6;
                                         if (hookAnimation < hookDuration / 2) {
+                                            //hook enters screen
                                             float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
                                             drawBmp(hook, new RectF(player.getX() - w() / 16, -w() / 8 * 7.5f, player.getX() + w() / 16, hookY));
                                         } else {
+                                            //hook exits screen w/ poro
                                             float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
                                             drawBmp(hook, new RectF(player.getX() - w() / 16, -w() / 8 * 7.5f, player.getX() + w() / 16, hookY));
                                             player.setY(hookY - player.getW());
@@ -239,10 +243,11 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawColor(river);
 
                                         canvas.save();
-                                        canvas.translate(0, -shift);
+                                        canvas.translate(0, -shift); //screen shift
                                         drawPlatforms();
                                         player.draw();
 
+                                        //fade effect over poro
                                         int sinkDuration = FRAMES_PER_SECOND;
                                         int alpha = (int) (255. * Math.min(1, Math.pow(1. * sinkAnimation / sinkDuration, 2)));
                                         sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW()/2+c480(3),
@@ -265,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
 
+                                //fading transition effect
                                 if (transition > 0) {
                                     int t = TRANSITION_MAX / 2, alpha;
                                     if (transition > t) {
@@ -325,12 +331,16 @@ public class MainActivity extends AppCompatActivity {
             lastX = X;
             lastY = Y;
             if (action == MotionEvent.ACTION_DOWN && !channeling) {
+                //start channeling with a speed dependent on screen-shift speed
                 player.startChannel((float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5));
             } else if (action == MotionEvent.ACTION_UP) {
+                //release
                 if (player.isChanneling()) player.endChannel();
             }
         } else if (menu.equals("limbo")) {
+            //avoid starting a new game after getting hooked mid-channel and releasing on end screen
             if (action == MotionEvent.ACTION_DOWN) pressedDuringLimbo = true;
+
             if (pressedDuringLimbo && action == MotionEvent.ACTION_UP) {
                 player.reset();
                 goToMenu("game");
@@ -374,10 +384,12 @@ public class MainActivity extends AppCompatActivity {
         return Math.PI/180*deg;
     }
 
+    //distance between (x1,y1) and (x2,y2)
     private double distance(float x1, float y1, float x2, float y2) {
         return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
 
+    //draw a bitmap w/o cropping
     private void drawBmp(Bitmap bmp, RectF rectF) {
         canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight()), rectF, null);
     }
@@ -387,12 +399,14 @@ public class MainActivity extends AppCompatActivity {
             transition = TRANSITION_MAX;
 
         if (s.equals("game") && (menu.equals("start") || menu.equals("limbo"))) {
+            //restart
             shift = frameCount = score = 0;
             resetPlatforms();
             generatePlatforms();
         }
 
         if (s.equals("gameover")) {
+            //check for new high score
             if (score > getHighScore()) {
                 editor.putInt("high_score", score);
                 editor.apply();
@@ -429,17 +443,20 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawText(getHighScore()+"", w()-c480(10), c854(60), scoreText);
     }
 
+    //delete all platforms and initialize one lilypad
     private void resetPlatforms() {
         platforms.clear();
         platforms.add(new Platform(canvas,w()/2,h()/2));
         player.setPlatform(platforms.get(0));
     }
     private void generatePlatforms() {
+        //check that at least one platform exists
         if (platforms.isEmpty()) resetPlatforms();
 
         //remove platforms that have gone past the top of the screen
         while (!platforms.get(0).visible(shift)) platforms.remove(0);
 
+        //while the lowest platform is visible
         while (platforms.get(platforms.size()-1).visible(shift)) {
             Platform prev = platforms.get(platforms.size()-1);
             float platformW = prev.getW();
@@ -478,6 +495,7 @@ public class MainActivity extends AppCompatActivity {
             if (p.visible(shift)) p.update();
     }
 
+    //find the platform that the player has landed on, return false if lands in water
     private boolean checkForPlatform() {
         for (Platform p : platforms) {
             double dist = distance(player.getX(),player.getY(),p.getX(),p.getY());
