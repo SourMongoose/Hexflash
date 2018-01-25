@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, porosnax, hook, blitzwithporo, lilypad, sadporo;
+    static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, sadporo;
     private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
@@ -72,13 +72,14 @@ public class MainActivity extends AppCompatActivity {
     private float playerY;
     private int score;
 
-    private double ev_scuttle; //expected value
-    private int num_scuttle; //actual
+    private double ev_scuttle, ev_porosnax; //expected value
+    private int num_scuttle = 0, num_porosnax = 0; //actual
 
     private List<Platform> platforms = new ArrayList<>();
+    private List<PoroSnax> snaxlist = new ArrayList<>();
 
     private float shift, //pixels translated down
-        shiftSpeed;
+        shiftSpeed = 0.75f;
     private int hookAnimation, sinkAnimation;
     private float maxRange, secToMaxRange;
 
@@ -104,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
         //initialize bitmaps
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
-        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
+        porowsnax = BitmapFactory.decodeResource(getResources(), R.drawable.porowsnax);
+        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad);
@@ -171,6 +173,10 @@ public class MainActivity extends AppCompatActivity {
                                         if (transition == 0) movePlatforms();
                                         generatePlatforms();
 
+                                        //draw and update porosnax
+                                        drawPoroSnax();
+                                        updatePoroSnax();
+
                                         player.draw();
                                         //player.drawHitbox(); //debugging purposes
 
@@ -216,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
                                         drawPlatforms();
+                                        drawPoroSnax();
                                         player.draw();
                                         canvas.restore();
 
@@ -244,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
                                         drawPlatforms();
+                                        drawPoroSnax();
                                         player.draw();
 
                                         //fade effect over poro
@@ -378,6 +386,9 @@ public class MainActivity extends AppCompatActivity {
     private long getHighScore() {
         return sharedPref.getInt("high_score", 0);
     }
+    private int getPoroSnax() {
+        return sharedPref.getInt("porosnax", 0);
+    }
 
     private double toRad(double deg) {
         return Math.PI/180*deg;
@@ -399,7 +410,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (s.equals("game") && (menu.equals("start") || menu.equals("limbo"))) {
             //restart
-            shift = frameCount = score = 0;
+            shift = frameCount = 0;
+            score = 0;
+            ev_scuttle = ev_porosnax = 0;
+            num_scuttle = num_porosnax = 0;
+            clearPoroSnax();
             resetPlatforms();
             generatePlatforms();
         }
@@ -417,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawTitleMenu() {
         canvas.drawText("HEXFLASH", w()/2, c854(561), title_bold);
-        drawBmp(porosnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
+        drawBmp(porowsnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
         canvas.drawText("tap to start", w()/2, c854(667), title);
     }
 
@@ -453,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
         if (platforms.isEmpty()) resetPlatforms();
 
         //remove platforms that have gone past the top of the screen
-        while (!platforms.get(0).visible(shift)) platforms.remove(0);
+        while (!platforms.isEmpty() && !platforms.get(0).visible(shift)) platforms.remove(0);
 
         //while the lowest platform is visible
         while (platforms.get(platforms.size()-1).visible(shift)) {
@@ -472,15 +487,24 @@ public class MainActivity extends AppCompatActivity {
             float newX = platformW/2 + dist;
             float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
             if (distance(prev.getX(),prev.getY(),newX,newY) < player.getMaxRange()) {
+                //probability of platform being a scuttle crab
                 double prob = 0.5 * score/1000 / 15;
                 ev_scuttle += prob;
-                double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/2);
+                double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/1.5);
 
                 if (rows > 0 && Math.random() < adjProb) {
-                    platforms.add(new Platform(canvas, newX, newY, (float) (3 + 0.5 * Math.random())));
+                    platforms.add(new Platform(canvas, newX, newY, (float) (1 + shiftSpeed + 0.5 * Math.random())));
                     num_scuttle++;
                 } else {
                     platforms.add(new Platform(canvas, newX, newY));
+                    //add a porosnax onto the lilypad
+                    double prob2 = 0.2;
+                    ev_porosnax += prob2;
+                    double adjProb2 = prob2 * (1 + (ev_porosnax-num_porosnax)/2);
+                    if (Math.random() < adjProb2) {
+                        snaxlist.add(new PoroSnax(canvas, platforms.get(platforms.size() - 1)));
+                        num_porosnax++;
+                    }
                 }
             }
         }
@@ -505,5 +529,28 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private void clearPoroSnax() {
+        snaxlist.clear();
+    }
+    private void drawPoroSnax() {
+        for (PoroSnax p : snaxlist)
+            if (p.visible(shift)) p.draw();
+    }
+    private void updatePoroSnax() {
+        //remove porosnax that have gone off the screen
+        while (!snaxlist.isEmpty() && !snaxlist.get(0).visible(shift)
+                && snaxlist.get(0).getY()-shift < h()) snaxlist.remove(0);
+
+        //check if porosnax have been eaten
+        for (int i = snaxlist.size()-1; i >= 0; i--) {
+            if (distance(snaxlist.get(i).getX(),snaxlist.get(i).getY(),player.getX(),player.getY())
+                    < (player.getW()+snaxlist.get(i).getW())/2) {
+                snaxlist.remove(i);
+                editor.putInt("porosnax", getPoroSnax()+1);
+                editor.apply();
+            }
+        }
     }
 }

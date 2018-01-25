@@ -72,7 +72,7 @@ class Platform {
         c.save();
         c.translate(x, y);
 
-        c.rotate(angle + 90); //convert to degrees and shift by 90deg
+        c.rotate(angle + 90); //shift by 90deg
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
 
         c.restore();
