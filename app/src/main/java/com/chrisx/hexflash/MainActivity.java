@@ -63,9 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title_bold, title, sink, scoreTitle, scoreText;
+    private Paint title_bold, title, sink, scoreTitle, scoreText, gameoverText, gameoverText2;
     private int river = Color.rgb(35,66,94);
 
+    private CircleButton restart, home, shop;
+    private float offset;
 
     private Poro player;
     private boolean channeling;
@@ -145,8 +147,20 @@ public class MainActivity extends AppCompatActivity {
         scoreText = newPaint(Color.WHITE);
         scoreText.setTextSize(c854(30));
 
-        //title screen
-        drawTitleMenu();
+        gameoverText = newPaint(Color.WHITE);
+        gameoverText.setTextAlign(Paint.Align.CENTER);
+        gameoverText.setTypeface(cd_b);
+
+        gameoverText2 = newPaint(Color.WHITE);
+        gameoverText2.setStrokeWidth(c854(3));
+        gameoverText2.setStyle(Paint.Style.STROKE);
+        gameoverText2.setStrokeCap(Paint.Cap.ROUND);
+
+        //buttons
+        offset = c854(125);
+        restart = new CircleButton(canvas,w()/2,c854(700),c854(70));
+        home = new CircleButton(canvas,w()/2+offset,c854(730),c854(40));
+        shop = new CircleButton(canvas,w()/2-offset,c854(730),c854(40));
 
         final Handler handler = new Handler();
         new Thread(new Runnable() {
@@ -161,7 +175,10 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             if (!paused) {
                                 if (transition < TRANSITION_MAX / 2) {
-                                    if (menu.equals("game")) {
+                                    if (menu.equals("start")) {
+                                        //title screen
+                                        drawTitleMenu();
+                                    } else if (menu.equals("game")) {
                                         //background
                                         canvas.drawColor(river);
 
@@ -250,8 +267,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
-                                        drawPlatforms();
-                                        drawPoroSnax();
+
                                         player.draw();
 
                                         //fade effect over poro
@@ -261,6 +277,9 @@ public class MainActivity extends AppCompatActivity {
                                                 Color.argb(alpha, Color.red(river), Color.green(river), Color.blue(river)),
                                                 river, Shader.TileMode.CLAMP));
                                         canvas.drawCircle(player.getX(), player.getY(), player.getW()/2+c480(3), sink);
+
+                                        drawPlatforms();
+                                        drawPoroSnax();
 
                                         canvas.restore();
 
@@ -274,6 +293,8 @@ public class MainActivity extends AppCompatActivity {
                                         drawGameoverScreen();
 
                                         if (transition == 0) goToMenu("limbo");
+                                    } else if (menu.equals("limbo")) {
+                                        drawGameoverButtons();
                                     }
                                 }
 
@@ -348,11 +369,28 @@ public class MainActivity extends AppCompatActivity {
             //avoid starting a new game after getting hooked mid-channel and releasing on end screen
             if (action == MotionEvent.ACTION_DOWN) pressedDuringLimbo = true;
 
-            if (pressedDuringLimbo && action == MotionEvent.ACTION_UP) {
-                player.reset();
-                goToMenu("game");
-
-                pressedDuringLimbo = false;
+            if (pressedDuringLimbo) {
+                if (action == MotionEvent.ACTION_DOWN) {
+                    if (restart.contains(X, Y)) restart.press();
+                    if (home.contains(X, Y)) home.press();
+                    if (shop.contains(X, Y)) shop.press();
+                } else if (action == MotionEvent.ACTION_MOVE) {
+                    if (!restart.contains(X, Y)) restart.release();
+                    if (!home.contains(X, Y)) home.release();
+                    if (!shop.contains(X, Y)) shop.release();
+                } else if (action == MotionEvent.ACTION_UP) {
+                    if (restart.isPressed()) {
+                        restart.release();
+                        player.reset();
+                        goToMenu("game");
+                    } else if (home.isPressed()) {
+                        home.release();
+                        goToMenu("start");
+                    } else if (shop.isPressed()) {
+                        shop.release();
+                        goToMenu("shop");
+                    }
+                }
             }
         }
 
@@ -395,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //distance between (x1,y1) and (x2,y2)
-    private double distance(float x1, float y1, float x2, float y2) {
+    static double distance(float x1, float y1, float x2, float y2) {
         return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
 
@@ -405,7 +443,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToMenu(String s) {
-        if (s.equals("game") || s.equals("gameover"))
+        if (s.equals("start")
+                || s.equals("game")
+                || s.equals("gameover")
+                || s.equals("shop")
+                || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
 
         if (s.equals("game") && (menu.equals("start") || menu.equals("limbo"))) {
@@ -417,6 +459,7 @@ public class MainActivity extends AppCompatActivity {
             clearPoroSnax();
             resetPlatforms();
             generatePlatforms();
+            pressedDuringLimbo = false;
         }
 
         if (s.equals("gameover")) {
@@ -431,19 +474,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void drawTitleMenu() {
+        canvas.drawColor(river);
+        title_bold.setTextSize(c854(80));
         canvas.drawText("HEXFLASH", w()/2, c854(561), title_bold);
         drawBmp(porowsnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
         canvas.drawText("tap to start", w()/2, c854(667), title);
     }
 
+    private void drawGameoverButtons() {
+        canvas.drawRect(0,restart.getY()-restart.getR()-c854(5),w(),restart.getY()+restart.getR()+c854(5),newPaint(river));
+
+        //restart button
+        restart.draw();
+        gameoverText.setTextSize(c854(95));
+        float tmp = c854(705) - (gameoverText.ascent()+gameoverText.descent()) / 2;
+        canvas.drawText("↻",w()/2,tmp,gameoverText);
+
+        //shop
+        shop.draw();
+        drawCart(w()/2-offset,c854(730),c854(20));
+
+        //back to home
+        home.draw();
+        gameoverText.setTextSize(c854(45));
+        tmp = c854(730) - (gameoverText.ascent()+gameoverText.descent()) / 2;
+        canvas.drawText("↩",w()/2+offset,tmp,gameoverText);
+    }
     private void drawGameoverScreen() {
         canvas.drawColor(river);
         canvas.drawBitmap(gameoverBmp, new Rect(3,3,gameoverBmp.getWidth()-2,gameoverBmp.getHeight()-2),
                 new RectF(w()/2-c854(180),h()/2-c854(180),w()/2+c854(180),h()/2+c854(180)), null);
-        title_bold.setTextSize(c854(70));
-        canvas.drawText("GAME OVER", w()/2, c854(160), title_bold);
+        title_bold.setTextSize(c854(60));
+        canvas.drawText("GAME OVER", w()/2, c854(155), title_bold);
         canvas.drawText("you scored: " + score, w()/2, c854(200), title);
-        canvas.drawText("play again?", w()/2, c854(700), title);
+
+        drawGameoverButtons();
     }
 
     private void drawScores() {
@@ -552,5 +617,15 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
             }
         }
+    }
+
+    private void drawCart(float x, float y, float w) {
+        canvas.drawLine(x-w, y-w/2, x-w*.6f, y-w/2, gameoverText2);
+        canvas.drawLine(x-w*.6f, y-w/2, x-w*.2f, y+w/3, gameoverText2);
+        canvas.drawLine(x-w*.2f, y+w/3, x+w*.6f, y+w/3, gameoverText2);
+        canvas.drawLine(x+w*.6f, y+w/3, x+w, y-w/3, gameoverText2);
+        canvas.drawLine(x+w, y-w/3, x-w*.5f, y-w/3, gameoverText2);
+        canvas.drawCircle(x-w*.2f, y+w*2/3, w/6, gameoverText2);
+        canvas.drawCircle(x+w*.6f, y+w*2/3, w/6, gameoverText2);
     }
 }
