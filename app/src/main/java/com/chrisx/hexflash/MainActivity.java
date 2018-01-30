@@ -308,16 +308,17 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     canvas.drawColor(Color.argb(alpha,
                                             Color.red(river), Color.green(river), Color.blue(river)));
-                                }
-                            }
 
-                            //update canvas
-                            ll.invalidate();
+                                    transition--;
+                                }
+
+                                frameCount++;
+
+                                //update canvas
+                                ll.invalidate();
+                            }
                         }
                     });
-
-                    if (transition > 0) transition--;
-                    frameCount++;
 
                     //wait until frame is done
                     while (System.nanoTime() - startTime < nanosecondsPerFrame);
