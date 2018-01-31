@@ -2,10 +2,8 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
+ * @TODO different gamemodes (scuttle chaos?)
  * @TODO instructions menu
- * @TODO porosnax
- * @TODO *optional* prevent hexflashing off the screen
- *
  * @TODO shop with different poro skins?
  */
 
