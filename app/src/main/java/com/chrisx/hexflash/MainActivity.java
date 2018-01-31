@@ -39,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, sadporo;
+    static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, sadporo,
+            restart, home, shop, play, more;
     private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private long frameCount = 0;
 
     private String menu = "start";
-    private boolean pressedDuringLimbo = false;
+    private String lastPressMenu;
 
     private int transition = 0;
     private final int TRANSITION_MAX = 40;
@@ -63,10 +64,10 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title_bold, title, sink, scoreTitle, scoreText, gameoverText, gameoverText2;
+    private Paint title_bold, title, sink, scoreTitle, scoreText;
     private int river = Color.rgb(35,66,94);
 
-    private CircleButton restart, home, shop;
+    private CircleButton middle, left, right;
     private float offset;
 
     private Poro player;
@@ -113,6 +114,11 @@ public class MainActivity extends AppCompatActivity {
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
+        restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
+        home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
+        shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
+        play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
+        more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -147,20 +153,11 @@ public class MainActivity extends AppCompatActivity {
         scoreText = newPaint(Color.WHITE);
         scoreText.setTextSize(c854(30));
 
-        gameoverText = newPaint(Color.WHITE);
-        gameoverText.setTextAlign(Paint.Align.CENTER);
-        gameoverText.setTypeface(cd_b);
-
-        gameoverText2 = newPaint(Color.WHITE);
-        gameoverText2.setStrokeWidth(c854(3));
-        gameoverText2.setStyle(Paint.Style.STROKE);
-        gameoverText2.setStrokeCap(Paint.Cap.ROUND);
-
         //buttons
         offset = c854(125);
-        restart = new CircleButton(canvas,w()/2,c854(700),c854(70));
-        home = new CircleButton(canvas,w()/2+offset,c854(730),c854(40));
-        shop = new CircleButton(canvas,w()/2-offset,c854(730),c854(40));
+        middle = new CircleButton(canvas,w()/2,c854(700),c854(70));
+        right = new CircleButton(canvas,w()/2+offset,c854(730),c854(40));
+        left = new CircleButton(canvas,w()/2-offset,c854(730),c854(40));
 
         final Handler handler = new Handler();
         new Thread(new Runnable() {
@@ -351,10 +348,31 @@ public class MainActivity extends AppCompatActivity {
         float Y = event.getY();
         int action = event.getAction();
 
+        if (action == MotionEvent.ACTION_DOWN) {
+            lastPressMenu = menu;
+
+            if (middle.contains(X, Y)) middle.press();
+            if (right.contains(X, Y)) right.press();
+            if (left.contains(X, Y)) left.press();
+        } else if (action == MotionEvent.ACTION_MOVE){
+            if (!middle.contains(X, Y)) middle.release();
+            if (!right.contains(X, Y)) right.release();
+            if (!left.contains(X, Y)) left.release();
+        }
+
         if (menu.equals("start")) {
             if (action == MotionEvent.ACTION_UP) {
-                player = new Poro(canvas);
-                goToMenu("game");
+                if (middle.isPressed()) {
+                    middle.release();
+                    player = new Poro(canvas);
+                    goToMenu("game");
+                } else if (right.isPressed()) {
+                    right.release();
+                    goToMenu("more");
+                } else if (left.isPressed()) {
+                    left.release();
+                    goToMenu("shop");
+                }
             }
         } else if (menu.equals("game")) {
             lastX = X;
@@ -367,28 +385,17 @@ public class MainActivity extends AppCompatActivity {
                 if (player.isChanneling()) player.endChannel();
             }
         } else if (menu.equals("limbo")) {
-            //avoid starting a new game after getting hooked mid-channel and releasing on end screen
-            if (action == MotionEvent.ACTION_DOWN) pressedDuringLimbo = true;
-
-            if (pressedDuringLimbo) {
-                if (action == MotionEvent.ACTION_DOWN) {
-                    if (restart.contains(X, Y)) restart.press();
-                    if (home.contains(X, Y)) home.press();
-                    if (shop.contains(X, Y)) shop.press();
-                } else if (action == MotionEvent.ACTION_MOVE) {
-                    if (!restart.contains(X, Y)) restart.release();
-                    if (!home.contains(X, Y)) home.release();
-                    if (!shop.contains(X, Y)) shop.release();
-                } else if (action == MotionEvent.ACTION_UP) {
-                    if (restart.isPressed()) {
-                        restart.release();
+            if (lastPressMenu.equals("limbo")) {
+                if (action == MotionEvent.ACTION_UP) {
+                    if (middle.isPressed()) {
+                        middle.release();
                         player.reset();
                         goToMenu("game");
-                    } else if (home.isPressed()) {
-                        home.release();
+                    } else if (right.isPressed()) {
+                        right.release();
                         goToMenu("start");
-                    } else if (shop.isPressed()) {
-                        shop.release();
+                    } else if (left.isPressed()) {
+                        left.release();
                         goToMenu("shop");
                     }
                 }
@@ -448,6 +455,7 @@ public class MainActivity extends AppCompatActivity {
                 || s.equals("game")
                 || s.equals("gameover")
                 || s.equals("shop")
+                || s.equals("more")
                 || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
 
@@ -460,7 +468,6 @@ public class MainActivity extends AppCompatActivity {
             clearPoroSnax();
             resetPlatforms();
             generatePlatforms();
-            pressedDuringLimbo = false;
         }
 
         if (s.equals("gameover")) {
@@ -479,27 +486,46 @@ public class MainActivity extends AppCompatActivity {
         title_bold.setTextSize(c854(80));
         canvas.drawText("HEXFLASH", w()/2, c854(561), title_bold);
         drawBmp(porowsnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
-        canvas.drawText("tap to start", w()/2, c854(667), title);
+        
+        //play button
+        middle.draw();
+        RectF tmp = new RectF(middle.getX()-middle.getR()/2f, middle.getY()-middle.getR()/1.8f,
+                middle.getX()+middle.getR()/1.8f, middle.getY()+middle.getR()/1.8f);
+        drawBmp(play, tmp);
+
+        //shop
+        left.draw();
+        tmp = new RectF(left.getX()-left.getR()/1.414f, left.getY()-left.getR()/1.414f,
+                left.getX()+left.getR()/1.414f, left.getY()+left.getR()/1.414f);
+        drawBmp(shop, tmp);
+
+        //more gamemodes
+        right.draw();
+        tmp = new RectF(right.getX()-right.getR()/1.9f, right.getY()-right.getR()/1.9f,
+                right.getX()+right.getR()/1.9f, right.getY()+right.getR()/1.9f);
+        drawBmp(more, tmp);
     }
 
     private void drawGameoverButtons() {
-        canvas.drawRect(0,restart.getY()-restart.getR()-c854(5),w(),restart.getY()+restart.getR()+c854(5),newPaint(river));
+        canvas.drawRect(0,middle.getY()-middle.getR()-c854(5),w(),middle.getY()+middle.getR()+c854(5),newPaint(river));
 
         //restart button
-        restart.draw();
-        gameoverText.setTextSize(c854(95));
-        float tmp = c854(705) - (gameoverText.ascent()+gameoverText.descent()) / 2;
-        canvas.drawText("↻",w()/2,tmp,gameoverText);
+        middle.draw();
+        RectF tmp = new RectF(middle.getX()-middle.getR()/1.8f, middle.getY()-middle.getR()/1.8f,
+                middle.getX()+middle.getR()/1.8f, middle.getY()+middle.getR()/1.8f);
+        drawBmp(restart, tmp);
 
         //shop
-        shop.draw();
-        drawCart(w()/2-offset,c854(730),c854(20));
+        left.draw();
+        tmp = new RectF(left.getX()-left.getR()/1.414f, left.getY()-left.getR()/1.414f,
+                left.getX()+left.getR()/1.414f, left.getY()+left.getR()/1.414f);
+        drawBmp(shop, tmp);
 
         //back to home
-        home.draw();
-        gameoverText.setTextSize(c854(45));
-        tmp = c854(730) - (gameoverText.ascent()+gameoverText.descent()) / 2;
-        canvas.drawText("↩",w()/2+offset,tmp,gameoverText);
+        right.draw();
+        tmp = new RectF(right.getX()-right.getR()/1.9f, right.getY()-right.getR()/1.9f,
+                right.getX()+right.getR()/1.9f, right.getY()+right.getR()/1.9f);
+        drawBmp(home, tmp);
     }
     private void drawGameoverScreen() {
         canvas.drawColor(river);
@@ -618,15 +644,5 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
             }
         }
-    }
-
-    private void drawCart(float x, float y, float w) {
-        canvas.drawLine(x-w, y-w/2, x-w*.6f, y-w/2, gameoverText2);
-        canvas.drawLine(x-w*.6f, y-w/2, x-w*.2f, y+w/3, gameoverText2);
-        canvas.drawLine(x-w*.2f, y+w/3, x+w*.6f, y+w/3, gameoverText2);
-        canvas.drawLine(x+w*.6f, y+w/3, x+w, y-w/3, gameoverText2);
-        canvas.drawLine(x+w, y-w/3, x-w*.5f, y-w/3, gameoverText2);
-        canvas.drawCircle(x-w*.2f, y+w*2/3, w/6, gameoverText2);
-        canvas.drawCircle(x+w*.6f, y+w*2/3, w/6, gameoverText2);
     }
 }
