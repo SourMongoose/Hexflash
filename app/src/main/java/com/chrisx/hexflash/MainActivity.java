@@ -34,7 +34,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private Bitmap bmp;
-    private Canvas canvas;
+    static Canvas canvas;
     private LinearLayout ll;
 
     static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, sadporo,
@@ -63,11 +63,13 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title_bold, title, sink, scoreTitle, scoreText;
+    private Paint title_bold, title, mode, sink, scoreTitle, scoreText;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
     private float offset;
+
+    private RoundRectButton scuttle;
 
     private Poro player;
     private boolean channeling;
@@ -146,6 +148,9 @@ public class MainActivity extends AppCompatActivity {
         title.setTextSize(c854(40));
         title.setTypeface(cd);
 
+        mode = new Paint(title);
+        mode.setTextSize(c854(35));
+
         sink = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         scoreTitle = newPaint(Color.WHITE);
@@ -158,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
         middle = new CircleButton(canvas,w()/2,c854(700),c854(70));
         right = new CircleButton(canvas,w()/2+offset,c854(730),c854(40));
         left = new CircleButton(canvas,w()/2-offset,c854(730),c854(40));
+
+        scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(255,140,0));
+
+        //player
+        player = new Poro(canvas);
 
         final Handler handler = new Handler();
         new Thread(new Runnable() {
@@ -181,7 +191,9 @@ public class MainActivity extends AppCompatActivity {
                                         title_bold.setTextSize(c854(60));
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
-                                        canvas.drawText("Check back later!", w()/2, h()/2, title);
+                                        scuttle.draw();
+                                        canvas.drawText("SCUTTLE MAYHEM", scuttle.getRectF().centerX(),
+                                                scuttle.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -376,19 +388,21 @@ public class MainActivity extends AppCompatActivity {
             if (middle.contains(X, Y)) middle.press();
             if (right.contains(X, Y)) right.press();
             if (left.contains(X, Y)) left.press();
+            if (scuttle.contains(X, Y)) scuttle.press();
         } else if (action == MotionEvent.ACTION_MOVE){
             if (!middle.contains(X, Y)) middle.release();
             if (!right.contains(X, Y)) right.release();
             if (!left.contains(X, Y)) left.release();
+            if (!scuttle.contains(X, Y)) scuttle.release();
         }
 
         if (menu.equals("start")) {
             if (action == MotionEvent.ACTION_UP) {
                 if (middle.isPressed()) {
                     middle.release();
-                    player = new Poro(canvas);
-                    goToMenu("game");
+                    player.reset();
                     gamemode = "classic";
+                    goToMenu("game");
                 } else if (right.isPressed()) {
                     right.release();
                     goToMenu("more");
@@ -401,6 +415,15 @@ public class MainActivity extends AppCompatActivity {
             //back arrow
             if (X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("more")) {
+            if (action == MotionEvent.ACTION_UP) {
+                if (scuttle.isPressed()) {
+                    scuttle.release();
+                    player.reset();
+                    gamemode = "scuttle";
+                    goToMenu("game");
+                }
+            }
+
             //back arrow
             if (X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("game")) {
@@ -435,10 +458,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //shorthand for w() and h()
-    private float w() {
+    static float w() {
         return canvas.getWidth();
     }
-    private float h() {
+    static float h() {
         return canvas.getHeight();
     }
 
@@ -451,10 +474,10 @@ public class MainActivity extends AppCompatActivity {
         return p;
     }
 
-    private float c480(float f) {
-        return w() / (450 / f);
+    static float c480(float f) {
+        return w() / (480 / f);
     }
-    private float c854(float f) {
+    static float c854(float f) {
         return h() / (854 / f);
     }
 
@@ -490,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
                 || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
 
-        if (s.equals("game") && (menu.equals("start") || menu.equals("limbo"))) {
+        if (s.equals("game") && (menu.equals("start") || menu.equals("limbo") || menu.equals("more"))) {
             //restart
             shift = frameCount = 0;
             score = 0;
@@ -611,7 +634,9 @@ public class MainActivity extends AppCompatActivity {
             float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
             if (distance(prev.getX(),prev.getY(),newX,newY) < player.getMaxRange()) {
                 //probability of platform being a scuttle crab
-                double prob = 0.5 * score/1000 / 15;
+                double prob;
+                if (gamemode.equals("scuttle")) prob = 1;
+                else prob = 0.5 * score/1000 / 15;
                 ev_scuttle += prob;
                 double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/1.5);
 
