@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout ll;
 
     static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, sadporo,
-            restart, home, shop, play, more;
+            restart, home, shop, play, more, leftarrow;
     private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String menu = "start", prevMenu = "start";
     private String lastPressMenu;
+    private String gamemode = "classic";
 
     private int transition = 0;
     private final int TRANSITION_MAX = 40;
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
         play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
         more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
+        leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -180,6 +182,9 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
                                         canvas.drawText("Check back later!", w()/2, h()/2, title);
+
+                                        //back
+                                        drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
                                     } else if (menu.equals("shop")) {
                                         canvas.drawColor(river);
 
@@ -187,6 +192,9 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawText("SHOP", w()/2, c854(80), title_bold);
 
                                         canvas.drawText("Check back later!", w()/2, h()/2, title);
+
+                                        //back
+                                        drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
                                     } else if (menu.equals("game")) {
                                         //background
                                         canvas.drawColor(river);
@@ -303,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         if (transition == 0) goToMenu("limbo");
                                     } else if (menu.equals("limbo")) {
-                                        drawGameoverButtons();
+                                        drawGameoverScreen();
                                     }
                                 }
 
@@ -351,8 +359,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (menu.equals("shop") || menu.equals("more")) {
-            menu = prevMenu;
-            transition = TRANSITION_MAX;
+            goToMenu(prevMenu);
         }
     }
 
@@ -381,6 +388,7 @@ public class MainActivity extends AppCompatActivity {
                     middle.release();
                     player = new Poro(canvas);
                     goToMenu("game");
+                    gamemode = "classic";
                 } else if (right.isPressed()) {
                     right.release();
                     goToMenu("more");
@@ -389,6 +397,12 @@ public class MainActivity extends AppCompatActivity {
                     goToMenu("shop");
                 }
             }
+        } else if (menu.equals("shop")) {
+            //back arrow
+            if (X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
+        } else if (menu.equals("more")) {
+            //back arrow
+            if (X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("game")) {
             lastX = X;
             lastY = Y;
@@ -444,8 +458,8 @@ public class MainActivity extends AppCompatActivity {
         return h() / (854 / f);
     }
 
-    private long getHighScore() {
-        return sharedPref.getInt("high_score", 0);
+    private long getHighScore(String s) {
+        return sharedPref.getInt("high_score_"+s, 0);
     }
     private int getPoroSnax() {
         return sharedPref.getInt("porosnax", 0);
@@ -489,8 +503,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (s.equals("gameover")) {
             //check for new high score
-            if (score > getHighScore()) {
-                editor.putInt("high_score", score);
+            if (score > getHighScore(gamemode)) {
+                editor.putInt("high_score_"+gamemode, score);
                 editor.apply();
             }
         }
@@ -563,7 +577,7 @@ public class MainActivity extends AppCompatActivity {
         scoreText.setTextAlign(Paint.Align.LEFT);
         canvas.drawText(score+"", c480(10), c854(60), scoreText);
         scoreText.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText(getHighScore()+"", w()-c480(10), c854(60), scoreText);
+        canvas.drawText(getHighScore(gamemode)+"", w()-c480(10), c854(60), scoreText);
     }
 
     //delete all platforms and initialize one lilypad
