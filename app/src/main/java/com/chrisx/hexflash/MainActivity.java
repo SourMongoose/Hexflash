@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean paused = false;
     private long frameCount = 0;
 
-    private String menu = "start";
+    private String menu = "start", prevMenu = "start";
     private String lastPressMenu;
 
     private int transition = 0;
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize bitmaps
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
-        scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler);
+        scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
         porowsnax = BitmapFactory.decodeResource(getResources(), R.drawable.porowsnax);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
@@ -173,6 +173,20 @@ public class MainActivity extends AppCompatActivity {
                                     if (menu.equals("start")) {
                                         //title screen
                                         drawTitleMenu();
+                                    } else if (menu.equals("more")) {
+                                        canvas.drawColor(river);
+
+                                        title_bold.setTextSize(c854(60));
+                                        canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
+
+                                        canvas.drawText("Check back later!", w()/2, h()/2, title);
+                                    } else if (menu.equals("shop")) {
+                                        canvas.drawColor(river);
+
+                                        title_bold.setTextSize(c854(60));
+                                        canvas.drawText("SHOP", w()/2, c854(80), title_bold);
+
+                                        canvas.drawText("Check back later!", w()/2, h()/2, title);
                                     } else if (menu.equals("game")) {
                                         //background
                                         canvas.drawColor(river);
@@ -336,7 +350,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
+        if (menu.equals("shop") || menu.equals("more")) {
+            menu = prevMenu;
+            transition = TRANSITION_MAX;
+        }
     }
 
     @Override
@@ -449,6 +466,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToMenu(String s) {
+        prevMenu = menu;
+
         if (s.equals("start")
                 || s.equals("game")
                 || s.equals("gameover")
@@ -488,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
         //play button
         middle.draw();
         RectF tmp = new RectF(middle.getX()-middle.getR()/2f, middle.getY()-middle.getR()/1.8f,
-                middle.getX()+middle.getR()/1.8f, middle.getY()+middle.getR()/1.8f);
+                middle.getX()+middle.getR()/1.6f, middle.getY()+middle.getR()/1.8f);
         drawBmp(play, tmp);
 
         //shop

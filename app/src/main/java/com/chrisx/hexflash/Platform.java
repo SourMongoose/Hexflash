@@ -2,6 +2,8 @@ package com.chrisx.hexflash;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
@@ -12,6 +14,8 @@ class Platform {
 
     private Canvas c;
     private Bitmap bmp;
+
+    private Paint hitbox;
 
     //constructor for lilypad
     Platform(Canvas c, float x, float y) {
@@ -24,6 +28,10 @@ class Platform {
 
         angle = (int)(Math.random()*360);
         bmp = MainActivity.lilypad;
+
+        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
+        hitbox.setStyle(Paint.Style.STROKE);
+        hitbox.setColor(Color.WHITE);
     }
     //constructor for scuttle
     Platform(Canvas c, float x, float y, float speed) {
@@ -36,6 +44,10 @@ class Platform {
 
         angle = Math.random() < 0.5 ? 90 : 270;
         bmp = MainActivity.scuttler;
+
+        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
+        hitbox.setStyle(Paint.Style.STROKE);
+        hitbox.setColor(Color.WHITE);
     }
 
     float getX() {
@@ -72,9 +84,14 @@ class Platform {
         c.save();
         c.translate(x, y);
 
-        c.rotate(angle + 90); //shift by 90deg
-        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
+        c.rotate(angle - 90); //shift by 90deg
+        if (speed == 0) c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),new RectF(-w/2,-w/2,w/2,w/2),null);
+        else c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),new RectF(-w/1.7f,-w/1.7f,w/1.7f,w/1.7f),null);
 
         c.restore();
+    }
+
+    void drawHitbox() {
+        c.drawCircle(x, y, w/2, hitbox);
     }
 }
