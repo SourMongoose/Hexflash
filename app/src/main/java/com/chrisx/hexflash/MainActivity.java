@@ -629,6 +629,7 @@ public class MainActivity extends AppCompatActivity {
             dist %= (w()-platformW);
 
             if (platforms.get(platforms.size()-1).getSpeed() > 0) rows++;
+            if (gamemode.equals("scuttle")) rows = 1;
 
             float newX = platformW/2 + dist;
             float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
@@ -645,14 +646,14 @@ public class MainActivity extends AppCompatActivity {
                     num_scuttle++;
                 } else {
                     platforms.add(new Platform(canvas, newX, newY));
-                    //add a porosnax onto the lilypad
-                    double prob2 = 0.2;
-                    ev_porosnax += prob2;
-                    double adjProb2 = prob2 * (1 + (ev_porosnax-num_porosnax)/2);
-                    if (Math.random() < adjProb2) {
-                        snaxlist.add(new PoroSnax(canvas, platforms.get(platforms.size() - 1)));
-                        num_porosnax++;
-                    }
+                }
+                //add a porosnax?
+                double prob2 = 0.2;
+                ev_porosnax += prob2;
+                double adjProb2 = prob2 * (1 + (ev_porosnax-num_porosnax)/2);
+                if (Math.random() < adjProb2) {
+                    snaxlist.add(new PoroSnax(canvas, platforms.get(platforms.size() - 1)));
+                    num_porosnax++;
                 }
             }
         }

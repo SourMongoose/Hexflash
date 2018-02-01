@@ -6,7 +6,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 
 class PoroSnax {
-    private float x, y, w;
+    private float dx, dy, w;
+    private Platform p;
     private int angle;
 
     private Canvas c;
@@ -14,24 +15,25 @@ class PoroSnax {
 
     PoroSnax(Canvas c, Platform p) {
         this.c = c;
+        this.p = p;
 
         w = p.getW()/3;
 
         double r = Math.random() * (p.getW()-w)/2;
         double theta = Math.random() * 2 * Math.PI;
 
-        x = (float)(p.getX() + r*Math.cos(theta));
-        y = (float)(p.getY() + r*Math.sin(theta));
+        dx = (float)(r*Math.cos(theta));
+        dy = (float)(r*Math.sin(theta));
 
         angle = (int)(Math.random()*360);
         bmp = MainActivity.porosnax;
     }
 
     float getX() {
-        return x;
+        return p.getX() + dx;
     }
     float getY() {
-        return y;
+        return p.getY() + dy;
     }
     float getW() {
         return w;
@@ -41,12 +43,12 @@ class PoroSnax {
     }
 
     boolean visible(float shift) {
-        return y-shift+w/2 > 0 && y-shift-w/2 < c.getHeight();
+        return getY()-shift+w/2 > 0 && getY()-shift-w/2 < c.getHeight();
     }
 
     void draw() {
         c.save();
-        c.translate(x, y);
+        c.translate(getX(), getY());
 
         c.rotate(angle);
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
