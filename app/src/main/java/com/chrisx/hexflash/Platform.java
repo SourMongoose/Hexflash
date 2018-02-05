@@ -27,7 +27,7 @@ class Platform {
         speed = 0;
 
         angle = (int)(Math.random()*360);
-        bmp = MainActivity.lilypad;
+        bmp = Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus;
 
         hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
         hitbox.setStyle(Paint.Style.STROKE);

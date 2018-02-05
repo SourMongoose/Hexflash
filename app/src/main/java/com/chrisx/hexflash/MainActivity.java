@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
     static Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, sadporo,
-            restart, home, shop, play, more, leftarrow;
+    static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, lilypadlotus,
+            sadporo, restart, home, shop, play, more, leftarrow;
     private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
@@ -113,7 +113,8 @@ public class MainActivity extends AppCompatActivity {
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
-        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad);
+        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
+        lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
         home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
