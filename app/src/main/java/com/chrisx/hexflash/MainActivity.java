@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout ll;
 
     static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, lilypadlotus,
-            sadporo, restart, home, shop, play, more, leftarrow;
+            sadporo, riverbmp, restart, home, shop, play, more, leftarrow;
     private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
         lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
+        riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
         home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
         shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
@@ -210,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
                                     } else if (menu.equals("game")) {
                                         //background
-                                        canvas.drawColor(river);
+                                        drawRiver();
 
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
@@ -264,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
                                         if (transition == 0) shift += shiftSpeed;
                                     } else if (menu.equals("hook")) {
                                         //background
-                                        canvas.drawColor(river);
+                                        drawRiver();
 
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
@@ -293,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
                                         hookAnimation++;
                                     } else if (menu.equals("sink")) {
                                         //background
-                                        canvas.drawColor(river);
+                                        drawRiver();
 
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
@@ -593,6 +594,14 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawText("you scored: " + score, w()/2, c854(200), title);
 
         drawGameoverButtons();
+    }
+
+    private void drawRiver() {
+        //background
+        float tmp = -shift+w()*3;
+        while (tmp < 0) tmp += w()*3;
+        drawBmp(riverbmp, new RectF(0,tmp-w()*3,w(),tmp));
+        if (tmp <= h()) drawBmp(riverbmp, new RectF(0,tmp,w(),tmp+w()*3));
     }
 
     private void drawScores() {
