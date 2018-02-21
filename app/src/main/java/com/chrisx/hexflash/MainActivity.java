@@ -275,14 +275,17 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 5 / 6;
+                                        float hookWidth = w() / 6;
                                         if (hookAnimation < hookDuration / 2) {
                                             //hook enters screen
                                             float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
-                                            drawBmp(hook, new RectF(player.getX() - w() / 16, -w() / 8 * 7.5f, player.getX() + w() / 16, hookY));
+                                            drawBmp(hook, new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
+                                                    player.getX() + hookWidth/2, hookY));
                                         } else {
                                             //hook exits screen w/ poro
                                             float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
-                                            drawBmp(hook, new RectF(player.getX() - w() / 16, -w() / 8 * 7.5f, player.getX() + w() / 16, hookY));
+                                            drawBmp(hook, new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
+                                                    player.getX() + hookWidth/2, hookY));
                                             player.setY(hookY - player.getW());
                                         }
 
