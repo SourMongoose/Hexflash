@@ -26,7 +26,6 @@ class Poro {
 
     Poro(Canvas c) {
         this.c = c;
-        this.bmp = MainActivity.poro;
 
         maxRange = c.getHeight() / 4;
 
@@ -58,6 +57,8 @@ class Poro {
         x = c.getWidth() / 2;
         y = c.getHeight() / 2;
         angle = Math.PI / 2;
+
+        bmp = MainActivity.poro;
     }
 
     float getW() {
@@ -77,6 +78,10 @@ class Poro {
 
     float getMaxRange() {
         return maxRange;
+    }
+
+    void setBmp(Bitmap bmp) {
+        this.bmp = bmp;
     }
 
     void setPlatform(Platform p) {

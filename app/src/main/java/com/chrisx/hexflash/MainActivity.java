@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, lilypadlotus,
             sadporo, riverbmp, restart, home, shop, play, more, leftarrow;
+    static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
     private SharedPreferences sharedPref;
@@ -123,6 +124,10 @@ public class MainActivity extends AppCompatActivity {
         play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
         more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
         leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
+
+        sinking = new Bitmap[15];
+        for (int i = 0; i < sinking.length; i++)
+            sinking[i] = BitmapFactory.decodeResource(getResources(), 0x7f06006b+i);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -306,11 +311,8 @@ public class MainActivity extends AppCompatActivity {
 
                                         //fade effect over poro
                                         int sinkDuration = FRAMES_PER_SECOND;
-                                        int alpha = (int) (255. * Math.min(1, Math.pow(1. * sinkAnimation / sinkDuration, 2)));
-                                        sink.setShader(new RadialGradient(player.getX(), player.getY(), player.getW()/2+c480(3),
-                                                Color.argb(alpha, Color.red(river), Color.green(river), Color.blue(river)),
-                                                river, Shader.TileMode.CLAMP));
-                                        canvas.drawCircle(player.getX(), player.getY(), player.getW()/2+c480(3), sink);
+                                        player.setBmp(sinking[Math.min(sinking.length-1,
+                                                sinkAnimation/(sinkDuration/sinking.length))]);
 
                                         drawPlatforms();
                                         drawPoroSnax();
