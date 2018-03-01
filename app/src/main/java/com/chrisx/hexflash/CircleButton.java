@@ -34,6 +34,16 @@ class CircleButton {
         return r;
     }
 
+    void setX(float x) {
+        this.x = x;
+    }
+    void setY(float y) {
+        this.y = y;
+    }
+    void setR(float r) {
+        this.r = r;
+    }
+
     void press() {
         pressed = true;
     }

@@ -539,6 +539,17 @@ public class MainActivity extends AppCompatActivity {
                 editor.putInt("high_score_"+gamemode, score);
                 editor.apply();
             }
+            //move buttons
+            middle.setY(c854(290));
+            right.setY(c854(320));
+            left.setY(c854(320));
+        }
+
+        if (s.equals("start")) {
+            //move buttons
+            middle.setY(c854(700));
+            right.setY(c854(730));
+            left.setY(c854(730));
         }
 
         menu = s;
@@ -592,11 +603,13 @@ public class MainActivity extends AppCompatActivity {
     }
     private void drawGameoverScreen() {
         canvas.drawColor(river);
-        canvas.drawBitmap(gameoverBmp, new Rect(3,3,gameoverBmp.getWidth()-2,gameoverBmp.getHeight()-2),
-                new RectF(w()/2-c854(180),h()/2-c854(180),w()/2+c854(180),h()/2+c854(180)), null);
+
+        float tmp = (float)Math.max(h()-w(), middle.getY()+middle.getR()+c854(5));
+        drawBmp(gameoverBmp, new RectF(0,tmp,w(),tmp+w()));
+
         title_bold.setTextSize(c854(60));
-        canvas.drawText("GAME OVER", w()/2, c854(155), title_bold);
-        canvas.drawText("you scored: " + score, w()/2, c854(200), title);
+        canvas.drawText("GAME OVER", w()/2, c854(125), title_bold);
+        canvas.drawText("you scored: " + score, w()/2, c854(170), title);
 
         drawGameoverButtons();
     }
