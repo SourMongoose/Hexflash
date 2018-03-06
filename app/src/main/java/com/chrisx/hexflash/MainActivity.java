@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
-            sinking[i] = BitmapFactory.decodeResource(getResources(), 0x7f06006b+i);
+            sinking[i] = BitmapFactory.decodeResource(getResources(), R.drawable.poro01+i);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -211,6 +211,12 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawText("SHOP", w()/2, c854(80), title_bold);
 
                                         canvas.drawText("Check back later!", w()/2, h()/2, title);
+
+                                        //porosnax count
+                                        drawBmp(porosnax, new RectF(w()-c854(75),h()-c854(75),w()-c854(25),h()-c854(25)));
+                                        title.setTextAlign(Paint.Align.RIGHT);
+                                        canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
+                                        title.setTextAlign(Paint.Align.CENTER);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -420,7 +426,8 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (menu.equals("shop")) {
             //back arrow
-            if (X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
+            if (action == MotionEvent.ACTION_UP &&
+                    X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("more")) {
             if (action == MotionEvent.ACTION_UP) {
                 if (scuttle.isPressed()) {
@@ -432,7 +439,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //back arrow
-            if (X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
+            if (action == MotionEvent.ACTION_UP &&
+                    X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("game")) {
             lastX = X;
             lastY = Y;
