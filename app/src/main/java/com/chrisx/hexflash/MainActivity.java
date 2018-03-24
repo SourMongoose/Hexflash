@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
     static Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, porowsnax, porosnax, hook, blitzwithporo, lilypad, lilypadlotus,
-            sadporo, riverbmp, restart, home, shop, play, more, leftarrow;
+    static Bitmap poro, scuttler, porowsnax, porosnax, snaptrap, hook, blitzwithporo, lilypad,
+            lilypadlotus, sadporo, riverbmp, restart, home, shop, play, more, leftarrow;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -77,11 +77,12 @@ public class MainActivity extends AppCompatActivity {
     private float playerY;
     private int score;
 
-    private double ev_scuttle, ev_porosnax; //expected value
-    private int num_scuttle = 0, num_porosnax = 0; //actual
+    private double ev_scuttle, ev_porosnax, ev_snaptrap; //expected value
+    private int num_scuttle = 0, num_porosnax = 0, num_snaptrap; //actual
 
     private List<Platform> platforms = new ArrayList<>();
     private List<PoroSnax> snaxlist = new ArrayList<>();
+    private List<SnapTrap> snaptraps = new ArrayList<>();
 
     private float shift, //pixels translated down
         shiftSpeed = 0.75f;
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
         porowsnax = BitmapFactory.decodeResource(getResources(), R.drawable.porowsnax);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
+        snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
@@ -236,6 +238,10 @@ public class MainActivity extends AppCompatActivity {
                                         drawPoroSnax();
                                         updatePoroSnax();
 
+                                        //draw and update snap-traps
+                                        drawSnapTraps();
+                                        updateSnapTraps();
+
                                         player.draw();
                                         //player.drawHitbox(); //debugging purposes
 
@@ -282,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.translate(0, -shift); //screen shift
                                         drawPlatforms();
                                         drawPoroSnax();
+                                        drawSnapTraps();
                                         player.draw();
                                         canvas.restore();
 
@@ -322,6 +329,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         drawPlatforms();
                                         drawPoroSnax();
+                                        drawSnapTraps();
 
                                         canvas.restore();
 
@@ -536,7 +544,9 @@ public class MainActivity extends AppCompatActivity {
             score = 0;
             ev_scuttle = ev_porosnax = 0;
             num_scuttle = num_porosnax = 0;
+            ev_snaptrap = num_snaptrap = 0;
             clearPoroSnax();
+            clearSnapTraps();
             resetPlatforms();
             generatePlatforms();
         }
@@ -612,7 +622,7 @@ public class MainActivity extends AppCompatActivity {
     private void drawGameoverScreen() {
         canvas.drawColor(river);
 
-        float tmp = (float)Math.max(h()-w(), middle.getY()+middle.getR()+c854(5));
+        float tmp = Math.max(h()-w(), middle.getY()+middle.getR()+c854(5));
         drawBmp(gameoverBmp, new RectF(0,tmp,w(),tmp+w()));
 
         title_bold.setTextSize(c854(60));
@@ -693,6 +703,14 @@ public class MainActivity extends AppCompatActivity {
                     snaxlist.add(new PoroSnax(canvas, platforms.get(platforms.size() - 1)));
                     num_porosnax++;
                 }
+                //add a snap trap?
+                double prob3 = 0.1;
+                ev_snaptrap += prob3;
+                double adjProb3 = prob3 * (1 + (ev_porosnax-num_porosnax)/2);
+                if (Math.random() < adjProb3) {
+                    snaptraps.add(new SnapTrap(canvas, platforms.get(platforms.size() - 1)));
+                    num_snaptrap++;
+                }
             }
         }
     }
@@ -737,6 +755,28 @@ public class MainActivity extends AppCompatActivity {
                 snaxlist.remove(i);
                 editor.putInt("porosnax", getPoroSnax()+1);
                 editor.apply();
+            }
+        }
+    }
+
+    private void clearSnapTraps() {
+        snaptraps.clear();
+    }
+    private void drawSnapTraps() {
+        for (SnapTrap s : snaptraps)
+            if (s.visible(shift)) s.draw();
+    }
+    private void updateSnapTraps() {
+        //remove traps that have gone off the screen
+        while (!snaptraps.isEmpty() && !snaptraps.get(0).visible(shift)
+                && snaptraps.get(0).getY()-shift < h()) snaptraps.remove(0);
+
+        //check if traps have been triggered
+        for (int i = snaptraps.size()-1; i >= 0; i--) {
+            if (distance(snaptraps.get(i).getX(),snaptraps.get(i).getY(),player.getX(),player.getY())
+                    < (player.getW()+snaptraps.get(i).getW())/2) {
+                snaptraps.remove(i);
+                player.snare();
             }
         }
     }

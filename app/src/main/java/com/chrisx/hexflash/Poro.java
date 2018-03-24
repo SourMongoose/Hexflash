@@ -15,6 +15,7 @@ class Poro {
             maxRange, currRange, secToMaxRange;
     private double angle;
     private boolean channel;
+    private double snared;
 
     private Platform platform;
     private float offsetX, offsetY; //distance away from center of platform
@@ -92,9 +93,11 @@ class Poro {
     }
 
     void startChannel(float secToMaxRange) {
-        channel = true;
-        this.currRange = 0;
-        this.secToMaxRange = secToMaxRange;
+        if (snared <= 0) {
+            channel = true;
+            this.currRange = 0;
+            this.secToMaxRange = secToMaxRange;
+        }
     }
     void interruptChannel() {
         channel = false;
@@ -123,6 +126,12 @@ class Poro {
         x = platform.getX() - offsetX;
         y = platform.getY() - offsetY;
         angle = platform.getAngle()*Math.PI/180 - offsetAngle;
+
+        if (snared > 0) snared = Math.max(snared - 1. / MainActivity.FRAMES_PER_SECOND, 0);
+    }
+
+    void snare() {
+        snared = 0.5;
     }
 
     void draw() {
