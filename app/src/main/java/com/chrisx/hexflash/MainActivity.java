@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private CircleButton middle, left, right;
     private float offset;
 
-    private RoundRectButton scuttle;
+    private RoundRectButton scuttle, snare;
 
     private Poro player;
     private boolean channeling;
@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         left = new CircleButton(canvas,w()/2-offset,c854(730),c854(40));
 
         scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(255,140,0));
+        snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(54,173,31));
 
         //player
         player = new Poro(canvas);
@@ -203,6 +204,9 @@ public class MainActivity extends AppCompatActivity {
                                         scuttle.draw();
                                         canvas.drawText("SCUTTLE MAYHEM", scuttle.getRectF().centerX(),
                                                 scuttle.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
+                                        snare.draw();
+                                        canvas.drawText("SNARE FAIR", snare.getRectF().centerX(),
+                                                snare.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -410,11 +414,13 @@ public class MainActivity extends AppCompatActivity {
             if (right.contains(X, Y)) right.press();
             if (left.contains(X, Y)) left.press();
             if (scuttle.contains(X, Y)) scuttle.press();
+            if (snare.contains(X, Y)) snare.press();
         } else if (action == MotionEvent.ACTION_MOVE){
             if (!middle.contains(X, Y)) middle.release();
             if (!right.contains(X, Y)) right.release();
             if (!left.contains(X, Y)) left.release();
             if (!scuttle.contains(X, Y)) scuttle.release();
+            if (!snare.contains(X, Y)) snare.release();
         }
 
         if (menu.equals("start")) {
@@ -443,6 +449,11 @@ public class MainActivity extends AppCompatActivity {
                     player.reset();
                     gamemode = "scuttle";
                     goToMenu("game");
+                } else if (snare.isPressed()) {
+                    snare.release();
+                    player.reset();
+                    gamemode = "snare";
+                    goToMenu("game");
                 }
             }
 
@@ -455,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_DOWN && !channeling) {
                 //start channeling with a speed dependent on screen-shift speed
                 float sec = (float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
-                if (gamemode.equals("scuttle")) sec *= 0.8;
+                if (gamemode.equals("scuttle") || gamemode.equals("snare")) sec *= 0.8;
                 player.startChannel(sec);
             } else if (action == MotionEvent.ACTION_UP) {
                 //release
@@ -683,9 +694,7 @@ public class MainActivity extends AppCompatActivity {
             float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
             if (distance(prev.getX(),prev.getY(),newX,newY) < player.getMaxRange()) {
                 //probability of platform being a scuttle crab
-                double prob;
-                if (gamemode.equals("scuttle")) prob = 1;
-                else prob = 0.5 * score/1000 / 15;
+                double prob = gamemode.equals("scuttle") ? 1 : 0.5 * score/1000 / 15;
                 ev_scuttle += prob;
                 double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/1.5);
 
@@ -704,9 +713,9 @@ public class MainActivity extends AppCompatActivity {
                     num_porosnax++;
                 }
                 //add a snap trap?
-                double prob3 = 0.1;
+                double prob3 = 0.15;
                 ev_snaptrap += prob3;
-                double adjProb3 = prob3 * (1 + (ev_porosnax-num_porosnax)/2);
+                double adjProb3 = gamemode.equals("snare") ? 1 : prob3 * (1 + (ev_porosnax-num_porosnax)/2);
                 if (Math.random() < adjProb3) {
                     snaptraps.add(new SnapTrap(canvas, platforms.get(platforms.size() - 1)));
                     num_snaptrap++;
