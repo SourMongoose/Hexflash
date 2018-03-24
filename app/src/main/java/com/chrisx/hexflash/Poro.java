@@ -16,14 +16,15 @@ class Poro {
     private double angle;
     private boolean channel;
     private double snared;
+    private final double MAX_SNARE = 0.5;
 
     private Platform platform;
     private float offsetX, offsetY; //distance away from center of platform
     private float offsetAngle;
 
     private Canvas c;
-    private Bitmap bmp;
-    private Paint hitbox, indicator, maxRangeCircle, currRangeCircle, rangeGradient;
+    private Bitmap bmp, snarefx, m_range, c_range, indicator; //max/current range
+    private Paint hitbox;
 
     Poro(Canvas c) {
         this.c = c;
@@ -33,22 +34,6 @@ class Poro {
         hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
         hitbox.setStyle(Paint.Style.STROKE);
         hitbox.setColor(Color.WHITE);
-
-        indicator = new Paint(Paint.ANTI_ALIAS_FLAG);
-        indicator.setStyle(Paint.Style.FILL);
-        indicator.setColor(Color.rgb(123,251,242));
-
-        maxRangeCircle = new Paint(Paint.ANTI_ALIAS_FLAG);
-        maxRangeCircle.setStyle(Paint.Style.STROKE);
-        maxRangeCircle.setColor(Color.rgb(123,251,242));
-        maxRangeCircle.setStrokeWidth(c.getWidth() / 80);
-
-        currRangeCircle = new Paint(maxRangeCircle);
-        currRangeCircle.setStrokeWidth(c.getWidth() / 150);
-
-        rangeGradient = new Paint(Paint.ANTI_ALIAS_FLAG);
-        rangeGradient.setShader(new RadialGradient(0, 0, maxRange,
-                Color.argb(0,0,0,0), Color.argb(50,123,251,242), Shader.TileMode.CLAMP));
 
         w = c.getWidth() / 8;
         reset();
@@ -60,6 +45,10 @@ class Poro {
         angle = Math.PI / 2;
 
         bmp = MainActivity.poro;
+        snarefx = MainActivity.snarefx;
+        m_range = MainActivity.maxrange;
+        c_range = MainActivity.currrange;
+        indicator = MainActivity.indicator;
     }
 
     float getW() {
@@ -131,7 +120,7 @@ class Poro {
     }
 
     void snare() {
-        snared = 0.5;
+        snared = MAX_SNARE;
     }
 
     void draw() {
@@ -145,6 +134,11 @@ class Poro {
         c.rotate((float)(angle * 180/Math.PI - 90)); //convert to degrees and shift by 90deg
         //c.drawText(currRange + " / " + maxRange, 0,0,indicator); //debugging purposes
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
+        if (snared > 0) {
+            c.rotate((float)(-45 + 90 * (snared / MAX_SNARE)));
+            c.drawBitmap(snarefx, new Rect(0,0,snarefx.getWidth(),snarefx.getHeight()),
+                    new RectF(-w/1.6f,-w/1.6f,w/1.6f,w/1.6f), null);
+        }
 
         c.restore();
     }
@@ -154,16 +148,17 @@ class Poro {
     }
 
     void drawRange() {
-        c.drawCircle(0, 0, maxRange, rangeGradient);
-        c.drawCircle(0, 0, currRange, currRangeCircle);
-        c.drawCircle(0, 0, maxRange, maxRangeCircle);
+        float mr = maxRange, cr = currRange;
+        c.drawBitmap(m_range, new Rect(0,0,m_range.getWidth(),m_range.getHeight()), new RectF(-mr,-mr,mr,mr), null);
+        c.drawBitmap(c_range, new Rect(0,0,c_range.getWidth(),c_range.getHeight()), new RectF(-cr,-cr,cr,cr), null);
     }
 
     void drawIndicator() {
-        double tempAngle = Math.atan2(targetY - y, targetX - x);
-        float tempX = currRange * (float)Math.cos(tempAngle),
-                tempY = currRange * (float)Math.sin(tempAngle);
-        c.drawCircle(tempX, tempY, maxRange*3/40, currRangeCircle);
-        c.drawCircle(tempX, tempY, maxRange/40, indicator);
+        double tempAngle = Math.atan2(targetY - y, targetX - x) / Math.PI * 180;
+        float cr = currRange;
+
+        c.rotate((float)tempAngle);
+        c.drawBitmap(indicator, new Rect(0,0,indicator.getWidth(),indicator.getHeight()), new RectF(cr-w/2,-w/2,cr+w/2,w/2), null);
+        c.rotate(-(float)tempAngle);
     }
 }

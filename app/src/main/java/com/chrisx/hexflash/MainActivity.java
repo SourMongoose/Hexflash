@@ -37,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
     static Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, porowsnax, porosnax, snaptrap, hook, blitzwithporo, lilypad,
-            lilypadlotus, sadporo, riverbmp, restart, home, shop, play, more, leftarrow;
+    static Bitmap poro, scuttler, porowsnax, porosnax, snaptrap, snarefx, hook, blitzwithporo, lilypad,
+            lilypadlotus, sadporo, riverbmp, restart, home, shop, play, more, leftarrow, maxrange,
+            currrange, indicator;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         porowsnax = BitmapFactory.decodeResource(getResources(), R.drawable.porowsnax);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
         snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
+        snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
         hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
@@ -126,6 +128,9 @@ public class MainActivity extends AppCompatActivity {
         play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
         more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
         leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
+        maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange);
+        currrange = BitmapFactory.decodeResource(getResources(), R.drawable.currrange);
+        indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
