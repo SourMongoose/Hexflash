@@ -137,7 +137,7 @@ class Poro {
         if (snared > 0) {
             c.rotate((float)(-45 + 90 * (snared / MAX_SNARE)));
             c.drawBitmap(snarefx, new Rect(0,0,snarefx.getWidth(),snarefx.getHeight()),
-                    new RectF(-w/1.6f,-w/1.6f,w/1.6f,w/1.6f), null);
+                    new RectF(-w/1.5f,-w/1.5f,w/1.5f,w/1.5f), null);
         }
 
         c.restore();

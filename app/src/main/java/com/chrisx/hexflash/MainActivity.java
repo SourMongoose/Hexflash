@@ -471,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_DOWN && !channeling) {
                 //start channeling with a speed dependent on screen-shift speed
                 float sec = (float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
-                if (gamemode.equals("scuttle") || gamemode.equals("snare")) sec *= 0.8;
+                if (gamemode.equals("scuttle")) sec *= 0.8;
                 player.startChannel(sec);
             } else if (action == MotionEvent.ACTION_UP) {
                 //release
