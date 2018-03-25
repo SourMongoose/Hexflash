@@ -42,6 +42,10 @@ class SnapTrap {
         return p.getAngle()+dAngle;
     }
 
+    void addSpin() {
+        dAngle = (dAngle + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
+    }
+
     boolean visible(float shift) {
         return getY()-shift+w/2 > 0 && getY()-shift-w/2 < c.getHeight();
     }

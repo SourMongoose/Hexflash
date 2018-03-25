@@ -11,6 +11,7 @@ class Platform {
     private float x, y, w;
     private float speed; //in x-direction
     private int angle;
+    private int spin;
 
     private Canvas c;
     private Bitmap bmp;
@@ -25,6 +26,7 @@ class Platform {
         this.y = y;
         w = c.getWidth() / 5;
         speed = 0;
+        spin = 0;
 
         angle = (int)(Math.random()*360);
         bmp = Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus;
@@ -72,19 +74,22 @@ class Platform {
 
     void update() {
         if (speed > 0) {
-            if (x + w/2 > c.getWidth() || x - w/2 < 0)
+            if (x + w / 2 > c.getWidth() || x - w / 2 < 0)
                 angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND * 2) % 360;
 
             if (angle == 90) x += speed;
             if (angle == 270) x -= speed;
         }
     }
+    void addSpin() {
+        spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
+    }
 
     void draw() {
         c.save();
         c.translate(x, y);
 
-        c.rotate(angle - 90); //shift by 90deg
+        c.rotate(angle - 90 + spin); //shift by 90deg
         if (speed == 0) c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),new RectF(-w/2,-w/2,w/2,w/2),null);
         else c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),new RectF(-w/1.7f,-w/1.7f,w/1.7f,w/1.7f),null);
 

@@ -14,6 +14,7 @@ class Poro {
             x, y, targetX, targetY, w,
             maxRange, currRange, secToMaxRange;
     private double angle;
+    private int spin;
     private boolean channel;
     private double snared;
     private final double MAX_SNARE = 0.5;
@@ -43,6 +44,7 @@ class Poro {
         x = c.getWidth() / 2;
         y = c.getHeight() / 2;
         angle = Math.PI / 2;
+        spin = 0;
 
         bmp = MainActivity.poro;
         snarefx = MainActivity.snarefx;
@@ -93,7 +95,7 @@ class Poro {
     }
     void endChannel() {
         channel = false;
-        angle = Math.atan2(targetY - y, targetX - x);
+        angle = Math.atan2(targetY - y, targetX - x) + spin*Math.PI/180;
         x += currRange * Math.cos(angle);
         y += currRange * Math.sin(angle);
     }
@@ -118,6 +120,9 @@ class Poro {
 
         if (snared > 0) snared = Math.max(snared - 1. / MainActivity.FRAMES_PER_SECOND, 0);
     }
+    void addSpin() {
+        spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND * 3 / 2) % 360;
+    }
 
     void snare() {
         snared = MAX_SNARE;
@@ -131,7 +136,7 @@ class Poro {
             drawRange();
             drawIndicator();
         }
-        c.rotate((float)(angle * 180/Math.PI - 90)); //convert to degrees and shift by 90deg
+        c.rotate((float)(angle * 180/Math.PI - 90) + spin); //convert to degrees and shift by 90deg
         //c.drawText(currRange + " / " + maxRange, 0,0,indicator); //debugging purposes
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
         if (snared > 0) {
@@ -157,8 +162,8 @@ class Poro {
         double tempAngle = Math.atan2(targetY - y, targetX - x) / Math.PI * 180;
         float cr = currRange;
 
-        c.rotate((float)tempAngle);
+        c.rotate((float)tempAngle+spin);
         c.drawBitmap(indicator, new Rect(0,0,indicator.getWidth(),indicator.getHeight()), new RectF(cr-w/2,-w/2,cr+w/2,w/2), null);
-        c.rotate(-(float)tempAngle);
+        c.rotate(-(float)tempAngle-spin);
     }
 }
