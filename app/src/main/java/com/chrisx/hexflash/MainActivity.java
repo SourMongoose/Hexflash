@@ -37,11 +37,16 @@ public class MainActivity extends AppCompatActivity {
     static Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, porowsnax, porosnax, snaptrap, snarefx, hook, blitzwithporo, lilypad,
-            lilypadlotus, sadporo, riverbmp, restart, home, shop, play, more, leftarrow, maxrange,
-            currrange, indicator;
+    static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
+            icon_classic, icon_iblitz, blitzwithporo, lilypad, lilypadlotus, sadporo, riverbmp, restart,
+            home, shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
+
+    private String blitzskins[] = {"classic", "iblitz"};
+    private int nBlitz = blitzskins.length;
+    private RectF blitzskins_rectf[] = new RectF[nBlitz];
+    private float ICON_WIDTH, BLITZSKINS_Y;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -69,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
-    private float offset;
+    private float offset, MIDDLE_Y1, MIDDLE_Y2;
 
     private RoundRectButton scuttle, snare;
 
@@ -112,11 +117,14 @@ public class MainActivity extends AppCompatActivity {
         //initialize bitmaps
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
-        porowsnax = BitmapFactory.decodeResource(getResources(), R.drawable.porowsnax);
+        titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
         snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
         snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
-        hook = BitmapFactory.decodeResource(getResources(), R.drawable.hook);
+        hook_classic = BitmapFactory.decodeResource(getResources(), R.drawable.hook_classic);
+        hook_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.hook_iblitz);
+        icon_classic = BitmapFactory.decodeResource(getResources(), R.drawable.icon_classic);
+        icon_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.icon_iblitz);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
         lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
@@ -131,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
         maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange);
         currrange = BitmapFactory.decodeResource(getResources(), R.drawable.currrange);
         indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator);
+        bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
+        border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -174,12 +184,23 @@ public class MainActivity extends AppCompatActivity {
 
         //buttons
         offset = c854(125);
-        middle = new CircleButton(canvas,w()/2,c854(700),c854(70));
-        right = new CircleButton(canvas,w()/2+offset,c854(730),c854(40));
-        left = new CircleButton(canvas,w()/2-offset,c854(730),c854(40));
+        MIDDLE_Y1 = c854(720);
+        MIDDLE_Y2 = c854(290);
+        middle = new CircleButton(canvas,w()/2,MIDDLE_Y1,c854(70));
+        right = new CircleButton(canvas,w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
+        left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
 
         scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(255,140,0));
         snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(54,173,31));
+
+        //blitz skins
+        ICON_WIDTH = c854(100);
+        BLITZSKINS_Y = c854(225);
+        float totalWidth = ICON_WIDTH*nBlitz + ICON_WIDTH*(nBlitz-1)/4;
+        for (int i = 0; i < nBlitz; i++) {
+            float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
+            blitzskins_rectf[i] = new RectF(x,BLITZSKINS_Y,x+ICON_WIDTH,BLITZSKINS_Y+ICON_WIDTH);
+        }
 
         //player
         player = new Poro(canvas);
@@ -221,7 +242,16 @@ public class MainActivity extends AppCompatActivity {
                                         title_bold.setTextSize(c854(60));
                                         canvas.drawText("SHOP", w()/2, c854(80), title_bold);
 
-                                        canvas.drawText("Check back later!", w()/2, h()/2, title);
+                                        //blitzcrank skins
+                                        canvas.drawText("BLITZ SKINS", w()/2, BLITZSKINS_Y-ICON_WIDTH/2, title);
+                                        for (int i = 0; i < nBlitz; i++) {
+                                            drawBmp(getIconBmp(blitzskins[i]), blitzskins_rectf[i]);
+                                            if (getBlitzSkin().equals(blitzskins[i])) {
+                                                RectF rf = blitzskins_rectf[i];
+                                                drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
+                                                        rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                            }
+                                        }
 
                                         //porosnax count
                                         drawBmp(porosnax, new RectF(w()-c854(75),h()-c854(75),w()-c854(25),h()-c854(25)));
@@ -306,14 +336,14 @@ public class MainActivity extends AppCompatActivity {
                                         if (hookAnimation < hookDuration / 2) {
                                             //hook enters screen
                                             float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
-                                            drawBmp(hook, new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
+                                            drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
                                                     player.getX() + hookWidth/2, hookY));
                                         } else {
                                             //hook exits screen w/ poro
                                             float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
-                                            drawBmp(hook, new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
+                                            drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
                                                     player.getX() + hookWidth/2, hookY));
-                                            player.setY(hookY - player.getW());
+                                            player.setY(hookY - player.getW() + shift);
                                         }
 
                                         drawScores();
@@ -412,50 +442,54 @@ public class MainActivity extends AppCompatActivity {
         float Y = event.getY();
         int action = event.getAction();
 
+        CircleButton cbs[] = {left, middle, right};
+        RoundRectButton rrbs[] = {scuttle, snare};
         if (action == MotionEvent.ACTION_DOWN) {
             lastPressMenu = menu;
 
-            if (middle.contains(X, Y)) middle.press();
-            if (right.contains(X, Y)) right.press();
-            if (left.contains(X, Y)) left.press();
-            if (scuttle.contains(X, Y)) scuttle.press();
-            if (snare.contains(X, Y)) snare.press();
-        } else if (action == MotionEvent.ACTION_MOVE){
-            if (!middle.contains(X, Y)) middle.release();
-            if (!right.contains(X, Y)) right.release();
-            if (!left.contains(X, Y)) left.release();
-            if (!scuttle.contains(X, Y)) scuttle.release();
-            if (!snare.contains(X, Y)) snare.release();
+            for (CircleButton cb : cbs)
+                if (cb.contains(X, Y)) cb.press();
+            for (RoundRectButton rrb : rrbs)
+                if (rrb.contains(X, Y)) rrb.press();
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            for (CircleButton cb : cbs)
+                if (!cb.contains(X, Y)) cb.release();
+            for (RoundRectButton rrb : rrbs)
+                if (!rrb.contains(X, Y)) rrb.release();
         }
 
         if (menu.equals("start")) {
             if (action == MotionEvent.ACTION_UP) {
                 if (middle.isPressed()) {
-                    middle.release();
                     player.reset();
                     gamemode = "classic";
                     goToMenu("game");
                 } else if (right.isPressed()) {
-                    right.release();
                     goToMenu("more");
                 } else if (left.isPressed()) {
-                    left.release();
                     goToMenu("shop");
                 }
             }
         } else if (menu.equals("shop")) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                for (int i = 0; i < nBlitz; i++) {
+                    if (blitzskins_rectf[i].contains(X, Y)) {
+                        editor.putString("blitzskin", blitzskins[i]);
+                        editor.apply();
+                    }
+                }
+            }
+
             //back arrow
             if (action == MotionEvent.ACTION_UP &&
                     X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("more")) {
             if (action == MotionEvent.ACTION_UP) {
                 if (scuttle.isPressed()) {
-                    scuttle.release();
                     player.reset();
                     gamemode = "scuttle";
                     goToMenu("game");
                 } else if (snare.isPressed()) {
-                    snare.release();
                     player.reset();
                     gamemode = "snare";
                     goToMenu("game");
@@ -481,18 +515,22 @@ public class MainActivity extends AppCompatActivity {
             if (lastPressMenu.equals("limbo")) {
                 if (action == MotionEvent.ACTION_UP) {
                     if (middle.isPressed()) {
-                        middle.release();
                         player.reset();
                         goToMenu("game");
                     } else if (right.isPressed()) {
-                        right.release();
                         goToMenu("start");
                     } else if (left.isPressed()) {
-                        left.release();
                         goToMenu("shop");
                     }
                 }
             }
+        }
+
+        if (action == MotionEvent.ACTION_UP) {
+            for (CircleButton cb : cbs)
+                cb.release();
+            for (RoundRectButton rrb : rrbs)
+                rrb.release();
         }
 
         return true;
@@ -527,6 +565,26 @@ public class MainActivity extends AppCompatActivity {
     }
     private int getPoroSnax() {
         return sharedPref.getInt("porosnax", 0);
+    }
+    private String getBlitzSkin() {
+        return sharedPref.getString("blitzskin", "classic");
+    }
+
+    private Bitmap getHookBmp() {
+        switch(getBlitzSkin()) {
+            case "iblitz":
+                return hook_iblitz;
+            default:
+                return hook_classic;
+        }
+    }
+    private Bitmap getIconBmp(String s) {
+        switch(s) {
+            case "iblitz":
+                return icon_iblitz;
+            default:
+                return icon_classic;
+        }
     }
 
     private double toRad(double deg) {
@@ -574,27 +632,35 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
             }
             //move buttons
-            middle.setY(c854(290));
-            right.setY(c854(320));
-            left.setY(c854(320));
+            middle.setY(MIDDLE_Y2);
+            right.setY(MIDDLE_Y2+c854(30));
+            left.setY(MIDDLE_Y2+c854(30));
         }
 
         if (s.equals("start")) {
             //move buttons
-            middle.setY(c854(700));
-            right.setY(c854(730));
-            left.setY(c854(730));
+            middle.setY(MIDDLE_Y1);
+            right.setY(MIDDLE_Y1+c854(30));
+            left.setY(MIDDLE_Y1+c854(30));
         }
 
         menu = s;
     }
 
     private void drawTitleMenu() {
-        canvas.drawColor(river);
+        if (h()/w() > 4./3) { //thinner
+            float w = h() * titlescreen.getWidth() / titlescreen.getHeight();
+            drawBmp(titlescreen, new RectF(w() / 2 - w / 2, 0, w() / 2 + w / 2, h()));
+        } else { //thicker
+            float h = w() * titlescreen.getHeight() / titlescreen.getWidth();
+            drawBmp(titlescreen, new RectF(0, 0, w(), h));
+        }
+
+        /*
         title_bold.setTextSize(c854(80));
         canvas.drawText("HEXFLASH", w()/2, c854(561), title_bold);
-        drawBmp(porowsnax, new RectF(w()/2-c854(180), c854(217), w()/2+c854(180), c854(577)));
-        
+        */
+
         //play button
         middle.draw();
         RectF tmp = new RectF(middle.getX()-middle.getR()/2f, middle.getY()-middle.getR()/1.8f,

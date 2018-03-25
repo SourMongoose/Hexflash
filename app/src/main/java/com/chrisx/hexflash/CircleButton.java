@@ -1,8 +1,11 @@
 package com.chrisx.hexflash;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 
 class CircleButton {
     private float x, y, r;
@@ -31,7 +34,7 @@ class CircleButton {
         return y;
     }
     float getR() {
-        return r;
+        return pressed ? r*.9f : r;
     }
 
     void setX(float x) {
@@ -59,7 +62,8 @@ class CircleButton {
     }
 
     void draw() {
-        if (pressed) c.drawCircle(x, y, r, p2);
-        else c.drawCircle(x, y, r, p);
+        Bitmap bmp = MainActivity.bubble;
+        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),
+                new RectF(x-getR(),y-getR(),x+getR(),y+getR()), null);
     }
 }
