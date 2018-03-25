@@ -71,18 +71,22 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title_bold, title, mode, sink, scoreTitle, scoreText;
+    private Paint title_bold, title, mode, scoreTitle, scoreText;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
     private float offset, MIDDLE_Y1, MIDDLE_Y2;
 
-    private RoundRectButton spin, scuttle, snare;
+    private RoundRectButton light, spin, scuttle, snare;
 
     private Poro player;
     private boolean channeling;
     private float playerY;
     private int score;
+
+    private double lightning, wait;
+    private final double MAX_LIGHTNING = 1;
+    private final double MAX_WAIT = 3;
 
     private double ev_scuttle, ev_porosnax, ev_snaptrap; //expected value
     private int num_scuttle = 0, num_porosnax = 0, num_snaptrap = 0; //actual
@@ -178,8 +182,6 @@ public class MainActivity extends AppCompatActivity {
         mode = new Paint(title);
         mode.setTextSize(c854(35));
 
-        sink = new Paint(Paint.ANTI_ALIAS_FLAG);
-
         scoreTitle = newPaint(Color.WHITE);
         scoreTitle.setTextSize(c854(20));
         scoreText = newPaint(Color.WHITE);
@@ -193,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         right = new CircleButton(canvas,w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
         left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
 
+        light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(80,163,215));
         spin = new RoundRectButton(canvas,c480(48),c854(287),c480(432),c854(367),Color.rgb(178,55,170));
         scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(255,140,0));
         snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(54,173,31));
@@ -230,6 +233,10 @@ public class MainActivity extends AppCompatActivity {
 
                                         title_bold.setTextSize(c854(60));
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
+
+                                        light.draw();
+                                        canvas.drawText("idk lol", light.getRectF().centerX(),
+                                                light.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
 
                                         spin.draw();
                                         canvas.drawText("SPIN TO WIN", spin.getRectF().centerX(),
@@ -324,10 +331,13 @@ public class MainActivity extends AppCompatActivity {
 
                                         canvas.restore();
 
+                                        if (gamemode.equals("light")) drawLightning();
+
                                         drawScores();
 
                                         shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
-                                        if (gamemode.equals("spin")) shiftSpeed *= 0.75;
+                                        if (gamemode.equals("spin") || gamemode.equals("light"))
+                                            shiftSpeed *= 0.75;
                                         if (transition == 0) shift += shiftSpeed;
                                     } else if (menu.equals("hook")) {
                                         //background
@@ -453,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
         int action = event.getAction();
 
         CircleButton cbs[] = {left, middle, right};
-        RoundRectButton rrbs[] = {spin, scuttle, snare};
+        RoundRectButton rrbs[] = {light, spin, scuttle, snare};
         if (action == MotionEvent.ACTION_DOWN) {
             lastPressMenu = menu;
 
@@ -495,18 +505,18 @@ public class MainActivity extends AppCompatActivity {
                     X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("more")) {
             if (action == MotionEvent.ACTION_UP) {
-                if (scuttle.isPressed()) {
-                    player.reset();
-                    gamemode = "scuttle";
-                    goToMenu("game");
-                } else if (snare.isPressed()) {
-                    player.reset();
-                    gamemode = "snare";
-                    goToMenu("game");
-                } else if (spin.isPressed()) {
-                    player.reset();
-                    gamemode = "spin";
-                    goToMenu("game");
+                for (RoundRectButton rrb : rrbs) {
+                    if (rrb.isPressed()) {
+                        player.reset();
+
+                        if (rrb == scuttle) gamemode = "scuttle";
+                        else if (rrb == snare) gamemode = "snare";
+                        else if (rrb == spin) gamemode = "spin";
+                        else if (rrb == light) gamemode = "light";
+
+                        goToMenu("game");
+                        break;
+                    }
                 }
             }
 
@@ -641,6 +651,8 @@ public class MainActivity extends AppCompatActivity {
             ev_scuttle = ev_porosnax = 0;
             num_scuttle = num_porosnax = 0;
             ev_snaptrap = num_snaptrap = 0;
+            lightning = 0;
+            wait = MAX_WAIT;
             clearPoroSnax();
             clearSnapTraps();
             resetPlatforms();
@@ -737,6 +749,35 @@ public class MainActivity extends AppCompatActivity {
         while (tmp < 0) tmp += w()*3;
         drawBmp(riverbmp, new RectF(0,tmp-w()*3,w(),tmp));
         if (tmp <= h()) drawBmp(riverbmp, new RectF(0,tmp,w(),tmp+w()*3));
+    }
+
+    private int blend(int a, int b) {
+        int a_r = Color.red(a), a_g = Color.green(a), a_b = Color.blue(a),
+            b_r = Color.red(b), b_g = Color.green(b), b_b = Color.blue(b);
+        double a_a = Color.alpha(a)/255., b_a = Color.alpha(b)/255.;
+        double alpha = a_a + b_a * (1 - a_a);
+        return Color.argb(
+                (int)(alpha * 255),
+                (int)((a_r * a_a  + b_r * b_a * (1 - a_a)) / alpha),
+                (int)((a_g * a_a  + b_g * b_a * (1 - a_a)) / alpha),
+                (int)((a_b * a_a  + b_b * b_a * (1 - a_a)) / alpha)
+        );
+    }
+    private void drawLightning() {
+        //darkness
+        int alpha = (int)(240 * (MAX_LIGHTNING - lightning) / MAX_LIGHTNING);
+        int dark = Color.argb(alpha,0,0,0);
+        //lightning
+        int light = Color.argb(240-alpha,255,255,255);
+        canvas.drawColor(blend(dark, light));
+
+        if (wait <= 0) {
+            lightning = (.8+.2*Math.random())*MAX_LIGHTNING;
+            wait = (.7+.3*Math.random())*MAX_WAIT;
+        } else {
+            lightning = Math.max(0, lightning - 1. / FRAMES_PER_SECOND);
+            wait = Math.max(0, wait - 1. / FRAMES_PER_SECOND);
+        }
     }
 
     private void drawScores() {

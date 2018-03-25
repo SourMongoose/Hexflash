@@ -155,7 +155,7 @@ class Poro {
     void drawRange() {
         float mr = maxRange, cr = currRange;
         c.drawBitmap(m_range, new Rect(0,0,m_range.getWidth(),m_range.getHeight()), new RectF(-mr,-mr,mr,mr), null);
-        c.drawBitmap(c_range, new Rect(0,0,c_range.getWidth(),c_range.getHeight()), new RectF(-cr,-cr,cr,cr), null);
+        //c.drawBitmap(c_range, new Rect(0,0,c_range.getWidth(),c_range.getHeight()), new RectF(-cr,-cr,cr,cr), null);
     }
 
     void drawIndicator() {
