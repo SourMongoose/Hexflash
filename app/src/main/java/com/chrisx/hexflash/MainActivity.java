@@ -85,8 +85,9 @@ public class MainActivity extends AppCompatActivity {
     private int score;
 
     private double lightning, wait;
-    private final double MAX_LIGHTNING = 1;
-    private final double MAX_WAIT = 3;
+    private boolean jumped = false;
+    private final double MAX_LIGHTNING = 1.5;
+    private final double MAX_WAIT = 2.75;
 
     private double ev_scuttle, ev_porosnax, ev_snaptrap; //expected value
     private int num_scuttle = 0, num_porosnax = 0, num_snaptrap = 0; //actual
@@ -235,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
                                         light.draw();
-                                        canvas.drawText("idk lol", light.getRectF().centerX(),
+                                        canvas.drawText("NIGHT LIGHTS", light.getRectF().centerX(),
                                                 light.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
 
                                         spin.draw();
@@ -652,7 +653,8 @@ public class MainActivity extends AppCompatActivity {
             num_scuttle = num_porosnax = 0;
             ev_snaptrap = num_snaptrap = 0;
             lightning = 0;
-            wait = MAX_WAIT;
+            wait = MAX_WAIT / 2;
+            jumped = false;
             clearPoroSnax();
             clearSnapTraps();
             resetPlatforms();
@@ -774,7 +776,14 @@ public class MainActivity extends AppCompatActivity {
         if (wait <= 0) {
             lightning = (.8+.2*Math.random())*MAX_LIGHTNING;
             wait = (.7+.3*Math.random())*MAX_WAIT;
+            jumped = false;
         } else {
+            if (!jumped && lightning > MAX_LIGHTNING/2 && (lightning-1./FRAMES_PER_SECOND) < MAX_LIGHTNING/2) {
+                if (Math.random() < 0.3) {
+                    lightning = (.8+.2*Math.random())*MAX_LIGHTNING;
+                    jumped = true;
+                }
+            }
             lightning = Math.max(0, lightning - 1. / FRAMES_PER_SECOND);
             wait = Math.max(0, wait - 1. / FRAMES_PER_SECOND);
         }
