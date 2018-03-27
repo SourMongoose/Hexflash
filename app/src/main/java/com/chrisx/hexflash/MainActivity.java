@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
             icon_classic, icon_iblitz, blitzwithporo, iblitzwithporo, lilypad, lilypadlotus, sadporo,
             sadporo_spin, riverbmp, restart, home, shop, play, more, leftarrow, maxrange, currrange,
-            indicator, bubble, border;
+            indicator, bubble, border, line;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private long millisecondsPerFrame;
 
     private float lastX, lastY;
+    private float lastX2, lastY2; //for multiflash
 
     private Paint title_bold, title, mode, scoreTitle, scoreText;
     private int river = Color.rgb(35,66,94);
@@ -77,11 +78,14 @@ public class MainActivity extends AppCompatActivity {
     private CircleButton middle, left, right;
     private float offset, MIDDLE_Y1, MIDDLE_Y2;
 
-    private RoundRectButton light, spin, scuttle, snare;
+    private RoundRectButton light, spin, scuttle, snare, multi;
 
-    private Poro player;
-    private boolean channeling;
-    private float playerY;
+    private CircleButton cbs[];
+    private RoundRectButton rrbs[];
+
+    private Poro player, player2;
+    private boolean channeling, channeling2;
+    private float playerY, playerX;
     private int score;
 
     private double lightning, wait;
@@ -99,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     private float shift, //pixels translated down
         shiftSpeed = 0.75f;
     private int hookAnimation, sinkAnimation;
-    private float maxRange, secToMaxRange;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,11 +198,14 @@ public class MainActivity extends AppCompatActivity {
         middle = new CircleButton(canvas,w()/2,MIDDLE_Y1,c854(70));
         right = new CircleButton(canvas,w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
         left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
+        cbs = new CircleButton[]{middle, right, left};
 
-        light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(80,163,215));
-        spin = new RoundRectButton(canvas,c480(48),c854(287),c480(432),c854(367),Color.rgb(178,55,170));
-        scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(255,140,0));
-        snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(54,173,31));
+        light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
+        spin = new RoundRectButton(canvas,c480(48),c854(287),c480(432),c854(367),Color.rgb(255,140,0));
+        scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(54,173,31));
+        snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(80,163,215));
+        multi = new RoundRectButton(canvas,c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
+        rrbs = new RoundRectButton[]{light, spin, scuttle, snare, multi};
 
         //blitz skins
         ICON_WIDTH = c854(100);
@@ -212,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
         //player
         player = new Poro(canvas);
+        player2 = new Poro(canvas);
 
         final Handler handler = new Handler();
         new Thread(new Runnable() {
@@ -235,20 +242,22 @@ public class MainActivity extends AppCompatActivity {
                                         title_bold.setTextSize(c854(60));
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
+                                        float tmp = (mode.ascent() + mode.descent()) / 2;
                                         light.draw();
                                         canvas.drawText("NIGHT LIGHTS", light.getRectF().centerX(),
-                                                light.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
-
+                                                light.getRectF().centerY()-tmp, mode);
                                         spin.draw();
                                         canvas.drawText("SPIN TO WIN", spin.getRectF().centerX(),
-                                                spin.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
-
+                                                spin.getRectF().centerY()-tmp, mode);
                                         scuttle.draw();
-                                        canvas.drawText("SCUTTLE MAYHEM", scuttle.getRectF().centerX(),
-                                                scuttle.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
+                                        canvas.drawText("SCUTTLE TROUBLE", scuttle.getRectF().centerX(),
+                                                scuttle.getRectF().centerY()-tmp, mode);
                                         snare.draw();
                                         canvas.drawText("SNARE FAIR", snare.getRectF().centerX(),
-                                                snare.getRectF().centerY()-(mode.ascent()+mode.descent())/2, mode);
+                                                snare.getRectF().centerY()-tmp, mode);
+                                        multi.draw();
+                                        canvas.drawText("MULTIFLASH", multi.getRectF().centerX(),
+                                                multi.getRectF().centerY()-tmp, mode);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -309,7 +318,8 @@ public class MainActivity extends AppCompatActivity {
                                         //just hexflashed
                                         if (channeling && !player.isChanneling()) {
                                             //if the player doesn't land on a platform
-                                            if (!checkForPlatform()) {
+                                            if (!checkForPlatform(player)) {
+                                                player2.interruptChannel();
                                                 goToMenu("sink");
                                                 gameoverBmp = gamemode.equals("spin") ? sadporo_spin : sadporo;
                                                 sinkAnimation = 0;
@@ -323,11 +333,48 @@ public class MainActivity extends AppCompatActivity {
                                         //reaches top of screen
                                         if (menu.equals("game") && player.getY() - shift < h() / 10) {
                                             player.interruptChannel();
+                                            player2.interruptChannel();
                                             playerY = player.getY();
 
                                             goToMenu("hook");
                                             gameoverBmp = getHookGameoverBmp();
                                             hookAnimation = 0;
+                                        }
+
+                                        //multiflash
+                                        if (gamemode.equals("multi")) {
+                                            player2.draw();
+
+                                            //mid-channel
+                                            if (player2.isChanneling()) {
+                                                channeling2 = true;
+                                                player2.update(lastX2, lastY2 + shift);
+                                            }
+
+                                            //just hexflashed
+                                            if (channeling2 && !player2.isChanneling()) {
+                                                //if the player doesn't land on a platform
+                                                if (!checkForPlatform(player2)) {
+                                                    player.interruptChannel();
+                                                    goToMenu("sink2");
+                                                    gameoverBmp = gamemode.equals("spin") ? sadporo_spin : sadporo;
+                                                    sinkAnimation = 0;
+                                                }
+                                                channeling2 = false;
+                                            } else {
+                                                player2.update(); //moving platform
+                                            }
+
+                                            //reaches top of screen
+                                            if (menu.equals("game") && player2.getY() - shift < h() / 10) {
+                                                player.interruptChannel();
+                                                player2.interruptChannel();
+                                                playerY = player2.getY();
+
+                                                goToMenu("hook2");
+                                                gameoverBmp = getHookGameoverBmp();
+                                                hookAnimation = 0;
+                                            }
                                         }
 
                                         canvas.restore();
@@ -337,10 +384,15 @@ public class MainActivity extends AppCompatActivity {
                                         drawScores();
 
                                         shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
-                                        if (gamemode.equals("spin") || gamemode.equals("light"))
+                                        if (gamemode.equals("spin"))
                                             shiftSpeed *= 0.75;
-                                        if (transition == 0) shift += shiftSpeed;
-                                    } else if (menu.equals("hook")) {
+                                        if (transition == 0) {
+                                            if (gamemode.equals("light") || gamemode.equals("multi"))
+                                                shift += shiftSpeed *= 0.75;
+                                            else
+                                                shift += shiftSpeed;
+                                        }
+                                    } else if (menu.equals("hook") || menu.equals("hook2")) {
                                         //background
                                         drawRiver();
 
@@ -350,6 +402,7 @@ public class MainActivity extends AppCompatActivity {
                                         drawPoroSnax();
                                         drawSnapTraps();
                                         player.draw();
+                                        if (gamemode.equals("multi")) player2.draw();
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 5 / 6;
@@ -357,14 +410,24 @@ public class MainActivity extends AppCompatActivity {
                                         if (hookAnimation < hookDuration / 2) {
                                             //hook enters screen
                                             float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
-                                            drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
-                                                    player.getX() + hookWidth/2, hookY));
+                                            if (menu.equals("hook2"))
+                                                drawBmp(getHookBmp(), new RectF(player2.getX() - hookWidth/2, hookY - hookWidth*3,
+                                                        player2.getX() + hookWidth/2, hookY));
+                                            else
+                                                drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
+                                                        player.getX() + hookWidth/2, hookY));
                                         } else {
                                             //hook exits screen w/ poro
                                             float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
-                                            drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
-                                                    player.getX() + hookWidth/2, hookY));
-                                            player.setY(hookY - player.getW() + shift);
+                                            if (menu.equals("hook2")) {
+                                                drawBmp(getHookBmp(), new RectF(player2.getX() - hookWidth/2, hookY - hookWidth*3,
+                                                        player2.getX() + hookWidth/2, hookY));
+                                                player2.setY(hookY - player2.getW() + shift);
+                                            } else {
+                                                drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth / 2, hookY - hookWidth * 3,
+                                                        player.getX() + hookWidth / 2, hookY));
+                                                player.setY(hookY - player.getW() + shift);
+                                            }
                                         }
 
                                         drawScores();
@@ -373,23 +436,28 @@ public class MainActivity extends AppCompatActivity {
                                             goToMenu("gameover");
 
                                         hookAnimation++;
-                                    } else if (menu.equals("sink")) {
+                                    } else if (menu.equals("sink") || menu.equals("sink2")) {
                                         //background
                                         drawRiver();
 
                                         canvas.save();
                                         canvas.translate(0, -shift); //screen shift
 
-                                        player.draw();
-
-                                        //fade effect over poro
-                                        int sinkDuration = FRAMES_PER_SECOND;
-                                        player.setBmp(sinking[Math.min(sinking.length-1,
-                                                sinkAnimation/(sinkDuration/sinking.length))]);
-
                                         drawPlatforms();
                                         drawPoroSnax();
                                         drawSnapTraps();
+
+                                        player.draw();
+                                        if (gamemode.equals("multi")) player2.draw();
+
+                                        //fade effect over poro
+                                        int sinkDuration = FRAMES_PER_SECOND;
+                                        if (menu.equals("sink2"))
+                                            player2.setBmp(sinking[Math.min(sinking.length-1,
+                                                    sinkAnimation/(sinkDuration/sinking.length))]);
+                                        else
+                                            player.setBmp(sinking[Math.min(sinking.length-1,
+                                                    sinkAnimation/(sinkDuration/sinking.length))]);
 
                                         canvas.restore();
 
@@ -459,12 +527,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     //handles touch events
     public boolean onTouchEvent(MotionEvent event) {
-        float X = event.getX();
-        float Y = event.getY();
-        int action = event.getAction();
+        float X = event.getX(event.getActionIndex());
+        float Y = event.getY(event.getActionIndex());
+        int action = event.getActionMasked();
 
-        CircleButton cbs[] = {left, middle, right};
-        RoundRectButton rrbs[] = {light, spin, scuttle, snare};
         if (action == MotionEvent.ACTION_DOWN) {
             lastPressMenu = menu;
 
@@ -509,11 +575,18 @@ public class MainActivity extends AppCompatActivity {
                 for (RoundRectButton rrb : rrbs) {
                     if (rrb.isPressed()) {
                         player.reset();
+                        player2.reset();
 
                         if (rrb == scuttle) gamemode = "scuttle";
                         else if (rrb == snare) gamemode = "snare";
                         else if (rrb == spin) gamemode = "spin";
                         else if (rrb == light) gamemode = "light";
+                        else if (rrb == multi) gamemode = "multi";
+
+                        if (gamemode.equals("multi")) {
+                            player.setX(w()/4);
+                            player2.setX(w()*3/4);
+                        }
 
                         goToMenu("game");
                         break;
@@ -525,22 +598,51 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_UP &&
                     X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("game")) {
-            lastX = X;
-            lastY = Y;
-            if (action == MotionEvent.ACTION_DOWN && !channeling) {
-                //start channeling with a speed dependent on screen-shift speed
-                float sec = (float)Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
-                if (gamemode.equals("scuttle")) sec *= 0.8;
-                player.startChannel(sec);
-            } else if (action == MotionEvent.ACTION_UP) {
-                //release
-                if (player.isChanneling()) player.endChannel();
+            if (gamemode.equals("multi")) {
+                if (X < w() / 2) {
+                    lastX = X;
+                    lastY = Y;
+                    if ((action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)
+                            && !channeling) {
+                        float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
+                        player.startChannel(sec);
+                    } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) {
+                        if (player.isChanneling()) player.endChannel();
+                    }
+                } else {
+                    lastX2 = X;
+                    lastY2 = Y;
+                    if ((action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)
+                            && !channeling2) {
+                        float sec = (float) Math.min(2.5, player2.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
+                        player2.startChannel(sec);
+                    } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) {
+                        if (player2.isChanneling()) player2.endChannel();
+                    }
+                }
+            } else {
+                lastX = X;
+                lastY = Y;
+                if (action == MotionEvent.ACTION_DOWN && !channeling) {
+                    //start channeling with a speed dependent on screen-shift speed
+                    float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
+                    if (gamemode.equals("scuttle")) sec *= 0.8;
+                    player.startChannel(sec);
+                } else if (action == MotionEvent.ACTION_UP) {
+                    //release
+                    if (player.isChanneling()) player.endChannel();
+                }
             }
         } else if (menu.equals("limbo")) {
             if (lastPressMenu.equals("limbo")) {
                 if (action == MotionEvent.ACTION_UP) {
                     if (middle.isPressed()) {
                         player.reset();
+                        player2.reset();
+                        if (gamemode.equals("multi")) {
+                            player.setX(w()/4);
+                            player2.setX(w()*3/4);
+                        }
                         goToMenu("game");
                     } else if (right.isPressed()) {
                         goToMenu("start");
@@ -803,8 +905,15 @@ public class MainActivity extends AppCompatActivity {
     //delete all platforms and initialize one lilypad
     private void resetPlatforms() {
         platforms.clear();
-        platforms.add(new Platform(canvas,w()/2,h()/2));
-        player.setPlatform(platforms.get(0));
+        if (gamemode.equals("multi")) {
+            platforms.add(new Platform(canvas, w()/4, h()/2));
+            platforms.add(new Platform(canvas, w()*3/4, h()/2));
+            player.setPlatform(platforms.get(0));
+            player2.setPlatform(platforms.get(1));
+        } else {
+            platforms.add(new Platform(canvas, w() / 2, h() / 2));
+            player.setPlatform(platforms.get(0));
+        }
     }
     private void generatePlatforms() {
         //check that at least one platform exists
@@ -841,6 +950,8 @@ public class MainActivity extends AppCompatActivity {
                     num_scuttle++;
                 } else {
                     platforms.add(new Platform(canvas, newX, newY));
+                    if (gamemode.equals("multi") && Math.abs(newX-w()/2) > platforms.get(0).getW()/2)
+                        platforms.add(new Platform(canvas, w()-newX, newY));
                 }
                 //add a porosnax?
                 double prob2 = 0.2;
@@ -860,6 +971,23 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        //remove overlapping lilypads
+        for (int i = 0; i < platforms.size(); i++) {
+            for (int j = i+1; j < platforms.size(); j++) {
+                Platform p1 = platforms.get(i), p2 = platforms.get(j);
+                if (distance(p1.getX(),p1.getY(),p2.getX(),p2.getY()) < p1.getW()) {
+                    if (p1.getX() < w()/2) {
+                        platforms.remove(j);
+                        j--;
+                    } else {
+                        platforms.remove(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+        }
     }
     private void drawPlatforms() {
         for (Platform p : platforms)
@@ -874,7 +1002,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //find the platform that the player has landed on, return false if lands in water
-    private boolean checkForPlatform() {
+    private boolean checkForPlatform(Poro player) {
         for (Platform p : platforms) {
             double dist = distance(player.getX(),player.getY(),p.getX(),p.getY());
             if (dist < (player.getW() + p.getW()) / 2) {
@@ -905,6 +1033,13 @@ public class MainActivity extends AppCompatActivity {
                 snaxlist.remove(i);
                 editor.putInt("porosnax", getPoroSnax()+1);
                 editor.apply();
+            } else if (gamemode.equals("multi")) {
+                if (distance(snaxlist.get(i).getX(),snaxlist.get(i).getY(),player2.getX(),player2.getY())
+                        < (player2.getW()+snaxlist.get(i).getW())/2) {
+                    snaxlist.remove(i);
+                    editor.putInt("porosnax", getPoroSnax()+1);
+                    editor.apply();
+                }
             }
         }
 
@@ -931,6 +1066,12 @@ public class MainActivity extends AppCompatActivity {
                     < (player.getW()+snaptraps.get(i).getW())/2) {
                 snaptraps.remove(i);
                 player.snare();
+            } else if (gamemode.equals("multi")) {
+                if (distance(snaptraps.get(i).getX(),snaptraps.get(i).getY(),player2.getX(),player2.getY())
+                        < (player2.getW()+snaptraps.get(i).getW())/2) {
+                    snaptraps.remove(i);
+                    player2.snare();
+                }
             }
         }
 

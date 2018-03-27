@@ -60,6 +60,9 @@ class Poro {
     float getX() {
         return x;
     }
+    void setX(float x) {
+        this.x = x;
+    }
 
     float getY() {
         return y;
