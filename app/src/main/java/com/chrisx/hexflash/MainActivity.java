@@ -2,9 +2,7 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
- * @TODO different gamemodes (scuttle chaos?)
  * @TODO instructions menu
- * @TODO shop with different poro skins?
  */
 
 import android.content.Context;
@@ -15,10 +13,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
@@ -38,13 +34,13 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout ll;
 
     static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
-            icon_classic, icon_iblitz, blitzwithporo, iblitzwithporo, lilypad, lilypadlotus, sadporo,
-            sadporo_spin, riverbmp, restart, home, shop, play, more, leftarrow, maxrange, currrange,
-            indicator, bubble, border, line;
+            hook_arcade, icon_classic, icon_iblitz, icon_arcade, blitzwithporo, iblitzwithporo,
+            arcadewithporo, lilypad, lilypadlotus, sadporo, sadporo_spin, riverbmp, restart, home,
+            shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border, line;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
-    private String blitzskins[] = {"classic", "iblitz"};
+    private String blitzskins[] = {"classic", "iblitz", "arcade"};
     private int nBlitz = blitzskins.length;
     private RectF blitzskins_rectf[] = new RectF[nBlitz];
     private float ICON_WIDTH, BLITZSKINS_Y;
@@ -85,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Poro player, player2;
     private boolean channeling, channeling2;
-    private float playerY, playerX;
+    private float playerY;
     private int score;
 
     private double lightning, wait;
@@ -132,8 +128,10 @@ public class MainActivity extends AppCompatActivity {
         snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
         hook_classic = BitmapFactory.decodeResource(getResources(), R.drawable.hook_classic);
         hook_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.hook_iblitz);
+        hook_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.hook_arcade);
         icon_classic = BitmapFactory.decodeResource(getResources(), R.drawable.icon_classic);
         icon_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.icon_iblitz);
+        icon_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.icon_arcade);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         iblitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.iblitzwithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
@@ -152,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
         bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
         border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
+        line = BitmapFactory.decodeResource(getResources(), R.drawable.line);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -383,6 +382,9 @@ public class MainActivity extends AppCompatActivity {
 
                                         drawScores();
 
+                                        if (gamemode.equals("multi"))
+                                            drawBmp(line, new RectF(w()-h()/400,0,w()+h()/400,h()));
+
                                         shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
                                         if (gamemode.equals("spin"))
                                             shiftSpeed *= 0.75;
@@ -405,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                                         if (gamemode.equals("multi")) player2.draw();
                                         canvas.restore();
 
-                                        int hookDuration = FRAMES_PER_SECOND * 5 / 6;
+                                        int hookDuration = FRAMES_PER_SECOND * 2 / 3;
                                         float hookWidth = w() / 6;
                                         if (hookAnimation < hookDuration / 2) {
                                             //hook enters screen
@@ -701,6 +703,8 @@ public class MainActivity extends AppCompatActivity {
         switch(getBlitzSkin()) {
             case "iblitz":
                 return hook_iblitz;
+            case "arcade":
+                return hook_arcade;
             default:
                 return hook_classic;
         }
@@ -717,6 +721,8 @@ public class MainActivity extends AppCompatActivity {
         switch(s) {
             case "iblitz":
                 return icon_iblitz;
+            case "arcade":
+                return icon_arcade;
             default:
                 return icon_classic;
         }
