@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
 
-public class RoundRectButton {
+class RoundRectButton {
     private RectF rectf;
     private Canvas c;
     private Paint p, p2;

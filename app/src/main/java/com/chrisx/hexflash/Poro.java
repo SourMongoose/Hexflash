@@ -15,7 +15,7 @@ class Poro {
             maxRange, currRange, secToMaxRange;
     private double angle;
     private int spin;
-    private boolean channel;
+    private boolean channel, burned;
     private double snared;
     private final double MAX_SNARE = 0.5;
 
@@ -45,6 +45,7 @@ class Poro {
         y = c.getHeight() / 2;
         angle = Math.PI / 2;
         spin = 0;
+        channel = burned = false;
 
         bmp = MainActivity.poro;
         snarefx = MainActivity.snarefx;
@@ -129,6 +130,14 @@ class Poro {
 
     void snare() {
         snared = MAX_SNARE;
+    }
+
+    void burn() {
+        burned = true;
+        interruptChannel();
+    }
+    boolean isBurned() {
+        return burned;
     }
 
     void draw() {

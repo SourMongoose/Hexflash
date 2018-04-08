@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
             hook_arcade, icon_classic, icon_iblitz, icon_arcade, blitzwithporo, iblitzwithporo,
             arcadewithporo, lilypad, lilypadlotus, sadporo, sadporo_spin, riverbmp, restart, home,
-            shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border;
+            shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border, bulletbmp;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -94,10 +94,12 @@ public class MainActivity extends AppCompatActivity {
     private List<Platform> platforms = new ArrayList<>();
     private List<PoroSnax> snaxlist = new ArrayList<>();
     private List<SnapTrap> snaptraps = new ArrayList<>();
+    private Bullet bullet;
+    private double bulletCD; //cooldown
 
     private float shift, //pixels translated down
         shiftSpeed = 0.75f;
-    private int hookAnimation, sinkAnimation;
+    private int hookAnimation, sinkAnimation, burnAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
         indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
         bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
         border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
+        bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -335,6 +338,8 @@ public class MainActivity extends AppCompatActivity {
                                             hookAnimation = 0;
                                         }
 
+                                        if (gamemode.equals("cc")) updateBullet();
+
                                         canvas.restore();
 
                                         if (gamemode.equals("light")) drawLightning();
@@ -360,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
                                         drawPoroSnax();
                                         drawSnapTraps();
                                         player.draw();
+                                        if (gamemode.equals("cc") && bullet.visible(shift)) bullet.draw();
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 2 / 3;
@@ -401,6 +407,8 @@ public class MainActivity extends AppCompatActivity {
                                         player.setBmp(sinking[Math.min(sinking.length-1,
                                                 sinkAnimation/(sinkDuration/sinking.length))]);
 
+                                        if (gamemode.equals("cc") && bullet.visible(shift)) bullet.draw();
+
                                         canvas.restore();
 
                                         drawScores();
@@ -409,6 +417,28 @@ public class MainActivity extends AppCompatActivity {
                                             goToMenu("gameover");
 
                                         sinkAnimation++;
+                                    } else if (menu.equals("burned")) {
+                                        //background
+                                        drawRiver();
+
+                                        canvas.save();
+                                        canvas.translate(0, -shift); //screen shift
+
+                                        drawPlatforms();
+                                        drawPoroSnax();
+                                        drawSnapTraps();
+
+                                        player.draw();
+
+                                        canvas.restore();
+
+                                        drawScores();
+
+                                        int burnDuration = FRAMES_PER_SECOND / 2;
+                                        if (burnAnimation > burnDuration + FRAMES_PER_SECOND / 3)
+                                            goToMenu("gameover");
+
+                                        burnAnimation++;
                                     } else if (menu.equals("gameover")) {
                                         drawGameoverScreen();
 
@@ -658,6 +688,8 @@ public class MainActivity extends AppCompatActivity {
                 || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
 
+        if (s.equals("burned")) burnAnimation = 0;
+
         if (s.equals("game") && (menu.equals("start") || menu.equals("limbo") || menu.equals("more"))) {
             //restart
             shift = frameCount = 0;
@@ -668,6 +700,8 @@ public class MainActivity extends AppCompatActivity {
             lightning = 0;
             wait = MAX_WAIT / 2;
             jumped = false;
+            bullet = null;
+            bulletCD = 3 + Math.random();
             clearPoroSnax();
             clearSnapTraps();
             resetPlatforms();
@@ -971,6 +1005,23 @@ public class MainActivity extends AppCompatActivity {
 
         for (SnapTrap st : snaptraps) {
             if (st.visible(shift) && gamemode.equals("spin")) st.addSpin();
+        }
+    }
+
+    private void updateBullet() {
+        if (bullet != null && bullet.visible(shift)) bullet.draw();
+        if (bullet != null) bullet.update();
+
+        if (bulletCD <= 0) {
+            bullet = new Bullet(canvas, player, shift);
+            bulletCD = 2 + Math.random();
+        } else {
+            bulletCD -= 1. / FRAMES_PER_SECOND;
+        }
+
+        if (player.isBurned()) {
+            goToMenu("burned");
+            gameoverBmp = getHookGameoverBmp();
         }
     }
 }
