@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private CircleButton middle, left, right;
     private float offset, MIDDLE_Y1, MIDDLE_Y2;
 
-    private RoundRectButton light, spin, scuttle, snare, multi;
+    private RoundRectButton light, spin, scuttle, snare, cc;
 
     private CircleButton cbs[];
     private RoundRectButton rrbs[];
@@ -201,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
         spin = new RoundRectButton(canvas,c480(48),c854(287),c480(432),c854(367),Color.rgb(255,140,0));
         scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(54,173,31));
         snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(80,163,215));
-        multi = new RoundRectButton(canvas,c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
-        rrbs = new RoundRectButton[]{light, spin, scuttle, snare, multi};
+        cc = new RoundRectButton(canvas,c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
+        rrbs = new RoundRectButton[]{light, spin, scuttle, snare, cc};
 
         //blitz skins
         ICON_WIDTH = c854(100);
@@ -251,9 +251,9 @@ public class MainActivity extends AppCompatActivity {
                                         snare.draw();
                                         canvas.drawText("SNARE FAIR", snare.getRectF().centerX(),
                                                 snare.getRectF().centerY()-tmp, mode);
-                                        multi.draw();
-                                        canvas.drawText("MULTIFLASH", multi.getRectF().centerX(),
-                                                multi.getRectF().centerY()-tmp, mode);
+                                        cc.draw();
+                                        canvas.drawText("CURTAIN CALL", cc.getRectF().centerX(),
+                                                cc.getRectF().centerY()-tmp, mode);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -522,7 +522,7 @@ public class MainActivity extends AppCompatActivity {
                         else if (rrb == snare) gamemode = "snare";
                         else if (rrb == spin) gamemode = "spin";
                         else if (rrb == light) gamemode = "light";
-                        else if (rrb == multi) gamemode = "multi";
+                        else if (rrb == cc) gamemode = "cc";
 
                         goToMenu("game");
                         break;
