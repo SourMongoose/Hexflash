@@ -20,12 +20,12 @@ class Bullet {
         x = c.getWidth()/2;
         y = (float)(-c.getWidth()/2/Math.tan(5*Math.PI/12)) + shift;
         angle = Math.atan2(p.getY()-y,p.getX()-x);
-        w = c.getWidth() / 18;
+        w = c.getWidth() / 24;
         s = c.getWidth() * 1.7f / MainActivity.FRAMES_PER_SECOND; //pixels per frame
 
         bmp = MainActivity.bulletbmp;
 
-        f = 1f/3; //fraction of bmp that is part of hitbox
+        f = 225f/800; //fraction of bmp that is part of hitbox
         H = bmp.getHeight() / bmp.getWidth() * w;
     }
 

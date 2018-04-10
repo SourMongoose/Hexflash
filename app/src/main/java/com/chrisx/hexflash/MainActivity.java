@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
         bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
         border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
-        bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet);
+        bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet_thin);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
                                         drawPoroSnax();
                                         drawSnapTraps();
                                         player.draw();
-                                        if (gamemode.equals("cc") && bullet.visible(shift)) bullet.draw();
+                                        if (gamemode.equals("cc") && bullet != null && bullet.visible(shift)) bullet.draw();
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 2 / 3;
@@ -407,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                                         player.setBmp(sinking[Math.min(sinking.length-1,
                                                 sinkAnimation/(sinkDuration/sinking.length))]);
 
-                                        if (gamemode.equals("cc") && bullet.visible(shift)) bullet.draw();
+                                        if (gamemode.equals("cc") && bullet != null && bullet.visible(shift)) bullet.draw();
 
                                         canvas.restore();
 
@@ -570,6 +570,7 @@ public class MainActivity extends AppCompatActivity {
                 //start channeling with a speed dependent on screen-shift speed
                 float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
                 if (gamemode.equals("scuttle")) sec *= 0.8;
+                else if (gamemode.equals("cc")) sec *= 0.5;
                 player.startChannel(sec);
             } else if (action == MotionEvent.ACTION_UP) {
                 //release
