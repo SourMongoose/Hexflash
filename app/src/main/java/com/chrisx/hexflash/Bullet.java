@@ -58,7 +58,7 @@ class Bullet {
     }
 
     void update() {
-        float[][] corners = new float[][]{{-w/2,f*H/2-H},{-w/2,f*H/2},{w/2,f*H/2-H},{w/2,f*H/2}};
+        float[][] corners = new float[][]{{-w/2,-f*H/2},{-w/2,f*H/2},{w/2,-f*H/2},{w/2,f*H/2}};
         for (float[] pt : corners) {
             if (MainActivity.distance(x+pt[0]*(float)Math.cos(angle+Math.PI/2)+pt[1]*(float)(Math.cos(angle)),
                     y+pt[0]*(float)Math.sin(angle+Math.PI/2)+pt[1]*(float)Math.sin(angle),

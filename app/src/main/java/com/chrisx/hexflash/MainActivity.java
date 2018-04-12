@@ -35,15 +35,23 @@ public class MainActivity extends AppCompatActivity {
 
     static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
             hook_arcade, icon_classic, icon_iblitz, icon_arcade, blitzwithporo, iblitzwithporo,
-            arcadewithporo, lilypad, lilypadlotus, sadporo, sadporo_spin, riverbmp, restart, home,
-            shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border, bulletbmp;
+            arcadewithporo, lilypad, lilypadlotus, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
+            icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange, currrange,
+            indicator, bubble, border, bulletbmp, explosion, lock;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
     private String blitzskins[] = {"classic", "iblitz", "arcade"};
+    private int blitzskins_cost[] = {0, 1, 1};
     private int nBlitz = blitzskins.length;
     private RectF blitzskins_rectf[] = new RectF[nBlitz];
     private float ICON_WIDTH, BLITZSKINS_Y;
+
+    private String riverskins[] = {"river", "candy"};
+    private int riverskins_cost[] = {0, 1};
+    private int nRiver = riverskins.length;
+    private RectF riverskins_rectf[] = new RectF[nRiver];
+    private float RIVERSKINS_Y;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -67,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
     private float lastX, lastY;
 
-    private Paint title_bold, title, mode, scoreTitle, scoreText;
+    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
@@ -135,11 +143,15 @@ public class MainActivity extends AppCompatActivity {
         icon_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.icon_arcade);
         blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
         iblitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.iblitzwithporo);
+        arcadewithporo = BitmapFactory.decodeResource(getResources(), R.drawable.arcadewithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
         lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
         sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
         riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
+        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_mediumres);
+        icon_river = BitmapFactory.decodeResource(getResources(), R.drawable.icon_river);
+        icon_candy = BitmapFactory.decodeResource(getResources(), R.drawable.icon_candy);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
         home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
         shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
@@ -152,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
         bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
         border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
         bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet_thin);
+        explosion = BitmapFactory.decodeResource(getResources(), R.drawable.explosion_lowres);
+        lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -191,6 +205,10 @@ public class MainActivity extends AppCompatActivity {
         scoreText = newPaint(Color.WHITE);
         scoreText.setTextSize(c854(30));
 
+        river_fade = newPaint(river);
+        river_fade.setStyle(Paint.Style.FILL);
+        river_fade.setAlpha(150);
+
         //buttons
         offset = c854(125);
         MIDDLE_Y1 = c854(720);
@@ -209,15 +227,27 @@ public class MainActivity extends AppCompatActivity {
 
         //blitz skins
         ICON_WIDTH = c854(100);
-        BLITZSKINS_Y = c854(225);
+        BLITZSKINS_Y = c854(275);
         float totalWidth = ICON_WIDTH*nBlitz + ICON_WIDTH*(nBlitz-1)/4;
         for (int i = 0; i < nBlitz; i++) {
             float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
             blitzskins_rectf[i] = new RectF(x,BLITZSKINS_Y,x+ICON_WIDTH,BLITZSKINS_Y+ICON_WIDTH);
         }
+        //river skins
+        RIVERSKINS_Y = c854(550);
+        totalWidth = ICON_WIDTH*nRiver + ICON_WIDTH*(nRiver-1)/4;
+        for (int i = 0; i < nRiver; i++) {
+            float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
+            riverskins_rectf[i] = new RectF(x,RIVERSKINS_Y,x+ICON_WIDTH,RIVERSKINS_Y+ICON_WIDTH);
+        }
 
         //player
         player = new Poro(canvas);
+
+        editor.putBoolean("has_skin_iblitz", false);
+        editor.putBoolean("has_skin_arcade", false);
+        editor.putBoolean("has_skin_candy", false);
+        editor.apply();
 
         final Handler handler = new Handler();
         new Thread(new Runnable() {
@@ -274,6 +304,28 @@ public class MainActivity extends AppCompatActivity {
                                                 RectF rf = blitzskins_rectf[i];
                                                 drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
                                                         rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                            }
+                                            if (!hasSkin(blitzskins[i])) {
+                                                RectF rf = blitzskins_rectf[i];
+                                                canvas.drawRect(rf, river_fade);
+                                                drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
+                                                        rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                            }
+                                        }
+                                        //river skins
+                                        canvas.drawText("RIVER SKINS", w()/2, RIVERSKINS_Y-ICON_WIDTH/2, title);
+                                        for (int i = 0; i < nRiver; i++) {
+                                            drawBmp(getIconBmp(riverskins[i]), riverskins_rectf[i]);
+                                            if (getRiverSkin().equals(riverskins[i])) {
+                                                RectF rf = riverskins_rectf[i];
+                                                drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
+                                                        rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                            }
+                                            if (!hasSkin(riverskins[i])) {
+                                                RectF rf = riverskins_rectf[i];
+                                                canvas.drawRect(rf, river_fade);
+                                                drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
+                                                        rf.right-rf.width()/3,rf.bottom-rf.width()/3));
                                             }
                                         }
 
@@ -430,6 +482,15 @@ public class MainActivity extends AppCompatActivity {
 
                                         player.draw();
 
+                                        int explodeDuration = FRAMES_PER_SECOND / 3;
+                                        if (burnAnimation < explodeDuration) {
+                                            float f = (float)(explodeDuration - burnAnimation) / explodeDuration;
+                                            drawBmp(explosion, new RectF(player.getX()-player.getW()*f,
+                                                    player.getY()-player.getW()*f,
+                                                    player.getX()+player.getW()*f,
+                                                    player.getY()+player.getW()*f));
+                                        }
+
                                         canvas.restore();
 
                                         drawScores();
@@ -530,11 +591,39 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } else if (menu.equals("shop")) {
+            //selecting skins
             if (action == MotionEvent.ACTION_DOWN) {
                 for (int i = 0; i < nBlitz; i++) {
-                    if (blitzskins_rectf[i].contains(X, Y)) {
+                    if (hasSkin(blitzskins[i]) && blitzskins_rectf[i].contains(X, Y)) {
                         editor.putString("blitzskin", blitzskins[i]);
                         editor.apply();
+                    }
+                }
+                for (int i = 0; i < nRiver; i++) {
+                    if (hasSkin(riverskins[i]) && riverskins_rectf[i].contains(X, Y)) {
+                        editor.putString("riverskin", riverskins[i]);
+                        editor.apply();
+                    }
+                }
+            }
+            //buying skins
+            if (action == MotionEvent.ACTION_UP) {
+                for (int i = 0; i < nBlitz; i++) {
+                    if (!hasSkin(blitzskins[i]) && blitzskins_rectf[i].contains(X, Y)) {
+                        if (getPoroSnax() >= blitzskins_cost[i]) {
+                            editor.putBoolean("has_skin_" + blitzskins[i], true);
+                            editor.putInt("porosnax", getPoroSnax() - blitzskins_cost[i]);
+                            editor.apply();
+                        }
+                    }
+                }
+                for (int i = 0; i < nRiver; i++) {
+                    if (!hasSkin(riverskins[i]) && riverskins_rectf[i].contains(X, Y)) {
+                        if (getPoroSnax() >= riverskins_cost[i]) {
+                            editor.putBoolean("has_skin_" + riverskins[i], true);
+                            editor.putInt("porosnax", getPoroSnax() - riverskins_cost[i]);
+                            editor.apply();
+                        }
                     }
                 }
             }
@@ -634,6 +723,9 @@ public class MainActivity extends AppCompatActivity {
     private String getBlitzSkin() {
         return sharedPref.getString("blitzskin", "classic");
     }
+    private String getRiverSkin() {
+        return sharedPref.getString("riverskin", "river");
+    }
 
     private Bitmap getHookBmp() {
         switch(getBlitzSkin()) {
@@ -649,18 +741,38 @@ public class MainActivity extends AppCompatActivity {
         switch(getBlitzSkin()) {
             case "iblitz":
                 return iblitzwithporo;
+            case "arcade":
+                return arcadewithporo;
             default:
                 return blitzwithporo;
         }
     }
     private Bitmap getIconBmp(String s) {
         switch(s) {
+            case "candy":
+                return icon_candy;
+            case "river":
+                return icon_river;
             case "iblitz":
                 return icon_iblitz;
             case "arcade":
                 return icon_arcade;
             default:
                 return icon_classic;
+        }
+    }
+
+    private boolean hasSkin(String s) {
+        if (s.equals("river") || s.equals("classic")) return true;
+        return sharedPref.getBoolean("has_skin_"+s, false);
+    }
+
+    private Bitmap getRiverBmp() {
+        switch(getRiverSkin()) {
+            case "candy":
+                return riverbmp_candy;
+            default:
+                return riverbmp;
         }
     }
 
@@ -798,11 +910,12 @@ public class MainActivity extends AppCompatActivity {
         float tmp = -shift+w()*3;
         while (tmp < 0) tmp += w()*3;
 
-        int topY = (int)(riverbmp.getHeight() * (w()*3 - tmp) / (w()*3) - 1);
-        canvas.drawBitmap(riverbmp, new Rect(0,topY,riverbmp.getWidth(),riverbmp.getHeight()),
+        Bitmap bmp = getRiverBmp();
+        int topY = (int)(bmp.getHeight() * (w()*3 - tmp) / (w()*3) - 1);
+        canvas.drawBitmap(bmp, new Rect(0,topY,bmp.getWidth(),bmp.getHeight()),
                 new RectF(0,0,w(),tmp), null);
-        int botY = (int)(riverbmp.getHeight() * (h() - tmp) / (w()*3) + 1);
-        if (tmp <= h()) canvas.drawBitmap(riverbmp, new Rect(0,0,riverbmp.getWidth(),botY),
+        int botY = (int)(bmp.getHeight() * (h() - tmp) / (w()*3) + 1);
+        if (tmp <= h()) canvas.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),botY),
                 new RectF(0,tmp,w(),h()), null);
     }
 
