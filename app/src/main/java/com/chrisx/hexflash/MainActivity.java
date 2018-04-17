@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             arcadewithporo, lilypad, lilypadlotus, candypad_red, candypad_orange, candypad_yellow,
             sadporo, sadporo_spin, riverbmp, riverbmp_candy, icon_river, icon_candy, restart, home,
             shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border, bulletbmp,
-            explosion, lock, gradient;
+            explosion, lock, gradient, stats;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private String menu = "start", prevMenu = "start";
     private String lastPressMenu;
     private String gamemode = "classic";
+    private boolean statsMode = false;
 
     private int transition = 0;
     private final int TRANSITION_MAX = 40;
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private long millisecondsPerFrame;
 
     private float lastX, lastY;
+    private float downX, downY;
 
     private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade;
     private int river = Color.rgb(35,66,94);
@@ -83,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
     private float offset, MIDDLE_Y1, MIDDLE_Y2;
 
     private RoundRectButton light, spin, scuttle, snare, cc;
+
+    private String modeNames[] = {"NIGHT LIGHTS", "SPIN TO WIN", "SCUTTLE TROUBLE", "SNARE FAIR", "CURTAIN CALL", "CHAOS MODE"};
+    private String modeCodes[] = {"light", "spin", "scuttle", "snare", "cc", "rr"};
 
     private CircleButton cbs[];
     private RoundRectButton rrbs[];
@@ -171,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
         explosion = BitmapFactory.decodeResource(getResources(), R.drawable.explosion_lowres);
         lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
         gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
+        stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -277,21 +283,42 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
                                         float tmp = (mode.ascent() + mode.descent()) / 2;
-                                        light.draw();
-                                        canvas.drawText("NIGHT LIGHTS", light.getRectF().centerX(),
-                                                light.getRectF().centerY()-tmp, mode);
-                                        spin.draw();
-                                        canvas.drawText("SPIN TO WIN", spin.getRectF().centerX(),
-                                                spin.getRectF().centerY()-tmp, mode);
-                                        scuttle.draw();
-                                        canvas.drawText("SCUTTLE TROUBLE", scuttle.getRectF().centerX(),
-                                                scuttle.getRectF().centerY()-tmp, mode);
-                                        snare.draw();
-                                        canvas.drawText("SNARE FAIR", snare.getRectF().centerX(),
-                                                snare.getRectF().centerY()-tmp, mode);
-                                        cc.draw();
-                                        canvas.drawText("CURTAIN CALL", cc.getRectF().centerX(),
-                                                cc.getRectF().centerY()-tmp, mode);
+                                        for (int i = 0; i < modeNames.length-1; i++) {
+                                            rrbs[i].draw();
+                                            canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
+                                                    rrbs[i].getRectF().centerY()-tmp, mode);
+                                        }
+
+                                        //back
+                                        drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                        //stats
+                                        drawBmp(stats, new RectF(w()-c854(80),h()-c854(80),w()-c854(20),h()-c854(20)));
+                                    } else if (menu.equals("stats")) {
+                                        canvas.drawColor(river);
+
+                                        title_bold.setTextSize(c854(50));
+                                        canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
+
+                                        mode.setTextSize(c854(25));
+                                        canvas.drawText("CLASSIC", rrbs[0].getRectF().centerX(),
+                                                rrbs[0].getRectF().centerY()-c854(100), mode);
+                                        mode.setTextSize(c854(35));
+                                        canvas.drawText(getHighScore("classic")+"", rrbs[0].getRectF().centerX(),
+                                                rrbs[0].getRectF().centerY()-c854(100)+c854(35), mode);
+                                        for (int i = 0; i < modeNames.length-1; i++) {
+                                            mode.setTextSize(c854(25));
+                                            canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
+                                                    rrbs[i].getRectF().centerY(), mode);
+                                            mode.setTextSize(c854(35));
+                                            canvas.drawText(getHighScore(modeCodes[i])+"", rrbs[i].getRectF().centerX(),
+                                                    rrbs[i].getRectF().centerY()+c854(35), mode);
+                                        }
+                                        mode.setTextSize(c854(25));
+                                        canvas.drawText("RAINBOW RIVER", rrbs[rrbs.length-1].getRectF().centerX(),
+                                                rrbs[rrbs.length-1].getRectF().centerY()+c854(100), mode);
+                                        mode.setTextSize(c854(35));
+                                        canvas.drawText(getHighScore("rr")+"", rrbs[rrbs.length-1].getRectF().centerX(),
+                                                rrbs[rrbs.length-1].getRectF().centerY()+c854(100)+c854(35), mode);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -376,13 +403,13 @@ public class MainActivity extends AppCompatActivity {
                                             //if the player doesn't land on a platform
                                             if (!checkForPlatform(player)) {
                                                 goToMenu("sink");
-                                                gameoverBmp = gamemode.equals("spin") ? sadporo_spin : sadporo;
+                                                gameoverBmp = (gamemode.equals("spin") || gamemode.equals("rr")) ? sadporo_spin : sadporo;
                                                 sinkAnimation = 0;
                                             }
                                             channeling = false;
                                         } else {
                                             player.update(); //moving platform
-                                            if (gamemode.equals("spin")) player.addSpin();
+                                            if (gamemode.equals("spin") || gamemode.equals("rr")) player.addSpin();
                                         }
 
                                         //reaches top of screen
@@ -395,19 +422,19 @@ public class MainActivity extends AppCompatActivity {
                                             hookAnimation = 0;
                                         }
 
-                                        if (gamemode.equals("cc")) updateBullet();
+                                        if (gamemode.equals("cc") || gamemode.equals("rr")) updateBullet();
 
                                         canvas.restore();
 
-                                        if (gamemode.equals("light")) drawLightning();
+                                        if (gamemode.equals("light") || gamemode.equals("rr")) drawLightning();
 
                                         drawScores();
 
                                         shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
-                                        if (gamemode.equals("spin"))
+                                        if (gamemode.equals("spin") || gamemode.equals("rr"))
                                             shiftSpeed *= 0.75;
                                         if (transition == 0) {
-                                            if (gamemode.equals("light"))
+                                            if (gamemode.equals("light") || gamemode.equals("rr"))
                                                 shift += shiftSpeed *= 0.75;
                                             else
                                                 shift += shiftSpeed;
@@ -422,7 +449,8 @@ public class MainActivity extends AppCompatActivity {
                                         drawPoroSnax();
                                         drawSnapTraps();
                                         player.draw();
-                                        if (gamemode.equals("cc") && bullet != null && bullet.visible(shift)) bullet.draw();
+                                        if ((gamemode.equals("cc") || gamemode.equals("rr"))
+                                                && bullet != null && bullet.visible(shift)) bullet.draw();
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 2 / 3;
@@ -464,7 +492,8 @@ public class MainActivity extends AppCompatActivity {
                                         player.setBmp(sinking[Math.min(sinking.length-1,
                                                 sinkAnimation/(sinkDuration/sinking.length))]);
 
-                                        if (gamemode.equals("cc") && bullet != null && bullet.visible(shift)) bullet.draw();
+                                        if ((gamemode.equals("cc") || gamemode.equals("rr"))
+                                                && bullet != null && bullet.visible(shift)) bullet.draw();
 
                                         canvas.restore();
 
@@ -637,6 +666,10 @@ public class MainActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_UP &&
                     X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
         } else if (menu.equals("more")) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                downX = X;
+                downY = Y;
+            }
             if (action == MotionEvent.ACTION_UP) {
                 for (RoundRectButton rrb : rrbs) {
                     if (rrb.isPressed()) {
@@ -652,11 +685,26 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                 }
+
+                //rainbow river
+                if (rrbs[rrbs.length-1].contains(X, Y)) {
+                    player.reset();
+                    gamemode = "rr";
+                    goToMenu("game");
+                }
             }
 
             //back arrow
             if (action == MotionEvent.ACTION_UP &&
-                    X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
+                    X < c854(100) && Y > h()-c854(100)) goToMenu("start");
+
+            //stats menu
+            if (action == MotionEvent.ACTION_UP &&
+                    X > w()-c854(100) && Y > h()-c854(100)) goToMenu("stats");
+        } else if (menu.equals("stats")) {
+            //back arrow
+            if (action == MotionEvent.ACTION_UP &&
+                    X < c854(100) && Y > h()-c854(100)) goToMenu("more");
         } else if (menu.equals("game")) {
             lastX = X;
             lastY = Y;
@@ -664,7 +712,7 @@ public class MainActivity extends AppCompatActivity {
                 //start channeling with a speed dependent on screen-shift speed
                 float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
                 if (gamemode.equals("scuttle")) sec *= 0.8;
-                else if (gamemode.equals("cc")) sec *= 0.5;
+                else if (gamemode.equals("cc") || gamemode.equals("rr")) sec *= 0.5;
                 player.startChannel(sec);
             } else if (action == MotionEvent.ACTION_UP) {
                 //release
@@ -800,6 +848,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (s.equals("start")
                 || s.equals("game")
+                || s.equals("stats")
                 || s.equals("gameover")
                 || s.equals("shop")
                 || s.equals("more")
@@ -961,7 +1010,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void drawScores() {
-        if (getRiverSkin().equals("candy")) {
+        if (getRiverSkin().equals("candy") && !gamemode.equals("light") && !gamemode.equals("rr")) {
             drawBmp(gradient, new RectF(0,0,w(),c854(150)));
             scoreTitle.setColor(Color.BLACK);
             scoreText.setColor(Color.BLACK);
@@ -1006,13 +1055,14 @@ public class MainActivity extends AppCompatActivity {
             dist %= (w()-platformW);
 
             if (platforms.get(platforms.size()-1).getSpeed() > 0) rows++;
-            if (gamemode.equals("scuttle")) rows = 1;
+            if (gamemode.equals("scuttle") || gamemode.equals("rr")) rows = 1;
 
             float newX = platformW/2 + dist;
             float newY = (float)(prev.getY() + (rows+Math.random()/2) * platformW);
             if (distance(prev.getX(),prev.getY(),newX,newY) < player.getMaxRange()) {
                 //probability of platform being a scuttle crab
-                double prob = gamemode.equals("scuttle") ? 1 : 0.5 * score/1000 / 15;
+                double prob = (gamemode.equals("scuttle") || gamemode.equals("rr"))
+                        ? 1 : 0.5 * score/1000 / 15;
                 ev_scuttle += prob;
                 double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/1.5);
 
@@ -1033,7 +1083,8 @@ public class MainActivity extends AppCompatActivity {
                 //add a snap trap?
                 double prob3 = 0.15;
                 ev_snaptrap += prob3;
-                double adjProb3 = gamemode.equals("snare") ? 1 : prob3 * (1 + (ev_snaptrap-num_snaptrap)/2);
+                double adjProb3 = (gamemode.equals("snare") || gamemode.equals("rr"))
+                        ? 1 : prob3 * (1 + (ev_snaptrap-num_snaptrap)/2);
                 if (Math.random() < adjProb3) {
                     snaptraps.add(new SnapTrap(canvas, platforms.get(platforms.size() - 1)));
                     num_snaptrap++;
@@ -1066,7 +1117,7 @@ public class MainActivity extends AppCompatActivity {
         for (Platform p : platforms)
             if (p.visible(shift)) {
                 p.update();
-                if (gamemode.equals("spin")) p.addSpin();
+                if (gamemode.equals("spin") || gamemode.equals("rr")) p.addSpin();
             }
     }
 
@@ -1106,7 +1157,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (PoroSnax ps : snaxlist) {
-            if (ps.visible(shift) && gamemode.equals("spin")) ps.addSpin();
+            if (ps.visible(shift) && (gamemode.equals("spin") || gamemode.equals("rr"))) ps.addSpin();
         }
     }
 
@@ -1132,7 +1183,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (SnapTrap st : snaptraps) {
-            if (st.visible(shift) && gamemode.equals("spin")) st.addSpin();
+            if (st.visible(shift) && (gamemode.equals("spin") || gamemode.equals("rr"))) st.addSpin();
         }
     }
 
