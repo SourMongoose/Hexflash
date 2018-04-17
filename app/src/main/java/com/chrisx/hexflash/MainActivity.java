@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
     private RoundRectButton light, spin, scuttle, snare, cc;
 
-    private String modeNames[] = {"NIGHT LIGHTS", "SPIN TO WIN", "SCUTTLE TROUBLE", "SNARE FAIR", "CURTAIN CALL", "CHAOS MODE"};
-    private String modeCodes[] = {"light", "spin", "scuttle", "snare", "cc", "rr"};
+    private String modeNames[] = {"NIGHT LIGHTS", "SPIN TO WIN", "SCUTTLE TROUBLE", "SNARE FAIR", "CURTAIN CALL"};
+    private String modeCodes[] = {"light", "spin", "scuttle", "snare", "cc"};
 
     private CircleButton cbs[];
     private RoundRectButton rrbs[];
@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
                                         float tmp = (mode.ascent() + mode.descent()) / 2;
-                                        for (int i = 0; i < modeNames.length-1; i++) {
+                                        for (int i = 0; i < modeNames.length; i++) {
                                             rrbs[i].draw();
                                             canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
                                                     rrbs[i].getRectF().centerY()-tmp, mode);
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                                         mode.setTextSize(c854(35));
                                         canvas.drawText(getHighScore("classic")+"", rrbs[0].getRectF().centerX(),
                                                 rrbs[0].getRectF().centerY()-c854(100)+c854(35), mode);
-                                        for (int i = 0; i < modeNames.length-1; i++) {
+                                        for (int i = 0; i < modeNames.length; i++) {
                                             mode.setTextSize(c854(25));
                                             canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
                                                     rrbs[i].getRectF().centerY(), mode);
@@ -314,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
                                                     rrbs[i].getRectF().centerY()+c854(35), mode);
                                         }
                                         mode.setTextSize(c854(25));
-                                        canvas.drawText("RAINBOW RIVER", rrbs[rrbs.length-1].getRectF().centerX(),
+                                        canvas.drawText("COMBO CHAOS", rrbs[rrbs.length-1].getRectF().centerX(),
                                                 rrbs[rrbs.length-1].getRectF().centerY()+c854(100), mode);
                                         mode.setTextSize(c854(35));
                                         canvas.drawText(getHighScore("rr")+"", rrbs[rrbs.length-1].getRectF().centerX(),
@@ -686,8 +686,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                //rainbow river
-                if (rrbs[rrbs.length-1].contains(X, Y)) {
+                //combo chaos/rainbow river
+                if (rrbs[0].contains(downX, downY) && rrbs[rrbs.length-1].contains(X, Y)) {
                     player.reset();
                     gamemode = "rr";
                     goToMenu("game");
