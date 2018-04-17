@@ -35,9 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
     static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
             hook_arcade, icon_classic, icon_iblitz, icon_arcade, blitzwithporo, iblitzwithporo,
-            arcadewithporo, lilypad, lilypadlotus, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
-            icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange, currrange,
-            indicator, bubble, border, bulletbmp, explosion, lock;
+            arcadewithporo, lilypad, lilypadlotus, candypad_red, candypad_orange, candypad_yellow,
+            sadporo, sadporo_spin, riverbmp, riverbmp_candy, icon_river, icon_candy, restart, home,
+            shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border, bulletbmp,
+            explosion, lock, gradient;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private RectF riverskins_rectf[] = new RectF[nRiver];
     private float RIVERSKINS_Y;
 
-    private SharedPreferences sharedPref;
+    static SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
 
     private Typeface cd, cd_i, cd_b, cd_bi;
@@ -146,6 +147,9 @@ public class MainActivity extends AppCompatActivity {
         arcadewithporo = BitmapFactory.decodeResource(getResources(), R.drawable.arcadewithporo);
         lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
         lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
+        candypad_red = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_red);
+        candypad_orange = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_orange);
+        candypad_yellow = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_yellow);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
         sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
         riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
@@ -166,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
         bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet_thin);
         explosion = BitmapFactory.decodeResource(getResources(), R.drawable.explosion_lowres);
         lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
+        gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -723,7 +728,7 @@ public class MainActivity extends AppCompatActivity {
     private String getBlitzSkin() {
         return sharedPref.getString("blitzskin", "classic");
     }
-    private String getRiverSkin() {
+    static String getRiverSkin() {
         return sharedPref.getString("riverskin", "river");
     }
 
@@ -956,6 +961,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void drawScores() {
+        if (getRiverSkin().equals("candy")) {
+            drawBmp(gradient, new RectF(0,0,w(),c854(150)));
+            scoreTitle.setColor(Color.BLACK);
+            scoreText.setColor(Color.BLACK);
+        } else {
+            scoreTitle.setColor(Color.WHITE);
+            scoreText.setColor(Color.WHITE);
+        }
+
         scoreTitle.setTextAlign(Paint.Align.LEFT);
         canvas.drawText("score", c480(10), c854(25), scoreTitle);
         scoreTitle.setTextAlign(Paint.Align.RIGHT);

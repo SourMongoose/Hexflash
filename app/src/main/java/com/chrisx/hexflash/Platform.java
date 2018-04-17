@@ -29,7 +29,11 @@ class Platform {
         spin = 0;
 
         angle = (int)(Math.random()*360);
-        bmp = Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus;
+        if (MainActivity.getRiverSkin().equals("candy"))
+            bmp = Math.random() < 0.333 ? MainActivity.candypad_red :
+                    Math.random() < 0.5 ? MainActivity.candypad_orange : MainActivity.candypad_yellow;
+        else
+            bmp = Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus;
 
         hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
         hitbox.setStyle(Paint.Style.STROKE);
