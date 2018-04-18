@@ -24,7 +24,7 @@ class Poro {
     private float offsetAngle;
 
     private Canvas c;
-    private Bitmap bmp, snarefx, m_range, c_range, indicator; //max/current range
+    private Bitmap bmp, snarefx, m_range, indicator; //max range
     private Paint hitbox;
 
     Poro(Canvas c) {
@@ -50,7 +50,6 @@ class Poro {
         bmp = MainActivity.poro;
         snarefx = MainActivity.snarefx;
         m_range = MainActivity.maxrange;
-        c_range = MainActivity.currrange;
         indicator = MainActivity.indicator;
     }
 
@@ -149,7 +148,6 @@ class Poro {
             drawIndicator();
         }
         c.rotate((float)(angle * 180/Math.PI - 90) + spin); //convert to degrees and shift by 90deg
-        //c.drawText(currRange + " / " + maxRange, 0,0,indicator); //debugging purposes
         c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
         if (snared > 0) {
             c.rotate((float)(-45 + 90 * (snared / MAX_SNARE)));
@@ -165,9 +163,8 @@ class Poro {
     }
 
     void drawRange() {
-        float mr = maxRange, cr = currRange;
+        float mr = maxRange;
         c.drawBitmap(m_range, new Rect(0,0,m_range.getWidth(),m_range.getHeight()), new RectF(-mr,-mr,mr,mr), null);
-        //c.drawBitmap(c_range, new Rect(0,0,c_range.getWidth(),c_range.getHeight()), new RectF(-cr,-cr,cr,cr), null);
     }
 
     void drawIndicator() {

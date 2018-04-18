@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz, icon_arcade,
             blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
             candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
-            icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange, currrange,
+            icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange,
             indicator, bubble, border, bulletbmp, explosion, lock, gradient, stats;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
         sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
         riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
-        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_mediumres);
+        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_compressed);
         icon_river = BitmapFactory.decodeResource(getResources(), R.drawable.icon_river);
         icon_candy = BitmapFactory.decodeResource(getResources(), R.drawable.icon_candy);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
@@ -168,8 +168,7 @@ public class MainActivity extends AppCompatActivity {
         play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
         more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
         leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
-        maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange);
-        currrange = BitmapFactory.decodeResource(getResources(), R.drawable.currrange);
+        maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange_lowres);
         indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
         bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
         border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
