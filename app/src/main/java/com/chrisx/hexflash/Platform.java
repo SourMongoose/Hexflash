@@ -49,7 +49,7 @@ class Platform {
         this.speed = speed;
 
         angle = Math.random() < 0.5 ? 90 : 270;
-        bmp = MainActivity.scuttler;
+        bmp = MainActivity.getRiverSkin().equals("candy") ? MainActivity.scuttler_candy : MainActivity.scuttler;
 
         hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
         hitbox.setStyle(Paint.Style.STROKE);

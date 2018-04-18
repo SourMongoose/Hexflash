@@ -33,12 +33,12 @@ public class MainActivity extends AppCompatActivity {
     static Canvas canvas;
     private LinearLayout ll;
 
-    static Bitmap poro, scuttler, titlescreen, porosnax, snaptrap, snarefx, hook_classic, hook_iblitz,
-            hook_arcade, icon_classic, icon_iblitz, icon_arcade, blitzwithporo, iblitzwithporo,
-            arcadewithporo, lilypad, lilypadlotus, candypad_red, candypad_orange, candypad_yellow,
-            sadporo, sadporo_spin, riverbmp, riverbmp_candy, icon_river, icon_candy, restart, home,
-            shop, play, more, leftarrow, maxrange, currrange, indicator, bubble, border, bulletbmp,
-            explosion, lock, gradient, stats;
+    static Bitmap poro, scuttler, scuttler_candy, titlescreen, porosnax, snaptrap, snarefx,
+            hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz, icon_arcade,
+            blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
+            candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
+            icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange, currrange,
+            indicator, bubble, border, bulletbmp, explosion, lock, gradient, stats;
     static Bitmap[] sinking;
     private Bitmap gameoverBmp;
 
@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         //initialize bitmaps
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
+        scuttler_candy = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_candy_lowres);
         titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
         snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
