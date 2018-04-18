@@ -2,7 +2,12 @@ package com.chrisx.hexflash;
 
 /**
  * Organized in order of priority:
- * @TODO instructions menu
+ * @TODO poro in jhin trap
+ * @TODO new porosnax icon
+ * @TODO add prices to shop
+ * @TODO hexflash animation
+ *
+ * @TODO ads?
  */
 
 import android.content.Context;
@@ -39,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
             icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange,
             indicator, bubble, border, bulletbmp, explosion, lock, gradient, stats;
-    static Bitmap[] sinking;
+    static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
     private String blitzskins[] = {"classic", "iblitz", "arcade"};
@@ -84,10 +89,13 @@ public class MainActivity extends AppCompatActivity {
     private CircleButton middle, left, right;
     private float offset, MIDDLE_Y1, MIDDLE_Y2;
 
-    private RoundRectButton light, spin, scuttle, snare, cc;
+    private RoundRectButton classic, light, spin, scuttle, snare, cc, rr;
 
-    private String modeNames[] = {"NIGHT LIGHTS", "SPIN TO WIN", "SCUTTLE TROUBLE", "SNARE FAIR", "CURTAIN CALL"};
-    private String modeCodes[] = {"light", "spin", "scuttle", "snare", "cc"};
+    private String modeNames[] = {"CLASSIC", "NIGHT LIGHTS", "SPIN TO WIN", "SCUTTLE TROUBLE",
+            "SNARE FAIR", "CURTAIN CALL", "COMBO CHAOS"};
+    private String modeCodes[] = {"classic", "light", "spin", "scuttle", "snare", "cc", "rr"};
+    private int medal_scores[][] = {{2500,5000,10000},{1500,3000,6000},{1000,2000,4000},
+            {1000,2000,4000},{1250,2500,5000},{1500,3000,6000},{250,500,1000}};
 
     private CircleButton cbs[];
     private RoundRectButton rrbs[];
@@ -178,6 +186,11 @@ public class MainActivity extends AppCompatActivity {
         gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
         stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
 
+        medals = new Bitmap[]{BitmapFactory.decodeResource(getResources(), R.drawable.medal_bronze),
+                BitmapFactory.decodeResource(getResources(), R.drawable.medal_silver),
+                BitmapFactory.decodeResource(getResources(), R.drawable.medal_gold),
+                BitmapFactory.decodeResource(getResources(), R.drawable.medal_blank)};
+
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
             sinking[i] = BitmapFactory.decodeResource(getResources(), R.drawable.poro01+i);
@@ -229,12 +242,14 @@ public class MainActivity extends AppCompatActivity {
         left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
         cbs = new CircleButton[]{middle, right, left};
 
+        classic = new RoundRectButton(canvas,c480(48),c854(87),c480(432),c854(167),Color.BLACK);
         light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
         spin = new RoundRectButton(canvas,c480(48),c854(287),c480(432),c854(367),Color.rgb(255,140,0));
         scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(54,173,31));
         snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(80,163,215));
         cc = new RoundRectButton(canvas,c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
-        rrbs = new RoundRectButton[]{light, spin, scuttle, snare, cc};
+        rr = new RoundRectButton(canvas,c480(48),c854(687),c480(432),c854(767),Color.BLACK);
+        rrbs = new RoundRectButton[]{classic, light, spin, scuttle, snare, cc, rr};
 
         //blitz skins
         ICON_WIDTH = c854(100);
@@ -282,8 +297,9 @@ public class MainActivity extends AppCompatActivity {
                                         title_bold.setTextSize(c854(60));
                                         canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
+                                        mode.setTextAlign(Paint.Align.CENTER);
                                         float tmp = (mode.ascent() + mode.descent()) / 2;
-                                        for (int i = 0; i < modeNames.length; i++) {
+                                        for (int i = 1; i < modeNames.length-1; i++) {
                                             rrbs[i].draw();
                                             canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
                                                     rrbs[i].getRectF().centerY()-tmp, mode);
@@ -299,26 +315,21 @@ public class MainActivity extends AppCompatActivity {
                                         title_bold.setTextSize(c854(50));
                                         canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
 
-                                        mode.setTextSize(c854(25));
-                                        canvas.drawText("CLASSIC", rrbs[0].getRectF().centerX(),
-                                                rrbs[0].getRectF().centerY()-c854(100), mode);
-                                        mode.setTextSize(c854(35));
-                                        canvas.drawText(getHighScore("classic")+"", rrbs[0].getRectF().centerX(),
-                                                rrbs[0].getRectF().centerY()-c854(100)+c854(35), mode);
+                                        mode.setTextAlign(Paint.Align.LEFT);
                                         for (int i = 0; i < modeNames.length; i++) {
                                             mode.setTextSize(c854(25));
-                                            canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
+                                            canvas.drawText(modeNames[i], c480(20),
                                                     rrbs[i].getRectF().centerY(), mode);
                                             mode.setTextSize(c854(35));
-                                            canvas.drawText(getHighScore(modeCodes[i])+"", rrbs[i].getRectF().centerX(),
+                                            canvas.drawText(getHighScore(modeCodes[i])+"", c480(20),
                                                     rrbs[i].getRectF().centerY()+c854(35), mode);
+
+                                            for (int m = 0; m < 3; m++) {
+                                                drawBmp((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
+                                                        new RectF(c480(460)-c854(120-m*40),rrbs[i].getRectF().centerY()-c854(15),
+                                                                c480(460)-c854(70-m*40),rrbs[i].getRectF().centerY()+c854(35)));
+                                            }
                                         }
-                                        mode.setTextSize(c854(25));
-                                        canvas.drawText("COMBO CHAOS", rrbs[rrbs.length-1].getRectF().centerX(),
-                                                rrbs[rrbs.length-1].getRectF().centerY()+c854(100), mode);
-                                        mode.setTextSize(c854(35));
-                                        canvas.drawText(getHighScore("rr")+"", rrbs[rrbs.length-1].getRectF().centerX(),
-                                                rrbs[rrbs.length-1].getRectF().centerY()+c854(100)+c854(35), mode);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -671,7 +682,9 @@ public class MainActivity extends AppCompatActivity {
                 downY = Y;
             }
             if (action == MotionEvent.ACTION_UP) {
-                for (RoundRectButton rrb : rrbs) {
+                for (int i = 1; i < rrbs.length-1; i++) {
+                    RoundRectButton rrb = rrbs[i];
+
                     if (rrb.isPressed()) {
                         player.reset();
 
@@ -687,7 +700,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //combo chaos/rainbow river
-                if (rrbs[0].contains(downX, downY) && rrbs[rrbs.length-1].contains(X, Y)) {
+                if (rrbs[1].contains(downX, downY) && rrbs[rrbs.length-2].contains(X, Y)) {
                     player.reset();
                     gamemode = "rr";
                     goToMenu("game");
