@@ -29,21 +29,30 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RewardedVideoAdListener {
     private Bitmap bmp;
     static Canvas canvas;
     private LinearLayout ll;
+
+    private RewardedVideoAd rva;
 
     static Bitmap poro, scuttler, scuttler_candy, titlescreen, porosnax, snaptrap, snarefx,
             hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz, icon_arcade,
             blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
             candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
             icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange,
-            indicator, bubble, border, bulletbmp, explosion, lock, gradient, stats;
+            indicator, bubble, border, bulletbmp, explosion, lock, gradient, stats, video;
     static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
@@ -83,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private float lastX, lastY;
     private float downX, downY;
 
-    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade;
+    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter, adText;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
@@ -95,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             "SNARE FAIR", "CURTAIN CALL", "COMBO CHAOS"};
     private String modeCodes[] = {"classic", "light", "spin", "scuttle", "snare", "cc", "rr"};
     private int medal_scores[][] = {{2500,5000,10000},{1500,3000,6000},{1000,2000,4000},
-            {1000,2000,4000},{1250,2500,5000},{1500,3000,6000},{250,500,1000}};
+            {1000,2000,4000},{1500,3000,6000},{1500,3000,6000},{250,500,1000}};
 
     private CircleButton cbs[];
     private RoundRectButton rrbs[];
@@ -129,6 +138,11 @@ public class MainActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(this, "ca-app-pub-2436690700589338~9070068520");
+        rva = MobileAds.getRewardedVideoAdInstance(this);
+        rva.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
 
         //creates the bitmap
         //note: Star 4.5 is 480x854
@@ -168,8 +182,6 @@ public class MainActivity extends AppCompatActivity {
         sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
         riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
         riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_compressed);
-        icon_river = BitmapFactory.decodeResource(getResources(), R.drawable.icon_river);
-        icon_candy = BitmapFactory.decodeResource(getResources(), R.drawable.icon_candy);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
         home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
         shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
@@ -185,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
         lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
         gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
         stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
+        video = BitmapFactory.decodeResource(getResources(), R.drawable.video);
 
         medals = new Bitmap[]{BitmapFactory.decodeResource(getResources(), R.drawable.medal_bronze),
                 BitmapFactory.decodeResource(getResources(), R.drawable.medal_silver),
@@ -232,6 +245,14 @@ public class MainActivity extends AppCompatActivity {
         river_fade = newPaint(river);
         river_fade.setStyle(Paint.Style.FILL);
         river_fade.setAlpha(150);
+
+        quarter = new Paint();
+        quarter.setAlpha(64);
+
+        adText = newPaint(Color.WHITE);
+        adText.setTextAlign(Paint.Align.CENTER);
+        adText.setTextSize(c854(20));
+        adText.setTypeface(cd_b);
 
         //buttons
         offset = c854(125);
@@ -377,6 +398,17 @@ public class MainActivity extends AppCompatActivity {
                                         title.setTextAlign(Paint.Align.RIGHT);
                                         canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
                                         title.setTextAlign(Paint.Align.CENTER);
+
+                                        //video ad
+                                        if (rva.isLoaded()) {
+                                            drawBmp(video, new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)));
+                                            adText.setAlpha(255);
+                                        } else {
+                                            canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
+                                                    new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)), quarter);
+                                            adText.setAlpha(64);
+                                        }
+                                        canvas.drawText("+15", w()-c854(50), c854(100), adText);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -585,14 +617,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        rva.pause(this);
         super.onPause();
         paused = true;
     }
 
     @Override
     protected void onResume() {
+        rva.resume(this);
         super.onResume();
         paused = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        rva.destroy(this);
+        super.onDestroy();
     }
 
     @Override
@@ -673,9 +713,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+            //watch video ad
+            if (action == MotionEvent.ACTION_UP && X > w()-c854(100) && Y < c854(100)) {
+                if (rva.isLoaded()) {
+                    rva.show();
+                }
+            }
+
             //back arrow
-            if (action == MotionEvent.ACTION_UP &&
-                    X < c854(100) && Y > h()-c854(100)) goToMenu(prevMenu);
+            if (action == MotionEvent.ACTION_UP && X < c854(100) && Y > h()-c854(100))
+                goToMenu(prevMenu);
         } else if (menu.equals("more")) {
             if (action == MotionEvent.ACTION_DOWN) {
                 downX = X;
@@ -756,12 +803,47 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void onRewarded(RewardItem reward) {
+        Toast.makeText(this, "Thanks for watching the video! You have been gifted 15 Poro-Snax.",
+                Toast.LENGTH_SHORT).show();
+        editor.putInt("porosnax", getPoroSnax()+15);
+        editor.apply();
+    }
+    
+    @Override
+    public void onRewardedVideoAdClosed() {
+        // Load the next rewarded video ad
+        loadRewardedVideoAd();
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {}
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int errorCode) {}
+    @Override
+    public void onRewardedVideoAdLoaded() {}
+    @Override
+    public void onRewardedVideoAdOpened() {}
+    @Override
+    public void onRewardedVideoStarted() {}
+    @Override
+    public void onRewardedVideoCompleted() {}
+
     //shorthand for w() and h()
     static float w() {
         return canvas.getWidth();
     }
     static float h() {
         return canvas.getHeight();
+    }
+
+    //load video ad
+    private void loadRewardedVideoAd() {
+        // Actual ad ID: ca-app-pub-2436690700589338/1186751210
+        // Test ad ID: ca-app-pub-3940256099942544/5224354917
+        rva.loadAd("ca-app-pub-3940256099942544/5224354917",
+                new AdRequest.Builder().build());
     }
 
     //creates an instance of Paint set to a given color
@@ -816,9 +898,9 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap getIconBmp(String s) {
         switch(s) {
             case "candy":
-                return icon_candy;
+                return candypad_red;
             case "river":
-                return icon_river;
+                return lilypadlotus;
             case "iblitz":
                 return icon_iblitz;
             case "arcade":
