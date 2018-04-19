@@ -4,10 +4,7 @@ package com.chrisx.hexflash;
  * Organized in order of priority:
  * @TODO poro in jhin trap
  * @TODO new porosnax icon
- * @TODO add prices to shop
  * @TODO hexflash animation
- *
- * @TODO ads?
  */
 
 import android.content.Context;
@@ -51,8 +48,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz, icon_arcade,
             blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
             candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
-            icon_river, icon_candy, restart, home, shop, play, more, leftarrow, maxrange,
-            indicator, bubble, border, bulletbmp, explosion, lock, gradient, stats, video;
+            restart, home, shop, play, more, leftarrow, maxrange, indicator, bubble, border,
+            bulletbmp, explosion, lock, gradient, stats, video;
     static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
@@ -92,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private float lastX, lastY;
     private float downX, downY;
 
-    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter, adText;
+    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter, adText, priceText;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
@@ -254,6 +251,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         adText.setTextSize(c854(20));
         adText.setTypeface(cd_b);
 
+        priceText = new Paint(adText);
+
         //buttons
         offset = c854(125);
         MIDDLE_Y1 = c854(720);
@@ -374,6 +373,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                                 canvas.drawRect(rf, river_fade);
                                                 drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
                                                         rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                                canvas.drawText(blitzskins_cost[i]+"", rf.centerX(),
+                                                        rf.bottom-rf.width()/10, priceText);
                                             }
                                         }
                                         //river skins
@@ -390,6 +391,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                                 canvas.drawRect(rf, river_fade);
                                                 drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
                                                         rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                                canvas.drawText(riverskins_cost[i]+"", rf.centerX(),
+                                                        rf.bottom-rf.width()/10, priceText);
                                             }
                                         }
 
@@ -810,7 +813,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         editor.putInt("porosnax", getPoroSnax()+15);
         editor.apply();
     }
-    
+
     @Override
     public void onRewardedVideoAdClosed() {
         // Load the next rewarded video ad
