@@ -89,7 +89,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private float lastX, lastY;
     private float downX, downY;
 
-    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter, adText, priceText;
+    private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter,
+            adText, priceText, medalText;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
@@ -253,6 +254,10 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         priceText = new Paint(adText);
 
+        medalText = new Paint(scoreTitle);
+        medalText.setTextAlign(Paint.Align.RIGHT);
+        medalText.setTextSize(c854(15));
+
         //buttons
         offset = c854(125);
         MIDDLE_Y1 = c854(720);
@@ -337,18 +342,24 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
                                         mode.setTextAlign(Paint.Align.LEFT);
                                         for (int i = 0; i < modeNames.length; i++) {
-                                            mode.setTextSize(c854(25));
-                                            canvas.drawText(modeNames[i], c480(20),
-                                                    rrbs[i].getRectF().centerY(), mode);
-                                            mode.setTextSize(c854(35));
-                                            canvas.drawText(getHighScore(modeCodes[i])+"", c480(20),
-                                                    rrbs[i].getRectF().centerY()+c854(35), mode);
+                                            float tmp = rrbs[i].getRectF().centerY();
+                                            tmp = h()/2+(tmp-h()/2)*0.9f;
 
+                                            mode.setTextSize(c854(25));
+                                            canvas.drawText(modeNames[i], c480(20), tmp, mode);
+                                            mode.setTextSize(c854(35));
+                                            canvas.drawText(getHighScore(modeCodes[i])+"", c480(20), tmp+c854(35), mode);
+
+                                            int nextMedal = -1;
                                             for (int m = 0; m < 3; m++) {
                                                 drawBmp((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
-                                                        new RectF(c480(460)-c854(120-m*40),rrbs[i].getRectF().centerY()-c854(15),
-                                                                c480(460)-c854(70-m*40),rrbs[i].getRectF().centerY()+c854(35)));
+                                                        new RectF(c480(460)-c854(120-m*40),tmp-c854(15),
+                                                                c480(460)-c854(70-m*40),tmp+c854(35)));
+                                                if (nextMedal == -1 && getHighScore(modeCodes[i]) < medal_scores[i][m])
+                                                    nextMedal = medal_scores[i][m];
                                             }
+                                            if (nextMedal != -1)
+                                                canvas.drawText("Next medal: " + nextMedal, w()-c480(20), tmp+c854(50), medalText);
                                         }
 
                                         //back
@@ -823,7 +834,23 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     @Override
     public void onRewardedVideoAdLeftApplication() {}
     @Override
-    public void onRewardedVideoAdFailedToLoad(int errorCode) {}
+    public void onRewardedVideoAdFailedToLoad(int errorCode) {
+        switch(errorCode) {
+            case 0:
+                Toast.makeText(this, "ERROR_CODE_INTERNAL_ERROR", Toast.LENGTH_SHORT).show();
+                break;
+            case 1:
+                Toast.makeText(this, "ERROR_CODE_INVALID REQUEST", Toast.LENGTH_SHORT).show();
+                break;
+            case 2:
+                Toast.makeText(this, "ERROR_CODE_NETWORK_ERROR", Toast.LENGTH_SHORT).show();
+                break;
+            case 3:
+                Toast.makeText(this, "ERROR_CODE_NO_FILL", Toast.LENGTH_SHORT).show();
+                break;
+        }
+
+    }
     @Override
     public void onRewardedVideoAdLoaded() {}
     @Override
@@ -952,6 +979,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 || s.equals("more")
                 || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
+
+        if (s.equals("shop")) loadRewardedVideoAd();
 
         if (s.equals("burned")) burnAnimation = 0;
 
