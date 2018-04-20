@@ -832,9 +832,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     }
 
     @Override
-    public void onRewardedVideoAdLeftApplication() {}
-    @Override
     public void onRewardedVideoAdFailedToLoad(int errorCode) {
+        /*
         switch(errorCode) {
             case 0:
                 Toast.makeText(this, "ERROR_CODE_INTERNAL_ERROR", Toast.LENGTH_SHORT).show();
@@ -849,8 +848,10 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 Toast.makeText(this, "ERROR_CODE_NO_FILL", Toast.LENGTH_SHORT).show();
                 break;
         }
-
+        */
     }
+    @Override
+    public void onRewardedVideoAdLeftApplication() {}
     @Override
     public void onRewardedVideoAdLoaded() {}
     @Override
@@ -980,7 +981,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
 
-        if (s.equals("shop")) loadRewardedVideoAd();
+        if (s.equals("shop") && !rva.isLoaded()) loadRewardedVideoAd();
 
         if (s.equals("burned")) burnAnimation = 0;
 
