@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
             candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
             restart, home, shop, play, more, leftarrow, maxrange, indicator, bubble, border,
-            bulletbmp, explosion, lock, gradient, stats, video;
+            bulletbmp, explosion, lock, gradient, stats, video, flash, flash2;
     static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
@@ -196,6 +196,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
         stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
         video = BitmapFactory.decodeResource(getResources(), R.drawable.video);
+        flash = BitmapFactory.decodeResource(getResources(), R.drawable.flash);
+        flash2 = BitmapFactory.decodeResource(getResources(), R.drawable.flash2);
 
         medals = new Bitmap[]{BitmapFactory.decodeResource(getResources(), R.drawable.medal_bronze),
                 BitmapFactory.decodeResource(getResources(), R.drawable.medal_silver),
@@ -506,8 +508,12 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                         drawPoroSnax();
                                         drawSnapTraps();
                                         player.draw();
+                                        player.updateAnimations();
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
-                                                && bullet != null && bullet.visible(shift)) bullet.draw();
+                                                && bullet != null && bullet.visible(shift)) {
+                                            bullet.draw();
+                                            bullet.update();
+                                        }
                                         canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 2 / 3;
@@ -543,6 +549,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                         drawSnapTraps();
 
                                         player.draw();
+                                        player.updateAnimations();
 
                                         //fade effect over poro
                                         int sinkDuration = FRAMES_PER_SECOND;
@@ -550,7 +557,10 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                                 sinkAnimation/(sinkDuration/sinking.length))]);
 
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
-                                                && bullet != null && bullet.visible(shift)) bullet.draw();
+                                                && bullet != null && bullet.visible(shift)) {
+                                            bullet.draw();
+                                            bullet.update();
+                                        }
 
                                         canvas.restore();
 
@@ -572,6 +582,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                         drawSnapTraps();
 
                                         player.draw();
+                                        player.updateAnimations();
 
                                         int explodeDuration = FRAMES_PER_SECOND / 3;
                                         if (burnAnimation < explodeDuration) {

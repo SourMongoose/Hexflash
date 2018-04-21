@@ -18,6 +18,9 @@ class Poro {
     private boolean channel, burned;
     private double snared;
     private final double MAX_SNARE = 0.5;
+    private double flashAnimation;
+    private float prevX, prevY;
+    private final double MAX_FLASH = 0.3;
 
     private Platform platform;
     private float offsetX, offsetY; //distance away from center of platform
@@ -46,6 +49,7 @@ class Poro {
         angle = Math.PI / 2;
         spin = 0;
         channel = burned = false;
+        flashAnimation = 0;
 
         bmp = MainActivity.poro;
         snarefx = MainActivity.snarefx;
@@ -97,6 +101,10 @@ class Poro {
         channel = false;
     }
     void endChannel() {
+        flashAnimation = MAX_FLASH;
+        prevX = x;
+        prevY = y;
+
         channel = false;
         angle = Math.atan2(targetY - y, targetX - x) + spin*Math.PI/180;
         x += currRange * Math.cos(angle);
@@ -121,7 +129,13 @@ class Poro {
         y = platform.getY() - offsetY;
         angle = platform.getAngle()*Math.PI/180 - offsetAngle;
 
-        if (snared > 0) snared = Math.max(snared - 1. / MainActivity.FRAMES_PER_SECOND, 0);
+        updateAnimations();
+    }
+    void updateAnimations() {
+        if (snared > 0)
+            snared = Math.max(snared - 1. / MainActivity.FRAMES_PER_SECOND, 0);
+        if (flashAnimation > 0)
+            flashAnimation = Math.max(flashAnimation - 1. / MainActivity.FRAMES_PER_SECOND, 0);
     }
     void addSpin() {
         spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND * 3 / 2) % 360;
@@ -156,6 +170,26 @@ class Poro {
         }
 
         c.restore();
+
+        if (flashAnimation > 0) {
+            c.save();
+            c.translate(prevX, prevY);
+            c.rotate((float) (angle * 180 / Math.PI - 90));
+            Paint opacity = new Paint();
+            opacity.setAlpha((int) (255 * flashAnimation / MAX_FLASH));
+            c.drawBitmap(MainActivity.flash,
+                    new Rect(0, 0, MainActivity.flash.getWidth(), MainActivity.flash.getHeight()),
+                    new RectF(-w/2, -w/2, w/2, w/2), opacity);
+            c.restore();
+            c.save();
+            c.translate(x, y);
+            if (flashAnimation > 0) {
+                c.drawBitmap(MainActivity.flash2,
+                        new Rect(0, 0, MainActivity.flash2.getWidth(), MainActivity.flash2.getHeight()),
+                        new RectF(-w/2, -w/2, w/2, w/2), opacity);
+            }
+            c.restore();
+        }
     }
 
     void drawHitbox() {
