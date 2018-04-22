@@ -147,6 +147,7 @@ class Poro {
 
     void burn() {
         burned = true;
+        bmp = MainActivity.poro_black;
         interruptChannel();
     }
     boolean isBurned() {

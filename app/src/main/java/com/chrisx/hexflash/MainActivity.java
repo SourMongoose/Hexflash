@@ -1,12 +1,5 @@
 package com.chrisx.hexflash;
 
-/**
- * Organized in order of priority:
- * @TODO poro in jhin trap
- * @TODO new porosnax icon
- * @TODO hexflash animation
- */
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -44,23 +37,23 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     private RewardedVideoAd rva;
 
-    static Bitmap poro, scuttler, scuttler_candy, titlescreen, porosnax, snaptrap, snarefx,
+    static Bitmap poro, poro_black, scuttler, scuttler_candy, titlescreen, porosnax, snaptrap, snarefx,
             hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz, icon_arcade,
             blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
-            candypad_orange, candypad_yellow, sadporo, sadporo_spin, riverbmp, riverbmp_candy,
+            candypad_orange, candypad_yellow, sadporo, sadporo_spin, burntporo, riverbmp, riverbmp_candy,
             restart, home, shop, play, more, leftarrow, maxrange, indicator, bubble, border,
             bulletbmp, explosion, lock, gradient, stats, video, flash, flash2;
     static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
     private String blitzskins[] = {"classic", "iblitz", "arcade"};
-    private int blitzskins_cost[] = {0, 1, 1};
+    private int blitzskins_cost[] = {0, 50, 50};
     private int nBlitz = blitzskins.length;
     private RectF blitzskins_rectf[] = new RectF[nBlitz];
     private float ICON_WIDTH, BLITZSKINS_Y;
 
     private String riverskins[] = {"river", "candy"};
-    private int riverskins_cost[] = {0, 1};
+    private int riverskins_cost[] = {0, 100};
     private int nRiver = riverskins.length;
     private RectF riverskins_rectf[] = new RectF[nRiver];
     private float RIVERSKINS_Y;
@@ -156,10 +149,11 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         //initialize bitmaps
         poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
+        poro_black = BitmapFactory.decodeResource(getResources(), R.drawable.poro_black);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
         scuttler_candy = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_candy_lowres);
         titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen);
-        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax_lowres);
+        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
         snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
         snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
         hook_classic = BitmapFactory.decodeResource(getResources(), R.drawable.hook_classic);
@@ -178,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         candypad_yellow = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_yellow);
         sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
         sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
+        burntporo = BitmapFactory.decodeResource(getResources(), R.drawable.burntporo);
         riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
         riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_compressed);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
@@ -296,11 +291,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         //player
         player = new Poro(canvas);
-
-        editor.putBoolean("has_skin_iblitz", false);
-        editor.putBoolean("has_skin_arcade", false);
-        editor.putBoolean("has_skin_candy", false);
-        editor.apply();
 
         final Handler handler = new Handler();
         new Thread(new Runnable() {
@@ -424,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                                     new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)), quarter);
                                             adText.setAlpha(64);
                                         }
-                                        canvas.drawText("+15", w()-c854(50), c854(100), adText);
+                                        canvas.drawText("+10", w()-c854(50), c854(100), adText);
 
                                         //back
                                         drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
@@ -598,8 +588,10 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                                         drawScores();
 
                                         int burnDuration = FRAMES_PER_SECOND / 2;
-                                        if (burnAnimation > burnDuration + FRAMES_PER_SECOND / 3)
+                                        if (burnAnimation > burnDuration + FRAMES_PER_SECOND / 3) {
                                             goToMenu("gameover");
+                                            gameoverBmp = MainActivity.burntporo;
+                                        }
 
                                         burnAnimation++;
                                     } else if (menu.equals("gameover")) {
@@ -830,9 +822,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     public void onRewarded(RewardItem reward) {
-        Toast.makeText(this, "Thanks for watching the video! You have been gifted 15 Poro-Snax.",
+        Toast.makeText(this, "Thanks for watching the video! You have been gifted 10 Poro-Snax.",
                 Toast.LENGTH_SHORT).show();
-        editor.putInt("porosnax", getPoroSnax()+15);
+        editor.putInt("porosnax", getPoroSnax()+10);
         editor.apply();
     }
 
@@ -884,7 +876,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private void loadRewardedVideoAd() {
         // Actual ad ID: ca-app-pub-2436690700589338/1186751210
         // Test ad ID: ca-app-pub-3940256099942544/5224354917
-        rva.loadAd("ca-app-pub-3940256099942544/5224354917",
+        rva.loadAd("ca-app-pub-2436690700589338/1186751210",
                 new AdRequest.Builder().build());
     }
 
