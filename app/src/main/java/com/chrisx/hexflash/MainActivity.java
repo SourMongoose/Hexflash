@@ -170,7 +170,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
         burntporo = BitmapFactory.decodeResource(getResources(), R.drawable.burntporo);
         riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
-        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_compressed);
+        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_mediumres_compressed);
         restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
         home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
         shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
