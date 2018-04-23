@@ -81,7 +81,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private float downX, downY;
 
     private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter,
-            adText, priceText, medalText;
+            adText, priceText, medalText, tutorialText, white;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
@@ -250,6 +250,15 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         medalText = new Paint(scoreTitle);
         medalText.setTextAlign(Paint.Align.RIGHT);
         medalText.setTextSize(c854(15));
+
+        tutorialText = newPaint(Color.WHITE);
+        tutorialText.setTypeface(cd_b);
+        tutorialText.setTextSize(c480(25));
+        tutorialText.setTextAlign(Paint.Align.CENTER);
+
+        white = newPaint(Color.WHITE);
+        white.setStyle(Paint.Style.STROKE);
+        white.setStrokeWidth(c480(2));
 
         //buttons
         offset = c854(125);
@@ -904,6 +913,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     static String getRiverSkin() {
         return sharedPref.getString("riverskin", "river");
     }
+    private boolean firstTime() {
+        return sharedPref.getBoolean("first_time", true);
+    }
 
     private Bitmap getHookBmp() {
         switch(getBlitzSkin()) {
@@ -969,6 +981,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
 
     private void goToMenu(String s) {
+        if (firstTime()) {
+            editor.putBoolean("first_time", false);
+            editor.apply();
+        }
+
         prevMenu = menu;
 
         if (s.equals("start")
@@ -1031,6 +1048,21 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         } else { //thicker
             float h = w() * titlescreen.getHeight() / titlescreen.getWidth();
             drawBmp(titlescreen, new RectF(0, 0, w(), h));
+        }
+
+        //mini tutorial
+        if (firstTime()) {
+            canvas.drawARGB(100,0,0,0);
+
+            canvas.drawLine(left.getX(),left.getY(),left.getX(),h()*2/3,white);
+            canvas.drawText("SHOP",left.getX(),h()*2/3-c854(10),tutorialText);
+
+            canvas.drawLine(middle.getX(),middle.getY(),middle.getX(),h()/3,white);
+            canvas.drawText("PLAY",middle.getX(),h()/3-c854(10),tutorialText);
+
+            canvas.drawLine(right.getX(),right.getY(),right.getX(),h()*2/3,white);
+            canvas.drawText("MORE",right.getX(),h()*2/3-c854(10)-c480(25),tutorialText);
+            canvas.drawText("GAMEMODES",right.getX(),h()*2/3-c854(10),tutorialText);
         }
 
         //play button
