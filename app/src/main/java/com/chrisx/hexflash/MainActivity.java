@@ -484,7 +484,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
                                         drawScores();
 
-                                        shiftSpeed = cf854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
+                                        shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
                                         if (gamemode.equals("spin") || gamemode.equals("rr"))
                                             shiftSpeed *= 0.75;
                                         if (transition == 0) {
@@ -659,8 +659,12 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     @Override
     public void onBackPressed() {
-        if (menu.equals("shop") || menu.equals("more")) {
+        if (menu.equals("shop")) {
             goToMenu(prevMenu);
+        } else if (menu.equals("more")) {
+            goToMenu("start");
+        } else if (menu.equals("stats")) {
+            goToMenu("more");
         }
     }
 
@@ -895,13 +899,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
 
     static float c480(float f) {
-        return Math.round(w() / (480 / f));
+        return w() / (480 / f);
     }
     static float c854(float f) {
-        return Math.round(h() / (854 / f));
-    }
-    static float cf854(float f) {
-        return h() / (853 / f);
+        return h() / (854 / f);
     }
 
     private long getHighScore(String s) {
