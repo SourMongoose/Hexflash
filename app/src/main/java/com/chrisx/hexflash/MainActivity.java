@@ -484,7 +484,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
                                         drawScores();
 
-                                        shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
+                                        shiftSpeed = cf854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
                                         if (gamemode.equals("spin") || gamemode.equals("rr"))
                                             shiftSpeed *= 0.75;
                                         if (transition == 0) {
@@ -899,6 +899,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
     static float c854(float f) {
         return Math.round(h() / (854 / f));
+    }
+    static float cf854(float f) {
+        return h() / (853 / f);
     }
 
     private long getHighScore(String s) {
