@@ -895,10 +895,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
 
     static float c480(float f) {
-        return w() / (480 / f);
+        return Math.round(w() / (480 / f));
     }
     static float c854(float f) {
-        return h() / (854 / f);
+        return Math.round(h() / (854 / f));
     }
 
     private long getHighScore(String s) {
