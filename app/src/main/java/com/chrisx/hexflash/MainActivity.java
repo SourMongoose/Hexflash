@@ -49,12 +49,16 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private int nBlitz = blitzskins.length;
     private RectF blitzskins_rectf[] = new RectF[nBlitz];
     private float ICON_WIDTH, BLITZSKINS_Y;
+    private boolean blitzskins_owned[];
+    private String blitzskin_used;
 
     private String riverskins[] = {"river", "candy"};
     private int riverskins_cost[] = {0, 100};
     private int nRiver = riverskins.length;
     private RectF riverskins_rectf[] = new RectF[nRiver];
     private float RIVERSKINS_Y;
+    private boolean riverskins_owned[];
+    private String riverskin_used;
 
     static SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -67,7 +71,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private String menu = "start", prevMenu = "start";
     private String lastPressMenu;
     private String gamemode = "classic";
-    private boolean statsMode = false;
 
     private int transition = 0;
     private final int TRANSITION_MAX = 40;
@@ -75,10 +78,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     //frame data
     static final int FRAMES_PER_SECOND = 60;
     private long nanosecondsPerFrame;
-    private long millisecondsPerFrame;
 
     private float lastX, lastY;
     private float downX, downY;
+    private boolean pressed;
 
     private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter,
             adText, priceText, medalText, tutorialText, white;
@@ -96,10 +99,12 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             {1000,2000,4000},{1500,3000,6000},{1500,3000,6000},{250,500,1000}};
 
     private CircleButton cbs[];
+    private boolean cbs_pressed[];
     private RoundRectButton rrbs[];
+    private boolean rrbs_pressed[];
 
     private Poro player;
-    private boolean channeling, channeling2;
+    private boolean channeling;
     private float playerY;
     private int score;
 
@@ -148,7 +153,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         poro_black = BitmapFactory.decodeResource(getResources(), R.drawable.poro_black);
         scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
         scuttler_candy = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_candy_lowres);
-        titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen);
+        titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen_lowres);
         porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
         snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
         snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
@@ -204,7 +209,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         editor = sharedPref.edit();
 
         nanosecondsPerFrame = (long)1e9 / FRAMES_PER_SECOND;
-        millisecondsPerFrame = (long)1e3 / FRAMES_PER_SECOND;
 
         //initialize fonts
         cd = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams.ttf");
@@ -268,6 +272,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         right = new CircleButton(canvas,w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
         left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
         cbs = new CircleButton[]{middle, right, left};
+        cbs_pressed = new boolean[cbs.length];
 
         classic = new RoundRectButton(canvas,c480(48),c854(87),c480(432),c854(167),Color.BLACK);
         light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
@@ -277,6 +282,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         cc = new RoundRectButton(canvas,c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
         rr = new RoundRectButton(canvas,c480(48),c854(687),c480(432),c854(767),Color.BLACK);
         rrbs = new RoundRectButton[]{classic, light, spin, scuttle, snare, cc, rr};
+        rrbs_pressed = new boolean[rrbs.length];
 
         //blitz skins
         ICON_WIDTH = c854(100);
@@ -286,6 +292,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
             blitzskins_rectf[i] = new RectF(x,BLITZSKINS_Y,x+ICON_WIDTH,BLITZSKINS_Y+ICON_WIDTH);
         }
+        blitzskins_owned = new boolean[nBlitz];
+        blitzskin_used = getBlitzSkin();
         //river skins
         RIVERSKINS_Y = c854(550);
         totalWidth = ICON_WIDTH*nRiver + ICON_WIDTH*(nRiver-1)/4;
@@ -293,6 +301,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
             riverskins_rectf[i] = new RectF(x,RIVERSKINS_Y,x+ICON_WIDTH,RIVERSKINS_Y+ICON_WIDTH);
         }
+        riverskins_owned = new boolean[nRiver];
+        riverskin_used = getRiverSkin();
 
         //player
         player = new Poro(canvas);
@@ -311,140 +321,16 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                             if (!paused) {
                                 if (transition < TRANSITION_MAX / 2) {
                                     if (menu.equals("start")) {
-                                        //title screen
-                                        drawTitleMenu();
                                     } else if (menu.equals("more")) {
-                                        canvas.drawColor(river);
-
-                                        title_bold.setTextSize(c854(60));
-                                        canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
-
-                                        mode.setTextAlign(Paint.Align.CENTER);
-                                        float tmp = (mode.ascent() + mode.descent()) / 2;
-                                        for (int i = 1; i < modeNames.length-1; i++) {
-                                            rrbs[i].draw();
-                                            canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
-                                                    rrbs[i].getRectF().centerY()-tmp, mode);
-                                        }
-
-                                        //back
-                                        drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
-                                        //stats
-                                        drawBmp(stats, new RectF(w()-c854(80),h()-c854(80),w()-c854(20),h()-c854(20)));
                                     } else if (menu.equals("stats")) {
-                                        canvas.drawColor(river);
-
-                                        title_bold.setTextSize(c854(50));
-                                        canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
-
-                                        mode.setTextAlign(Paint.Align.LEFT);
-                                        for (int i = 0; i < modeNames.length; i++) {
-                                            float tmp = rrbs[i].getRectF().centerY();
-                                            tmp = h()/2+(tmp-h()/2)*0.9f;
-
-                                            mode.setTextSize(c854(25));
-                                            canvas.drawText(modeNames[i], c480(20), tmp, mode);
-                                            mode.setTextSize(c854(35));
-                                            canvas.drawText(getHighScore(modeCodes[i])+"", c480(20), tmp+c854(35), mode);
-
-                                            int nextMedal = -1;
-                                            for (int m = 0; m < 3; m++) {
-                                                drawBmp((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
-                                                        new RectF(c480(460)-c854(120-m*40),tmp-c854(15),
-                                                                c480(460)-c854(70-m*40),tmp+c854(35)));
-                                                if (nextMedal == -1 && getHighScore(modeCodes[i]) < medal_scores[i][m])
-                                                    nextMedal = medal_scores[i][m];
-                                            }
-                                            if (nextMedal != -1)
-                                                canvas.drawText("Next medal: " + nextMedal, w()-c480(20), tmp+c854(50), medalText);
-                                        }
-
-                                        //back
-                                        drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
                                     } else if (menu.equals("shop")) {
-                                        canvas.drawColor(river);
-
-                                        title_bold.setTextSize(c854(60));
-                                        canvas.drawText("SHOP", w()/2, c854(80), title_bold);
-
-                                        //blitzcrank skins
-                                        canvas.drawText("BLITZ SKINS", w()/2, BLITZSKINS_Y-ICON_WIDTH/2, title);
-                                        for (int i = 0; i < nBlitz; i++) {
-                                            drawBmp(getIconBmp(blitzskins[i]), blitzskins_rectf[i]);
-                                            if (getBlitzSkin().equals(blitzskins[i])) {
-                                                RectF rf = blitzskins_rectf[i];
-                                                drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
-                                                        rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
-                                            }
-                                            if (!hasSkin(blitzskins[i])) {
-                                                RectF rf = blitzskins_rectf[i];
-                                                canvas.drawRect(rf, river_fade);
-                                                drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
-                                                        rf.right-rf.width()/3,rf.bottom-rf.width()/3));
-                                                canvas.drawText(blitzskins_cost[i]+"", rf.centerX(),
-                                                        rf.bottom-rf.width()/10, priceText);
-                                            }
-                                        }
-                                        //river skins
-                                        canvas.drawText("RIVER SKINS", w()/2, RIVERSKINS_Y-ICON_WIDTH/2, title);
-                                        for (int i = 0; i < nRiver; i++) {
-                                            drawBmp(getIconBmp(riverskins[i]), riverskins_rectf[i]);
-                                            if (getRiverSkin().equals(riverskins[i])) {
-                                                RectF rf = riverskins_rectf[i];
-                                                drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
-                                                        rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
-                                            }
-                                            if (!hasSkin(riverskins[i])) {
-                                                RectF rf = riverskins_rectf[i];
-                                                canvas.drawRect(rf, river_fade);
-                                                drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
-                                                        rf.right-rf.width()/3,rf.bottom-rf.width()/3));
-                                                canvas.drawText(riverskins_cost[i]+"", rf.centerX(),
-                                                        rf.bottom-rf.width()/10, priceText);
-                                            }
-                                        }
-
-                                        //porosnax count
-                                        drawBmp(porosnax, new RectF(w()-c854(75),h()-c854(75),w()-c854(25),h()-c854(25)));
-                                        title.setTextAlign(Paint.Align.RIGHT);
-                                        canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
-                                        title.setTextAlign(Paint.Align.CENTER);
-
-                                        //video ad
-                                        if (rva.isLoaded()) {
-                                            drawBmp(video, new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)));
-                                            adText.setAlpha(255);
-                                        } else {
-                                            canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
-                                                    new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)), quarter);
-                                            adText.setAlpha(64);
-                                        }
-                                        canvas.drawText("+10", w()-c854(50), c854(100), adText);
-
-                                        //back
-                                        drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
                                     } else if (menu.equals("game")) {
-                                        //background
-                                        drawRiver();
-
-                                        canvas.save();
-                                        canvas.translate(0, -shift); //screen shift
-
-                                        //draw and update platforms
-                                        drawPlatforms();
                                         if (transition == 0) movePlatforms();
                                         generatePlatforms();
 
-                                        //draw and update porosnax
-                                        drawPoroSnax();
                                         updatePoroSnax();
 
-                                        //draw and update snap-traps
-                                        drawSnapTraps();
                                         updateSnapTraps();
-
-                                        player.draw();
-                                        //player.drawHitbox(); //debugging purposes
 
                                         //mid-channel
                                         if (player.isChanneling()) {
@@ -478,12 +364,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
                                         if (gamemode.equals("cc") || gamemode.equals("rr")) updateBullet();
 
-                                        canvas.restore();
-
-                                        if (gamemode.equals("light") || gamemode.equals("rr")) drawLightning();
-
-                                        drawScores();
-
                                         shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
                                         if (gamemode.equals("spin") || gamemode.equals("rr"))
                                             shiftSpeed *= 0.75;
@@ -494,6 +374,268 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                                 shift += shiftSpeed;
                                         }
                                     } else if (menu.equals("hook")) {
+                                        player.updateAnimations();
+                                        if ((gamemode.equals("cc") || gamemode.equals("rr"))
+                                                && bullet != null && bullet.visible(shift)) {
+                                            bullet.update();
+                                        }
+
+                                        int hookDuration = FRAMES_PER_SECOND * 2 / 3;
+                                        if (hookAnimation < hookDuration / 2) {
+                                        } else {
+                                            //hook exits screen w/ poro
+                                            float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
+                                            player.setY(hookY - player.getW() + shift);
+                                        }
+
+                                        if (hookAnimation > hookDuration + FRAMES_PER_SECOND / 3)
+                                            goToMenu("gameover");
+
+                                        hookAnimation++;
+                                    } else if (menu.equals("sink")) {
+                                        player.updateAnimations();
+
+                                        //fade effect over poro
+                                        int sinkDuration = FRAMES_PER_SECOND;
+                                        player.setBmp(sinking[Math.min(sinking.length-1,
+                                                sinkAnimation/(sinkDuration/sinking.length))]);
+
+                                        if ((gamemode.equals("cc") || gamemode.equals("rr"))
+                                                && bullet != null && bullet.visible(shift)) {
+                                            bullet.update();
+                                        }
+
+                                        if (sinkAnimation > sinkDuration + FRAMES_PER_SECOND / 3)
+                                            goToMenu("gameover");
+
+                                        sinkAnimation++;
+                                    } else if (menu.equals("burned")) {
+                                        player.updateAnimations();
+
+                                        int burnDuration = FRAMES_PER_SECOND / 2;
+                                        if (burnAnimation > burnDuration + FRAMES_PER_SECOND / 3) {
+                                            goToMenu("gameover");
+                                            gameoverBmp = MainActivity.burntporo;
+                                        }
+
+                                        burnAnimation++;
+                                    } else if (menu.equals("gameover")) {
+                                        if (transition == 0) goToMenu("limbo");
+                                    } else if (menu.equals("limbo")) {
+                                    }
+                                }
+
+                                //fading transition effect
+                                if (transition > 0) {
+                                    transition--;
+                                }
+
+                                frameCount++;
+                            }
+                        }
+                    });
+
+                    //wait until frame is done
+                    while (System.nanoTime() - startTime < nanosecondsPerFrame);
+                }
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                drawTitleMenu();
+
+                //draw loop
+                while (!menu.equals("quit")) {
+                    long startTime = System.nanoTime();
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!paused) {
+                                boolean update = false;
+
+                                if (transition > 0)
+                                    update = true;
+
+                                if (transition < TRANSITION_MAX / 2) {
+                                    if (menu.equals("start")) {
+                                        for (int i = 0; i < cbs.length; i++) {
+                                            if (cbs[i].isPressed() != cbs_pressed[i]) {
+                                                update = true;
+                                                cbs_pressed[i] = cbs[i].isPressed();
+                                            }
+                                        }
+
+                                        //title screen
+                                        if (update) drawTitleMenu();
+                                    } else if (menu.equals("more")) {
+                                        for (int i = 1; i < rrbs.length-1; i++) {
+                                            if (rrbs[i].isPressed() != rrbs_pressed[i]) {
+                                                update = true;
+                                                rrbs_pressed[i] = rrbs[i].isPressed();
+                                            }
+                                        }
+
+                                        if (update) {
+                                            canvas.drawColor(river);
+
+                                            title_bold.setTextSize(c854(60));
+                                            canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
+
+                                            mode.setTextAlign(Paint.Align.CENTER);
+                                            float tmp = (mode.ascent() + mode.descent()) / 2;
+                                            for (int i = 1; i < modeNames.length-1; i++) {
+                                                rrbs[i].draw();
+                                                canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
+                                                        rrbs[i].getRectF().centerY()-tmp, mode);
+                                            }
+
+                                            //back
+                                            drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                            //stats
+                                            drawBmp(stats, new RectF(w()-c854(80),h()-c854(80),w()-c854(20),h()-c854(20)));
+                                        }
+                                    } else if (menu.equals("stats")) {
+                                        if (transition > 0) {
+                                            canvas.drawColor(river);
+
+                                            title_bold.setTextSize(c854(50));
+                                            canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
+
+                                            mode.setTextAlign(Paint.Align.LEFT);
+                                            for (int i = 0; i < modeNames.length; i++) {
+                                                float tmp = rrbs[i].getRectF().centerY();
+                                                tmp = h()/2+(tmp-h()/2)*0.9f;
+
+                                                mode.setTextSize(c854(25));
+                                                canvas.drawText(modeNames[i], c480(20), tmp, mode);
+                                                mode.setTextSize(c854(35));
+                                                canvas.drawText(getHighScore(modeCodes[i])+"", c480(20), tmp+c854(35), mode);
+
+                                                int nextMedal = -1;
+                                                for (int m = 0; m < 3; m++) {
+                                                    drawBmp((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
+                                                            new RectF(c480(460)-c854(120-m*40),tmp-c854(15),
+                                                                    c480(460)-c854(70-m*40),tmp+c854(35)));
+                                                    if (nextMedal == -1 && getHighScore(modeCodes[i]) < medal_scores[i][m])
+                                                        nextMedal = medal_scores[i][m];
+                                                }
+                                                if (nextMedal != -1)
+                                                    canvas.drawText("Next medal: " + nextMedal, w()-c480(20), tmp+c854(50), medalText);
+                                            }
+
+                                            //back
+                                            drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                        }
+                                    } else if (menu.equals("shop")) {
+                                        if (!blitzskin_used.equals(getBlitzSkin()) || !riverskin_used.equals(getRiverSkin()))
+                                            update = true;
+                                        for (int i = 0; i < nBlitz; i++) {
+                                            if (blitzskins_owned[i] != hasSkin(blitzskins[i])) {
+                                                update = true;
+                                                blitzskins_owned[i] = hasSkin(blitzskins[i]);
+                                            }
+                                        }
+                                        for (int i = 0; i < nRiver; i++) {
+                                            if (riverskins_owned[i] != hasSkin(riverskins[i])) {
+                                                update = true;
+                                                riverskins_owned[i] = hasSkin(riverskins[i]);
+                                            }
+                                        }
+
+                                        if (update) {
+                                            canvas.drawColor(river);
+
+                                            title_bold.setTextSize(c854(60));
+                                            canvas.drawText("SHOP", w()/2, c854(80), title_bold);
+
+                                            //blitzcrank skins
+                                            canvas.drawText("BLITZ SKINS", w()/2, BLITZSKINS_Y-ICON_WIDTH/2, title);
+                                            for (int i = 0; i < nBlitz; i++) {
+                                                drawBmp(getIconBmp(blitzskins[i]), blitzskins_rectf[i]);
+                                                if (getBlitzSkin().equals(blitzskins[i])) {
+                                                    RectF rf = blitzskins_rectf[i];
+                                                    drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
+                                                            rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                                }
+                                                if (!hasSkin(blitzskins[i])) {
+                                                    RectF rf = blitzskins_rectf[i];
+                                                    canvas.drawRect(rf, river_fade);
+                                                    drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
+                                                            rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                                    canvas.drawText(blitzskins_cost[i]+"", rf.centerX(),
+                                                            rf.bottom-rf.width()/10, priceText);
+                                                }
+                                            }
+                                            //river skins
+                                            canvas.drawText("RIVER SKINS", w()/2, RIVERSKINS_Y-ICON_WIDTH/2, title);
+                                            for (int i = 0; i < nRiver; i++) {
+                                                drawBmp(getIconBmp(riverskins[i]), riverskins_rectf[i]);
+                                                if (getRiverSkin().equals(riverskins[i])) {
+                                                    RectF rf = riverskins_rectf[i];
+                                                    drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
+                                                            rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                                }
+                                                if (!hasSkin(riverskins[i])) {
+                                                    RectF rf = riverskins_rectf[i];
+                                                    canvas.drawRect(rf, river_fade);
+                                                    drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
+                                                            rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                                    canvas.drawText(riverskins_cost[i]+"", rf.centerX(),
+                                                            rf.bottom-rf.width()/10, priceText);
+                                                }
+                                            }
+
+                                            //porosnax count
+                                            drawBmp(porosnax, new RectF(w()-c854(75),h()-c854(75),w()-c854(25),h()-c854(25)));
+                                            title.setTextAlign(Paint.Align.RIGHT);
+                                            canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
+                                            title.setTextAlign(Paint.Align.CENTER);
+
+                                            //video ad
+                                            if (rva.isLoaded()) {
+                                                drawBmp(video, new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)));
+                                                adText.setAlpha(255);
+                                            } else {
+                                                canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
+                                                        new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)), quarter);
+                                                adText.setAlpha(64);
+                                            }
+                                            canvas.drawText("+10", w()-c854(50), c854(100), adText);
+
+                                            //back
+                                            drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                        }
+                                    } else if (menu.equals("game")) {
+                                        update = true;
+
+                                        //background
+                                        drawRiver();
+
+                                        canvas.save();
+                                        canvas.translate(0, -shift); //screen shift
+
+                                        //draw platforms
+                                        drawPlatforms();
+
+                                        //draw porosnax
+                                        drawPoroSnax();
+
+                                        //draw snap-traps
+                                        drawSnapTraps();
+
+                                        player.draw();
+                                        //player.drawHitbox(); //debugging purposes
+
+                                        canvas.restore();
+
+                                        if (gamemode.equals("light") || gamemode.equals("rr")) drawLightning();
+
+                                        drawScores();
+                                    } else if (menu.equals("hook")) {
+                                        update = true;
+
                                         //background
                                         drawRiver();
 
@@ -503,11 +645,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawPoroSnax();
                                         drawSnapTraps();
                                         player.draw();
-                                        player.updateAnimations();
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
                                                 && bullet != null && bullet.visible(shift)) {
                                             bullet.draw();
-                                            bullet.update();
                                         }
                                         canvas.restore();
 
@@ -523,16 +663,12 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
                                             drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth / 2, hookY - hookWidth * 3,
                                                     player.getX() + hookWidth / 2, hookY));
-                                            player.setY(hookY - player.getW() + shift);
                                         }
 
                                         drawScores();
-
-                                        if (hookAnimation > hookDuration + FRAMES_PER_SECOND / 3)
-                                            goToMenu("gameover");
-
-                                        hookAnimation++;
                                     } else if (menu.equals("sink")) {
+                                        update = true;
+
                                         //background
                                         drawRiver();
 
@@ -544,28 +680,18 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawSnapTraps();
 
                                         player.draw();
-                                        player.updateAnimations();
-
-                                        //fade effect over poro
-                                        int sinkDuration = FRAMES_PER_SECOND;
-                                        player.setBmp(sinking[Math.min(sinking.length-1,
-                                                sinkAnimation/(sinkDuration/sinking.length))]);
 
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
                                                 && bullet != null && bullet.visible(shift)) {
                                             bullet.draw();
-                                            bullet.update();
                                         }
 
                                         canvas.restore();
 
                                         drawScores();
-
-                                        if (sinkAnimation > sinkDuration + FRAMES_PER_SECOND / 3)
-                                            goToMenu("gameover");
-
-                                        sinkAnimation++;
                                     } else if (menu.equals("burned")) {
+                                        update = true;
+
                                         //background
                                         drawRiver();
 
@@ -577,7 +703,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawSnapTraps();
 
                                         player.draw();
-                                        player.updateAnimations();
 
                                         int explodeDuration = FRAMES_PER_SECOND / 3;
                                         if (burnAnimation < explodeDuration) {
@@ -591,20 +716,21 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         canvas.restore();
 
                                         drawScores();
-
-                                        int burnDuration = FRAMES_PER_SECOND / 2;
-                                        if (burnAnimation > burnDuration + FRAMES_PER_SECOND / 3) {
-                                            goToMenu("gameover");
-                                            gameoverBmp = MainActivity.burntporo;
-                                        }
-
-                                        burnAnimation++;
                                     } else if (menu.equals("gameover")) {
+                                        update = true;
+
                                         drawGameoverScreen();
 
                                         if (transition == 0) goToMenu("limbo");
                                     } else if (menu.equals("limbo")) {
-                                        drawGameoverScreen();
+                                        for (int i = 0; i < cbs.length; i++) {
+                                            if (cbs[i].isPressed() != cbs_pressed[i]) {
+                                                update = true;
+                                                cbs_pressed[i] = cbs[i].isPressed();
+                                            }
+                                        }
+
+                                        if (update) drawGameoverScreen();
                                     }
                                 }
 
@@ -618,14 +744,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                     }
                                     canvas.drawColor(Color.argb(alpha,
                                             Color.red(river), Color.green(river), Color.blue(river)));
-
-                                    transition--;
                                 }
 
-                                frameCount++;
-
                                 //update canvas
-                                ll.invalidate();
+                                if (update) ll.invalidate();
                             }
                         }
                     });
@@ -677,6 +799,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         if (action == MotionEvent.ACTION_DOWN) {
             lastPressMenu = menu;
+            pressed = true;
 
             for (CircleButton cb : cbs)
                 if (cb.contains(X, Y)) cb.press();
@@ -687,6 +810,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 if (!cb.contains(X, Y)) cb.release();
             for (RoundRectButton rrb : rrbs)
                 if (!rrb.contains(X, Y)) rrb.release();
+        } else if (action == MotionEvent.ACTION_UP) {
+            pressed = false;
         }
 
         if (menu.equals("start")) {
@@ -981,7 +1106,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     //draw a bitmap w/o cropping
     private void drawBmp(Bitmap bmp, RectF rectF) {
-        canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight()), rectF, null);
+        canvas.drawBitmap(bmp, null, rectF, null);
     }
 
     private void goToMenu(String s) {
