@@ -64,6 +64,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private String riverskin_used;
 
     private int prevPorosnax;
+    private boolean adLoaded;
 
     static SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -623,6 +624,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         if (prevPorosnax != getPoroSnax()) {
                                             update = true;
                                             prevPorosnax = getPoroSnax();
+                                        }
+                                        if (adLoaded != rva.isLoaded()) {
+                                            update = true;
+                                            adLoaded = rva.isLoaded();
                                         }
                                         for (int i = 0; i < nBlitz; i++) {
                                             if (blitzskins_owned[i] != hasSkin(blitzskins[i])) {
