@@ -199,7 +199,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         snaptrap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snaptrap),
                 lilypad.getWidth()/3,lilypad.getWidth()/3,false);
         snarefx = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snarefx),
-                lilypad.getWidth()*4/3,lilypad.getWidth()*4/3,false);
+                poro.getWidth()*4/3,poro.getWidth()*4/3,false);
         
         int hw = Math.round(w()/6); //hook width
         hook_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_classic),
@@ -1350,12 +1350,16 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         while (tmp < 0) tmp += w()*3;
 
         Bitmap bmp = getRiverBmp();
+        /*
         int topY = (int)(bmp.getHeight() * (w()*3 - tmp) / (w()*3) - 1);
         canvas.drawBitmap(bmp, new Rect(0,topY,bmp.getWidth(),bmp.getHeight()),
                 new RectF(0,0,w(),tmp), null);
         int botY = (int)(bmp.getHeight() * (h() - tmp) / (w()*3) + 1);
         if (tmp <= h()) canvas.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),botY),
                 new RectF(0,tmp,w(),h()), null);
+        */
+        canvas.drawBitmap(bmp,0,tmp-bmp.getHeight(),null);
+        if (tmp <= h()) canvas.drawBitmap(bmp,0,tmp,null);
     }
 
     private int blend(int a, int b) {
