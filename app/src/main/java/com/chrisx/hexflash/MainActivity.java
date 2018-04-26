@@ -88,7 +88,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private boolean pressed;
 
     private Paint title_bold, title, mode, scoreTitle, scoreText, river_fade, quarter,
-            adText, priceText, medalText, tutorialText, white;
+            adText, priceText, medalText, tutorialText, white, startText;
     private int river = Color.rgb(35,66,94);
 
     private CircleButton middle, left, right;
@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private boolean rrbs_pressed[];
 
     private Poro player;
-    private boolean channeling;
+    private boolean channeling, waitingForTap;
     private float playerY;
     private int score;
 
@@ -268,6 +268,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         white.setStyle(Paint.Style.STROKE);
         white.setStrokeWidth(c480(2));
 
+        startText = new Paint(mode);
+
         //buttons
         offset = c854(125);
         MIDDLE_Y1 = c854(720);
@@ -331,51 +333,54 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                     } else if (menu.equals("stats")) {
                                     } else if (menu.equals("shop")) {
                                     } else if (menu.equals("game")) {
-                                        if (transition == 0) movePlatforms();
-                                        generatePlatforms();
+                                        if (!waitingForTap) {
+                                            if (transition == 0) movePlatforms();
+                                            generatePlatforms();
 
-                                        updatePoroSnax();
+                                            updatePoroSnax();
 
-                                        updateSnapTraps();
+                                            updateSnapTraps();
 
-                                        //mid-channel
-                                        if (player.isChanneling()) {
-                                            channeling = true;
-                                            player.update(lastX, lastY + shift);
-                                        }
-
-                                        //just hexflashed
-                                        if (channeling && !player.isChanneling()) {
-                                            //if the player doesn't land on a platform
-                                            if (!checkForPlatform(player)) {
-                                                goToMenu("sink");
-                                                gameoverBmp = (gamemode.equals("spin") || gamemode.equals("rr")) ? sadporo_spin : sadporo;
-                                                sinkAnimation = 0;
+                                            //mid-channel
+                                            if (player.isChanneling()) {
+                                                channeling = true;
+                                                player.update(lastX, lastY + shift);
                                             }
-                                            channeling = false;
-                                        } else {
-                                            player.update(); //moving platform
-                                            if (gamemode.equals("spin") || gamemode.equals("rr")) player.addSpin();
-                                        }
 
-                                        //reaches top of screen
-                                        if (menu.equals("game") && player.getY() - shift < h() / 10) {
-                                            player.interruptChannel();
-                                            playerY = player.getY();
+                                            //just hexflashed
+                                            if (channeling && !player.isChanneling()) {
+                                                //if the player doesn't land on a platform
+                                                if (!checkForPlatform(player)) {
+                                                    goToMenu("sink");
+                                                    gameoverBmp = (gamemode.equals("spin") || gamemode.equals("rr")) ? sadporo_spin : sadporo;
+                                                    sinkAnimation = 0;
+                                                }
+                                                channeling = false;
+                                            } else {
+                                                player.update(); //moving platform
+                                                if (gamemode.equals("spin") || gamemode.equals("rr"))
+                                                    player.addSpin();
+                                            }
 
-                                            goToMenu("hook");
-                                            gameoverBmp = getHookGameoverBmp();
-                                            hookAnimation = 0;
-                                        }
+                                            //reaches top of screen
+                                            if (menu.equals("game") && player.getY() - shift < h() / 10) {
+                                                player.interruptChannel();
+                                                playerY = player.getY();
 
-                                        shiftSpeed = c854((float) (0.75 + 0.02 * frameCount / FRAMES_PER_SECOND));
-                                        if (gamemode.equals("spin") || gamemode.equals("rr"))
-                                            shiftSpeed *= 0.75;
-                                        if (transition == 0) {
-                                            if (gamemode.equals("light") || gamemode.equals("rr"))
-                                                shift += shiftSpeed *= 0.75;
-                                            else
-                                                shift += shiftSpeed;
+                                                goToMenu("hook");
+                                                gameoverBmp = getHookGameoverBmp();
+                                                hookAnimation = 0;
+                                            }
+
+                                            shiftSpeed = c854(0.75f + 0.02f * frameCount / FRAMES_PER_SECOND);
+                                            if (gamemode.equals("spin") || gamemode.equals("rr"))
+                                                shiftSpeed *= 0.75;
+                                            if (transition == 0) {
+                                                if (gamemode.equals("light") || gamemode.equals("rr"))
+                                                    shift += shiftSpeed *= 0.75;
+                                                else
+                                                    shift += shiftSpeed;
+                                            }
                                         }
                                     } else if (menu.equals("hook")) {
                                         player.updateAnimations();
@@ -434,7 +439,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                     transition--;
                                 }
 
-                                frameCount++;
+                                if (!waitingForTap) frameCount++;
                             }
                         }
                     });
@@ -507,7 +512,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             drawBmp(stats, new RectF(w()-c854(80),h()-c854(80),w()-c854(20),h()-c854(20)));
                                         }
                                     } else if (menu.equals("stats")) {
-                                        if (transition > 0) {
+                                        if (update) {
                                             canvas.drawColor(river);
 
                                             title_bold.setTextSize(c854(50));
@@ -643,13 +648,22 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         player.draw();
                                         //player.drawHitbox(); //debugging purposes
 
-                                        if (gamemode.equals("cc") || gamemode.equals("rr")) updateBullet();
+                                        if (!waitingForTap && (gamemode.equals("cc") || gamemode.equals("rr")))
+                                            updateBullet();
 
                                         canvas.restore();
 
-                                        if (gamemode.equals("light") || gamemode.equals("rr")) drawLightning();
+                                        if (!waitingForTap && (gamemode.equals("light") || gamemode.equals("rr")))
+                                            drawLightning();
 
                                         drawScores();
+
+                                        if (waitingForTap) {
+                                            if (getRiverSkin().equals("candy")) startText.setColor(Color.BLACK);
+                                            else startText.setColor(Color.WHITE);
+                                            float y = platforms.get(0).getY() - platforms.get(0).getW();
+                                            canvas.drawText("tap to start",w()/2,y,startText);
+                                        }
                                     } else if (menu.equals("hook")) {
                                         update = true;
 
@@ -935,7 +949,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             lastY = Y;
             if (action == MotionEvent.ACTION_DOWN && !channeling) {
                 //start channeling with a speed dependent on screen-shift speed
-                float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
+                waitingForTap = false;
+                float sec = (float) Math.min(2.5, player.getMaxRange() / Math.max(1.25,shiftSpeed) / FRAMES_PER_SECOND - 0.5);
                 if (gamemode.equals("scuttle")) sec *= 0.8;
                 else if (gamemode.equals("cc") || gamemode.equals("rr")) sec *= 0.5;
                 player.startChannel(sec);
@@ -1154,6 +1169,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             lightning = 0;
             wait = MAX_WAIT / 2;
             jumped = false;
+            channeling = false;
+            waitingForTap = true;
             bullet = null;
             bulletCD = 3 + Math.random();
             clearPoroSnax();
