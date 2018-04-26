@@ -94,8 +94,8 @@ class Platform {
         c.translate(x, y);
 
         c.rotate(angle - 90 + spin); //shift by 90deg
-        if (speed == 0) c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),new RectF(-w/2,-w/2,w/2,w/2),null);
-        else c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),new RectF(-w/1.7f,-w/1.7f,w/1.7f,w/1.7f),null);
+        if (speed == 0) c.drawBitmap(bmp,-w/2,-w/2,null);
+        else c.drawBitmap(bmp,-w/1.7f,-w/1.7f,null);
 
         c.restore();
     }

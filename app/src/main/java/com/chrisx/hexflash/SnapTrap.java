@@ -55,7 +55,7 @@ class SnapTrap {
         c.translate(getX(), getY());
 
         c.rotate(getAngle());
-        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
+        c.drawBitmap(bmp,-w/2,-w/2,null);
 
         c.restore();
     }

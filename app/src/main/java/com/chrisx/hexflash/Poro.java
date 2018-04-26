@@ -163,11 +163,10 @@ class Poro {
             drawIndicator();
         }
         c.rotate((float)(angle * 180/Math.PI - 90) + spin); //convert to degrees and shift by 90deg
-        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), new RectF(-w/2,-w/2,w/2,w/2), null);
+        c.drawBitmap(bmp,-w/2,-w/2,null);
         if (snared > 0) {
             c.rotate((float)(-45 + 90 * (snared / MAX_SNARE)));
-            c.drawBitmap(snarefx, new Rect(0,0,snarefx.getWidth(),snarefx.getHeight()),
-                    new RectF(-w/1.5f,-w/1.5f,w/1.5f,w/1.5f), null);
+            c.drawBitmap(snarefx,-w/1.5f,-w/1.5f,null);
         }
 
         c.restore();
@@ -178,17 +177,12 @@ class Poro {
             c.rotate((float) (angle * 180 / Math.PI - 90));
             Paint opacity = new Paint();
             opacity.setAlpha((int) (255 * flashAnimation / MAX_FLASH));
-            c.drawBitmap(MainActivity.flash,
-                    new Rect(0, 0, MainActivity.flash.getWidth(), MainActivity.flash.getHeight()),
-                    new RectF(-w/2, -w/2, w/2, w/2), opacity);
+            c.drawBitmap(MainActivity.flash,-w/2,-w/2,opacity);
             c.restore();
+
             c.save();
             c.translate(x, y);
-            if (flashAnimation > 0) {
-                c.drawBitmap(MainActivity.flash2,
-                        new Rect(0, 0, MainActivity.flash2.getWidth(), MainActivity.flash2.getHeight()),
-                        new RectF(-w/2, -w/2, w/2, w/2), opacity);
-            }
+            c.drawBitmap(MainActivity.flash2,-w/2,-w/2,opacity);
             c.restore();
         }
     }
@@ -199,7 +193,7 @@ class Poro {
 
     void drawRange() {
         float mr = maxRange;
-        c.drawBitmap(m_range, new Rect(0,0,m_range.getWidth(),m_range.getHeight()), new RectF(-mr,-mr,mr,mr), null);
+        c.drawBitmap(m_range,-mr,-mr,null);
     }
 
     void drawIndicator() {
@@ -207,7 +201,7 @@ class Poro {
         float cr = currRange;
 
         c.rotate((float)tempAngle+spin);
-        c.drawBitmap(indicator, null, new RectF(cr-w/2,-w/2,cr+w/2,w/2), null);
+        c.drawBitmap(indicator,cr-w/2,-w/2,null);
         c.rotate(-(float)tempAngle-spin);
     }
 }

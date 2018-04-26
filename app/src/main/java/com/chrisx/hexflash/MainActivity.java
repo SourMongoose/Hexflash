@@ -168,9 +168,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         int pw = Math.round(w()/5); //platform width
         scuttler = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_lowres),
-                pw,pw,false);
+                Math.round(pw*2/1.7f),Math.round(pw*2/1.7f),false);
         scuttler_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_candy_lowres),
-                pw,pw,false);
+                Math.round(pw*2/1.7f),Math.round(pw*2/1.7f),false);
         lilypad = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus_lowres),
                 pw,pw,false);
         lilypadlotus = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres),
@@ -1215,7 +1215,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     static double distance(float x1, float y1, float x2, float y2) {
         return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
-    
+
     //draw a bitmap w/o cropping
     private void drawBmp(Bitmap bmp, RectF rectF) {
         canvas.drawBitmap(bmp, null, rectF, null);

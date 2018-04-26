@@ -51,8 +51,7 @@ class Bullet {
         c.translate(x, y);
         c.rotate((float)(angle * 180/Math.PI - 90));
 
-        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),
-                new RectF(-w/2,f*H/2-H,w/2,f*H/2), null);
+        c.drawBitmap(bmp,-w/2,f*H/2-H,null);
 
         c.restore();
     }
