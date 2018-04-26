@@ -153,60 +153,61 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         ll.setBackgroundDrawable(new BitmapDrawable(bmp));
 
         //initialize bitmaps
-        poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
-        poro_black = BitmapFactory.decodeResource(getResources(), R.drawable.poro_black);
-        scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
-        scuttler_candy = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_candy_lowres);
-        titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen_lowres);
-        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
-        snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
-        snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
-        hook_classic = BitmapFactory.decodeResource(getResources(), R.drawable.hook_classic);
-        hook_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.hook_iblitz);
-        hook_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.hook_arcade);
-        icon_classic = BitmapFactory.decodeResource(getResources(), R.drawable.icon_classic);
-        icon_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.icon_iblitz);
-        icon_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.icon_arcade);
-        blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
-        iblitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.iblitzwithporo);
-        arcadewithporo = BitmapFactory.decodeResource(getResources(), R.drawable.arcadewithporo);
-        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
-        lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
-        candypad_red = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_red);
-        candypad_orange = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_orange);
-        candypad_yellow = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_yellow);
-        sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
-        sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
-        burntporo = BitmapFactory.decodeResource(getResources(), R.drawable.burntporo);
-        riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
-        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_mediumres_compressed);
-        restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
-        home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
-        shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
-        play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
-        more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
-        leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
-        maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange_lowres);
-        indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
-        bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
-        border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
-        bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet_thin);
-        explosion = BitmapFactory.decodeResource(getResources(), R.drawable.explosion_lowres);
-        lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
-        gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
-        stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
-        video = BitmapFactory.decodeResource(getResources(), R.drawable.video);
-        flash = BitmapFactory.decodeResource(getResources(), R.drawable.flash);
-        flash2 = BitmapFactory.decodeResource(getResources(), R.drawable.flash2);
+        Resources res = getResources();
+        poro = BitmapFactory.decodeResource(res, R.drawable.poro_lowres);
+        poro_black = BitmapFactory.decodeResource(res, R.drawable.poro_black);
+        scuttler = BitmapFactory.decodeResource(res, R.drawable.scuttler_lowres);
+        scuttler_candy = BitmapFactory.decodeResource(res, R.drawable.scuttler_candy_lowres);
+        titlescreen = BitmapFactory.decodeResource(res, R.drawable.titlescreen_lowres);
+        porosnax = BitmapFactory.decodeResource(res, R.drawable.porosnax);
+        snaptrap = BitmapFactory.decodeResource(res, R.drawable.snaptrap);
+        snarefx = BitmapFactory.decodeResource(res, R.drawable.snarefx);
+        hook_classic = BitmapFactory.decodeResource(res, R.drawable.hook_classic);
+        hook_iblitz = BitmapFactory.decodeResource(res, R.drawable.hook_iblitz);
+        hook_arcade = BitmapFactory.decodeResource(res, R.drawable.hook_arcade);
+        icon_classic = BitmapFactory.decodeResource(res, R.drawable.icon_classic);
+        icon_iblitz = BitmapFactory.decodeResource(res, R.drawable.icon_iblitz);
+        icon_arcade = BitmapFactory.decodeResource(res, R.drawable.icon_arcade);
+        blitzwithporo = BitmapFactory.decodeResource(res, R.drawable.blitzwithporo);
+        iblitzwithporo = BitmapFactory.decodeResource(res, R.drawable.iblitzwithporo);
+        arcadewithporo = BitmapFactory.decodeResource(res, R.drawable.arcadewithporo);
+        lilypad = BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus_lowres);
+        lilypadlotus = BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres);
+        candypad_red = BitmapFactory.decodeResource(res, R.drawable.candypad_red);
+        candypad_orange = BitmapFactory.decodeResource(res, R.drawable.candypad_orange);
+        candypad_yellow = BitmapFactory.decodeResource(res, R.drawable.candypad_yellow);
+        sadporo = BitmapFactory.decodeResource(res, R.drawable.sadporo);
+        sadporo_spin = BitmapFactory.decodeResource(res, R.drawable.sadporo_spin);
+        burntporo = BitmapFactory.decodeResource(res, R.drawable.burntporo);
+        riverbmp = BitmapFactory.decodeResource(res, R.drawable.river_mediumres);
+        riverbmp_candy = BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed);
+        restart = BitmapFactory.decodeResource(res, R.drawable.restart_lowres);
+        home = BitmapFactory.decodeResource(res, R.drawable.home_lowres);
+        shop = BitmapFactory.decodeResource(res, R.drawable.shop);
+        play = BitmapFactory.decodeResource(res, R.drawable.play);
+        more = BitmapFactory.decodeResource(res, R.drawable.more);
+        leftarrow = BitmapFactory.decodeResource(res, R.drawable.leftarrow);
+        maxrange = BitmapFactory.decodeResource(res, R.drawable.maxrange_lowres);
+        indicator = BitmapFactory.decodeResource(res, R.drawable.indicator_lowres);
+        bubble = BitmapFactory.decodeResource(res, R.drawable.bubble);
+        border = BitmapFactory.decodeResource(res, R.drawable.border);
+        bulletbmp = BitmapFactory.decodeResource(res, R.drawable.bullet_thin);
+        explosion = BitmapFactory.decodeResource(res, R.drawable.explosion_lowres);
+        lock = BitmapFactory.decodeResource(res, R.drawable.lock);
+        gradient = BitmapFactory.decodeResource(res, R.drawable.gradient);
+        stats = BitmapFactory.decodeResource(res, R.drawable.stats);
+        video = BitmapFactory.decodeResource(res, R.drawable.video);
+        flash = BitmapFactory.decodeResource(res, R.drawable.flash);
+        flash2 = BitmapFactory.decodeResource(res, R.drawable.flash2);
 
-        medals = new Bitmap[]{BitmapFactory.decodeResource(getResources(), R.drawable.medal_bronze),
-                BitmapFactory.decodeResource(getResources(), R.drawable.medal_silver),
-                BitmapFactory.decodeResource(getResources(), R.drawable.medal_gold),
-                BitmapFactory.decodeResource(getResources(), R.drawable.medal_blank)};
+        medals = new Bitmap[]{BitmapFactory.decodeResource(res, R.drawable.medal_bronze),
+                BitmapFactory.decodeResource(res, R.drawable.medal_silver),
+                BitmapFactory.decodeResource(res, R.drawable.medal_gold),
+                BitmapFactory.decodeResource(res, R.drawable.medal_blank)};
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
-            sinking[i] = BitmapFactory.decodeResource(getResources(), R.drawable.poro01+i);
+            sinking[i] = BitmapFactory.decodeResource(res, R.drawable.poro01+i);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -1368,6 +1369,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         canvas.drawText(score+"", c480(10), c854(60), scoreText);
         scoreText.setTextAlign(Paint.Align.RIGHT);
         canvas.drawText(getHighScore(gamemode)+"", w()-c480(10), c854(60), scoreText);
+        scoreTitle.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("FPS: "+FRAMES_PER_SECOND, w()/2, c854(25), scoreTitle);
     }
 
     //delete all platforms and initialize one lilypad
