@@ -75,13 +75,13 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private String lastPressMenu;
     private String gamemode = "classic";
 
-    private final int TRANSITION_MAX = 40;
+    //frame data
+    static int FRAMES_PER_SECOND = 60;
+    private long nanosecondsPerFrame;
+
+    private int TRANSITION_MAX = FRAMES_PER_SECOND * 2 / 3;
     private int transition = TRANSITION_MAX / 2;
     private int prevTransition;
-
-    //frame data
-    static final int FRAMES_PER_SECOND = 60;
-    private long nanosecondsPerFrame;
 
     private float lastX, lastY;
     private float downX, downY;
@@ -340,6 +340,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             updatePoroSnax();
 
                                             updateSnapTraps();
+
+                                            if (gamemode.equals("cc") || gamemode.equals("rr"))
+                                                updateBullet();
 
                                             //mid-channel
                                             if (player.isChanneling()) {
@@ -649,7 +652,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         //player.drawHitbox(); //debugging purposes
 
                                         if (!waitingForTap && (gamemode.equals("cc") || gamemode.equals("rr")))
-                                            updateBullet();
+                                            if (bullet != null && bullet.visible(shift))
+                                                bullet.draw();
 
                                         canvas.restore();
 
@@ -659,10 +663,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawScores();
 
                                         if (waitingForTap) {
-                                            if (getRiverSkin().equals("candy")) startText.setColor(Color.BLACK);
+                                            if (getRiverSkin().equals("candy"))
+                                                startText.setColor(Color.BLACK);
                                             else startText.setColor(Color.WHITE);
                                             float y = platforms.get(0).getY() - platforms.get(0).getW();
-                                            canvas.drawText("tap to start",w()/2,y,startText);
+                                            canvas.drawText("tap to start", w() / 2, y, startText);
                                         }
                                     } else if (menu.equals("hook")) {
                                         update = true;
@@ -785,6 +790,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                     });
 
                     //wait until frame is done
+                    adjustFPS(System.nanoTime() - startTime);
                     while (System.nanoTime() - startTime < nanosecondsPerFrame);
                 }
             }
@@ -1057,6 +1063,21 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
     static float c854(float f) {
         return h() / (854 / f);
+    }
+
+    private void adjustFPS(long ns) {
+        int initialFPS = FRAMES_PER_SECOND;
+        if (ns > nanosecondsPerFrame) {
+            while (FRAMES_PER_SECOND > 18 && ns > (long)1e9 / FRAMES_PER_SECOND)
+                FRAMES_PER_SECOND -= 6;
+        } else {
+            while (FRAMES_PER_SECOND < 60 && ns < (long)1e9 / FRAMES_PER_SECOND)
+                FRAMES_PER_SECOND += 6;
+        }
+        if (FRAMES_PER_SECOND != initialFPS) {
+            nanosecondsPerFrame = (long)1e9 / FRAMES_PER_SECOND;
+            TRANSITION_MAX = FRAMES_PER_SECOND * 2 / 3;
+        }
     }
 
     private long getHighScore(String s) {
@@ -1508,7 +1529,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
 
     private void updateBullet() {
-        if (bullet != null && bullet.visible(shift)) bullet.draw();
         if (bullet != null) bullet.update();
 
         if (bulletCD <= 0) {
