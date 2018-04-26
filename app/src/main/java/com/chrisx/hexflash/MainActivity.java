@@ -41,7 +41,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             candypad_orange, candypad_yellow, sadporo, sadporo_spin, burntporo, riverbmp, riverbmp_candy,
             restart, home, shop, play, more, leftarrow, maxrange, indicator, bubble, border,
             bulletbmp, explosion, lock, gradient, stats, video, flash, flash2;
-    static Bitmap[] sinking, medals, startBmps, shopBmps, moreBmps, gameBmps;
+    static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
     private String blitzskins[] = {"classic", "iblitz", "arcade"};
@@ -72,7 +72,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     private String menu = "start", prevMenu = "start";
     private String loadMenu = "";
-    private boolean doneLoading = false;
     private String lastPressMenu;
     private String gamemode = "classic";
 
@@ -154,6 +153,56 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         ll.setBackgroundDrawable(new BitmapDrawable(bmp));
 
         //initialize bitmaps
+        poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
+        poro_black = BitmapFactory.decodeResource(getResources(), R.drawable.poro_black);
+        scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
+        scuttler_candy = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_candy_lowres);
+        titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen_lowres);
+        porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
+        snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
+        snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
+        hook_classic = BitmapFactory.decodeResource(getResources(), R.drawable.hook_classic);
+        hook_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.hook_iblitz);
+        hook_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.hook_arcade);
+        icon_classic = BitmapFactory.decodeResource(getResources(), R.drawable.icon_classic);
+        icon_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.icon_iblitz);
+        icon_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.icon_arcade);
+        blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
+        iblitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.iblitzwithporo);
+        arcadewithporo = BitmapFactory.decodeResource(getResources(), R.drawable.arcadewithporo);
+        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
+        lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
+        candypad_red = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_red);
+        candypad_orange = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_orange);
+        candypad_yellow = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_yellow);
+        sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
+        sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
+        burntporo = BitmapFactory.decodeResource(getResources(), R.drawable.burntporo);
+        riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
+        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_mediumres_compressed);
+        restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
+        home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
+        shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
+        play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
+        more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
+        leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
+        maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange_lowres);
+        indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
+        bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
+        border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
+        bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet_thin);
+        explosion = BitmapFactory.decodeResource(getResources(), R.drawable.explosion_lowres);
+        lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
+        gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
+        stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
+        video = BitmapFactory.decodeResource(getResources(), R.drawable.video);
+        flash = BitmapFactory.decodeResource(getResources(), R.drawable.flash);
+        flash2 = BitmapFactory.decodeResource(getResources(), R.drawable.flash2);
+
+        medals = new Bitmap[]{BitmapFactory.decodeResource(getResources(), R.drawable.medal_bronze),
+                BitmapFactory.decodeResource(getResources(), R.drawable.medal_silver),
+                BitmapFactory.decodeResource(getResources(), R.drawable.medal_gold),
+                BitmapFactory.decodeResource(getResources(), R.drawable.medal_blank)};
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
@@ -263,115 +312,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         player = new Poro(canvas);
 
         final Handler handler = new Handler();
-
-        //thread to load images into memory
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!menu.equals("quit")) {
-                    if (!loadMenu.equals(menu) && transition == TRANSITION_MAX / 2) {
-                        doneLoading = false;
-                        loadMenu = menu;
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (menu.equals("start")) {
-                                    titlescreen = BitmapFactory.decodeResource(getResources(), R.drawable.titlescreen_lowres);
-                                    bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
-                                    play = BitmapFactory.decodeResource(getResources(), R.drawable.play);
-                                    more = BitmapFactory.decodeResource(getResources(), R.drawable.more);
-                                    shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
-                                } else if (menu.equals("more")) {
-                                    leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
-                                    stats = BitmapFactory.decodeResource(getResources(), R.drawable.stats);
-                                } else if (menu.equals("stats")) {
-                                    medals = new Bitmap[]{BitmapFactory.decodeResource(getResources(), R.drawable.medal_bronze),
-                                            BitmapFactory.decodeResource(getResources(), R.drawable.medal_silver),
-                                            BitmapFactory.decodeResource(getResources(), R.drawable.medal_gold),
-                                            BitmapFactory.decodeResource(getResources(), R.drawable.medal_blank)};
-                                } else if (menu.equals("shop")) {
-                                    video = BitmapFactory.decodeResource(getResources(), R.drawable.video);
-                                    icon_classic = BitmapFactory.decodeResource(getResources(), R.drawable.icon_classic);
-                                    icon_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.icon_iblitz);
-                                    icon_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.icon_arcade);
-                                    lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
-                                    candypad_red = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_red);
-                                    porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
-                                    leftarrow = BitmapFactory.decodeResource(getResources(), R.drawable.leftarrow);
-                                    border = BitmapFactory.decodeResource(getResources(), R.drawable.border);
-                                    lock = BitmapFactory.decodeResource(getResources(), R.drawable.lock);
-                                } else if (menu.equals("game")) {
-                                    if (titlescreen != null) titlescreen.recycle();
-                                    if (more != null) more.recycle();
-                                    if (play != null) play.recycle();
-                                    for (Bitmap bmp : medals)
-                                        if (bmp != null) bmp.recycle();
-                                    if (stats != null) stats.recycle();
-
-                                    poro = BitmapFactory.decodeResource(getResources(), R.drawable.poro_lowres);
-                                    porosnax = BitmapFactory.decodeResource(getResources(), R.drawable.porosnax);
-                                    snaptrap = BitmapFactory.decodeResource(getResources(), R.drawable.snaptrap);
-                                    snarefx = BitmapFactory.decodeResource(getResources(), R.drawable.snarefx);
-
-                                    //blitzcrank-related bitmaps
-                                    if (getBlitzSkin().equals("classic")) {
-                                        blitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.blitzwithporo);
-                                        hook_classic = BitmapFactory.decodeResource(getResources(), R.drawable.hook_classic);
-                                    } else if (getBlitzSkin().equals("iblitz")) {
-                                        iblitzwithporo = BitmapFactory.decodeResource(getResources(), R.drawable.iblitzwithporo);
-                                        hook_iblitz = BitmapFactory.decodeResource(getResources(), R.drawable.hook_iblitz);
-                                    } else {
-                                        arcadewithporo = BitmapFactory.decodeResource(getResources(), R.drawable.arcadewithporo);
-                                        hook_arcade = BitmapFactory.decodeResource(getResources(), R.drawable.hook_arcade);
-                                    }
-
-                                    //river-related bmps
-                                    if (getRiverSkin().equals("river")) {
-                                        lilypad = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_nolotus_lowres);
-                                        lilypadlotus = BitmapFactory.decodeResource(getResources(), R.drawable.lilypad_lotus_lowres);
-                                        riverbmp = BitmapFactory.decodeResource(getResources(), R.drawable.river_mediumres);
-                                        scuttler = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_lowres);
-                                    } else {
-                                        candypad_red = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_red);
-                                        candypad_orange = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_orange);
-                                        candypad_yellow = BitmapFactory.decodeResource(getResources(), R.drawable.candypad_yellow);
-                                        scuttler_candy = BitmapFactory.decodeResource(getResources(), R.drawable.scuttler_candy_lowres);
-                                        riverbmp_candy = BitmapFactory.decodeResource(getResources(), R.drawable.river_candy_mediumres_compressed);
-                                        gradient = BitmapFactory.decodeResource(getResources(), R.drawable.gradient);
-                                    }
-
-                                    //sinking
-                                    if (!gamemode.equals("spin") && !gamemode.equals("rr")) sadporo = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo);
-                                    else sadporo_spin = BitmapFactory.decodeResource(getResources(), R.drawable.sadporo_spin);
-
-                                    //curtain call
-                                    if (gamemode.equals("cc") || gamemode.equals("rr")) {
-                                        burntporo = BitmapFactory.decodeResource(getResources(), R.drawable.burntporo);
-                                        poro_black = BitmapFactory.decodeResource(getResources(), R.drawable.poro_black);
-                                        explosion = BitmapFactory.decodeResource(getResources(), R.drawable.explosion_lowres);
-                                        bulletbmp = BitmapFactory.decodeResource(getResources(), R.drawable.bullet_thin);
-                                    }
-
-                                    restart = BitmapFactory.decodeResource(getResources(), R.drawable.restart_lowres);
-                                    home = BitmapFactory.decodeResource(getResources(), R.drawable.home_lowres);
-                                    shop = BitmapFactory.decodeResource(getResources(), R.drawable.shop);
-                                    maxrange = BitmapFactory.decodeResource(getResources(), R.drawable.maxrange_lowres);
-                                    indicator = BitmapFactory.decodeResource(getResources(), R.drawable.indicator_lowres);
-                                    bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
-                                    flash = BitmapFactory.decodeResource(getResources(), R.drawable.flash);
-                                    flash2 = BitmapFactory.decodeResource(getResources(), R.drawable.flash2);
-
-                                    player.reset();
-                                    resetPlatforms();
-                                    generatePlatforms();
-                                }
-                                doneLoading = true;
-                            }
-                        });
-                    }
-                }
-            }
-        }).start();
 
         //thread for calculations/updates
         new Thread(new Runnable() {
@@ -491,7 +431,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
                                 //fading transition effect
                                 if (transition > 0) {
-                                    if (doneLoading || transition != TRANSITION_MAX / 2) transition--;
+                                    transition--;
                                 }
 
                                 frameCount++;
@@ -509,7 +449,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!doneLoading);
                 drawTitleMenu();
 
                 //draw loop
@@ -527,7 +466,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                     prevTransition = transition;
                                 }
 
-                                if (transition < TRANSITION_MAX / 2 && doneLoading) {
+                                if (transition < TRANSITION_MAX / 2) {
                                     if (menu.equals("start")) {
                                         //check for updates (button presses)
                                         for (int i = 0; i < cbs.length; i++) {
@@ -893,139 +832,137 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             pressed = false;
         }
 
-        if (doneLoading) {
-            if (menu.equals("start")) {
+        if (menu.equals("start")) {
+            if (action == MotionEvent.ACTION_UP) {
+                if (middle.isPressed()) {
+                    gamemode = "classic";
+                    goToMenu("game");
+                } else if (right.isPressed()) {
+                    goToMenu("more");
+                } else if (left.isPressed()) {
+                    goToMenu("shop");
+                }
+            }
+        } else if (menu.equals("shop")) {
+            //selecting skins
+            if (action == MotionEvent.ACTION_DOWN) {
+                for (int i = 0; i < nBlitz; i++) {
+                    if (hasSkin(blitzskins[i]) && blitzskins_rectf[i].contains(X, Y)) {
+                        editor.putString("blitzskin", blitzskins[i]);
+                        editor.apply();
+                    }
+                }
+                for (int i = 0; i < nRiver; i++) {
+                    if (hasSkin(riverskins[i]) && riverskins_rectf[i].contains(X, Y)) {
+                        editor.putString("riverskin", riverskins[i]);
+                        editor.apply();
+                    }
+                }
+            }
+            //buying skins
+            if (action == MotionEvent.ACTION_UP) {
+                for (int i = 0; i < nBlitz; i++) {
+                    if (!hasSkin(blitzskins[i]) && blitzskins_rectf[i].contains(X, Y)) {
+                        if (getPoroSnax() >= blitzskins_cost[i]) {
+                            editor.putBoolean("has_skin_" + blitzskins[i], true);
+                            editor.putInt("porosnax", getPoroSnax() - blitzskins_cost[i]);
+                            editor.apply();
+                        }
+                    }
+                }
+                for (int i = 0; i < nRiver; i++) {
+                    if (!hasSkin(riverskins[i]) && riverskins_rectf[i].contains(X, Y)) {
+                        if (getPoroSnax() >= riverskins_cost[i]) {
+                            editor.putBoolean("has_skin_" + riverskins[i], true);
+                            editor.putInt("porosnax", getPoroSnax() - riverskins_cost[i]);
+                            editor.apply();
+                        }
+                    }
+                }
+            }
+
+            //watch video ad
+            if (action == MotionEvent.ACTION_UP && X > w() - c854(100) && Y < c854(100)) {
+                if (rva.isLoaded()) {
+                    rva.show();
+                }
+            }
+
+            //back arrow
+            if (action == MotionEvent.ACTION_UP && X < c854(100) && Y > h() - c854(100))
+                goToMenu(prevMenu);
+        } else if (menu.equals("more")) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                downX = X;
+                downY = Y;
+            }
+            if (action == MotionEvent.ACTION_UP) {
+                for (int i = 1; i < rrbs.length - 1; i++) {
+                    RoundRectButton rrb = rrbs[i];
+
+                    if (rrb.isPressed()) {
+                        if (rrb == scuttle) gamemode = "scuttle";
+                        else if (rrb == snare) gamemode = "snare";
+                        else if (rrb == spin) gamemode = "spin";
+                        else if (rrb == light) gamemode = "light";
+                        else if (rrb == cc) gamemode = "cc";
+
+                        goToMenu("game");
+                        break;
+                    }
+                }
+
+                //combo chaos/rainbow river
+                if (rrbs[1].contains(downX, downY) && rrbs[rrbs.length - 2].contains(X, Y)) {
+                    gamemode = "rr";
+                    goToMenu("game");
+                }
+            }
+
+            //back arrow
+            if (action == MotionEvent.ACTION_UP &&
+                    X < c854(100) && Y > h() - c854(100)) goToMenu("start");
+
+            //stats menu
+            if (action == MotionEvent.ACTION_UP &&
+                    X > w() - c854(100) && Y > h() - c854(100)) goToMenu("stats");
+        } else if (menu.equals("stats")) {
+            //back arrow
+            if (action == MotionEvent.ACTION_UP &&
+                    X < c854(100) && Y > h() - c854(100)) goToMenu("more");
+        } else if (menu.equals("game")) {
+            lastX = X;
+            lastY = Y;
+            if (action == MotionEvent.ACTION_DOWN && !channeling) {
+                //start channeling with a speed dependent on screen-shift speed
+                float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
+                if (gamemode.equals("scuttle")) sec *= 0.8;
+                else if (gamemode.equals("cc") || gamemode.equals("rr")) sec *= 0.5;
+                player.startChannel(sec);
+            } else if (action == MotionEvent.ACTION_UP) {
+                //release
+                if (player.isChanneling()) player.endChannel();
+            }
+        } else if (menu.equals("limbo")) {
+            if (lastPressMenu.equals("limbo")) {
                 if (action == MotionEvent.ACTION_UP) {
                     if (middle.isPressed()) {
-                        gamemode = "classic";
+                        player.reset();
                         goToMenu("game");
                     } else if (right.isPressed()) {
-                        goToMenu("more");
+                        goToMenu("start");
                     } else if (left.isPressed()) {
                         goToMenu("shop");
                     }
                 }
-            } else if (menu.equals("shop")) {
-                //selecting skins
-                if (action == MotionEvent.ACTION_DOWN) {
-                    for (int i = 0; i < nBlitz; i++) {
-                        if (hasSkin(blitzskins[i]) && blitzskins_rectf[i].contains(X, Y)) {
-                            editor.putString("blitzskin", blitzskins[i]);
-                            editor.apply();
-                        }
-                    }
-                    for (int i = 0; i < nRiver; i++) {
-                        if (hasSkin(riverskins[i]) && riverskins_rectf[i].contains(X, Y)) {
-                            editor.putString("riverskin", riverskins[i]);
-                            editor.apply();
-                        }
-                    }
-                }
-                //buying skins
-                if (action == MotionEvent.ACTION_UP) {
-                    for (int i = 0; i < nBlitz; i++) {
-                        if (!hasSkin(blitzskins[i]) && blitzskins_rectf[i].contains(X, Y)) {
-                            if (getPoroSnax() >= blitzskins_cost[i]) {
-                                editor.putBoolean("has_skin_" + blitzskins[i], true);
-                                editor.putInt("porosnax", getPoroSnax() - blitzskins_cost[i]);
-                                editor.apply();
-                            }
-                        }
-                    }
-                    for (int i = 0; i < nRiver; i++) {
-                        if (!hasSkin(riverskins[i]) && riverskins_rectf[i].contains(X, Y)) {
-                            if (getPoroSnax() >= riverskins_cost[i]) {
-                                editor.putBoolean("has_skin_" + riverskins[i], true);
-                                editor.putInt("porosnax", getPoroSnax() - riverskins_cost[i]);
-                                editor.apply();
-                            }
-                        }
-                    }
-                }
-
-                //watch video ad
-                if (action == MotionEvent.ACTION_UP && X > w() - c854(100) && Y < c854(100)) {
-                    if (rva.isLoaded()) {
-                        rva.show();
-                    }
-                }
-
-                //back arrow
-                if (action == MotionEvent.ACTION_UP && X < c854(100) && Y > h() - c854(100))
-                    goToMenu(prevMenu);
-            } else if (menu.equals("more")) {
-                if (action == MotionEvent.ACTION_DOWN) {
-                    downX = X;
-                    downY = Y;
-                }
-                if (action == MotionEvent.ACTION_UP) {
-                    for (int i = 1; i < rrbs.length - 1; i++) {
-                        RoundRectButton rrb = rrbs[i];
-
-                        if (rrb.isPressed()) {
-                            if (rrb == scuttle) gamemode = "scuttle";
-                            else if (rrb == snare) gamemode = "snare";
-                            else if (rrb == spin) gamemode = "spin";
-                            else if (rrb == light) gamemode = "light";
-                            else if (rrb == cc) gamemode = "cc";
-
-                            goToMenu("game");
-                            break;
-                        }
-                    }
-
-                    //combo chaos/rainbow river
-                    if (rrbs[1].contains(downX, downY) && rrbs[rrbs.length - 2].contains(X, Y)) {
-                        gamemode = "rr";
-                        goToMenu("game");
-                    }
-                }
-
-                //back arrow
-                if (action == MotionEvent.ACTION_UP &&
-                        X < c854(100) && Y > h() - c854(100)) goToMenu("start");
-
-                //stats menu
-                if (action == MotionEvent.ACTION_UP &&
-                        X > w() - c854(100) && Y > h() - c854(100)) goToMenu("stats");
-            } else if (menu.equals("stats")) {
-                //back arrow
-                if (action == MotionEvent.ACTION_UP &&
-                        X < c854(100) && Y > h() - c854(100)) goToMenu("more");
-            } else if (menu.equals("game")) {
-                lastX = X;
-                lastY = Y;
-                if (action == MotionEvent.ACTION_DOWN && !channeling) {
-                    //start channeling with a speed dependent on screen-shift speed
-                    float sec = (float) Math.min(2.5, player.getMaxRange() / shiftSpeed / FRAMES_PER_SECOND - 0.5);
-                    if (gamemode.equals("scuttle")) sec *= 0.8;
-                    else if (gamemode.equals("cc") || gamemode.equals("rr")) sec *= 0.5;
-                    player.startChannel(sec);
-                } else if (action == MotionEvent.ACTION_UP) {
-                    //release
-                    if (player.isChanneling()) player.endChannel();
-                }
-            } else if (menu.equals("limbo")) {
-                if (lastPressMenu.equals("limbo")) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        if (middle.isPressed()) {
-                            player.reset();
-                            goToMenu("game");
-                        } else if (right.isPressed()) {
-                            goToMenu("start");
-                        } else if (left.isPressed()) {
-                            goToMenu("shop");
-                        }
-                    }
-                }
             }
+        }
 
-            if (action == MotionEvent.ACTION_UP) {
-                for (CircleButton cb : cbs)
-                    cb.release();
-                for (RoundRectButton rrb : rrbs)
-                    rrb.release();
-            }
+        if (action == MotionEvent.ACTION_UP) {
+            for (CircleButton cb : cbs)
+                cb.release();
+            for (RoundRectButton rrb : rrbs)
+                rrb.release();
         }
 
         return true;
@@ -1221,6 +1158,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             bulletCD = 3 + Math.random();
             clearPoroSnax();
             clearSnapTraps();
+            player.reset();
+            resetPlatforms();
+            generatePlatforms();
         }
 
         if (s.equals("gameover")) {
