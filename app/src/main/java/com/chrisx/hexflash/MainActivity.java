@@ -193,13 +193,13 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         tmp.recycle();
         
         porosnax = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
-                poro.getWidth()/3,poro.getWidth()/3,false);
+                lilypad.getWidth()/3,lilypad.getWidth()/3,false);
         porosnax_count = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
                 Math.round(c854(50)),Math.round(c854(50)),false);
         snaptrap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snaptrap),
-                poro.getWidth()/3,poro.getWidth()/3,false);
+                lilypad.getWidth()/3,lilypad.getWidth()/3,false);
         snarefx = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snarefx),
-                poro.getWidth()*4/3,poro.getWidth()*4/3,false);
+                lilypad.getWidth()*4/3,lilypad.getWidth()*4/3,false);
         
         int hw = Math.round(w()/6); //hook width
         hook_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_classic),
@@ -852,7 +852,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                     });
 
                     //wait until frame is done
-                    //adjustFPS(System.nanoTime() - startTime);
                     while (System.nanoTime() - startTime < nanosecondsPerFrame);
                 }
             }
@@ -1125,21 +1124,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
     static float c854(float f) {
         return h() / (854 / f);
-    }
-
-    private void adjustFPS(long ns) {
-        int initialFPS = FRAMES_PER_SECOND;
-        if (ns > nanosecondsPerFrame) {
-            while (FRAMES_PER_SECOND > 18 && ns > (long)1e9 / FRAMES_PER_SECOND)
-                FRAMES_PER_SECOND -= 6;
-        } else {
-            while (FRAMES_PER_SECOND < 60 && ns < (long)1e9 / FRAMES_PER_SECOND)
-                FRAMES_PER_SECOND += 6;
-        }
-        if (FRAMES_PER_SECOND != initialFPS) {
-            nanosecondsPerFrame = (long)1e9 / FRAMES_PER_SECOND;
-            TRANSITION_MAX = FRAMES_PER_SECOND * 2 / 3;
-        }
     }
 
     private long getHighScore(String s) {
@@ -1428,8 +1412,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         canvas.drawText(score+"", c480(10), c854(60), scoreText);
         scoreText.setTextAlign(Paint.Align.RIGHT);
         canvas.drawText(getHighScore(gamemode)+"", w()-c480(10), c854(60), scoreText);
-        scoreTitle.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("FPS: "+FRAMES_PER_SECOND, w()/2, c854(25), scoreTitle);
     }
 
     //delete all platforms and initialize one lilypad
