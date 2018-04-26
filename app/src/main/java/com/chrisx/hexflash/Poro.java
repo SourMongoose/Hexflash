@@ -207,7 +207,7 @@ class Poro {
         float cr = currRange;
 
         c.rotate((float)tempAngle+spin);
-        c.drawBitmap(indicator, new Rect(0,0,indicator.getWidth(),indicator.getHeight()), new RectF(cr-w/2,-w/2,cr+w/2,w/2), null);
+        c.drawBitmap(indicator, null, new RectF(cr-w/2,-w/2,cr+w/2,w/2), null);
         c.rotate(-(float)tempAngle-spin);
     }
 }

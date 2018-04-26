@@ -15,6 +15,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -35,12 +36,13 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     private RewardedVideoAd rva;
 
-    static Bitmap poro, poro_black, scuttler, scuttler_candy, titlescreen, porosnax, snaptrap, snarefx,
-            hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz, icon_arcade,
-            blitzwithporo, iblitzwithporo, arcadewithporo, lilypad, lilypadlotus, candypad_red,
-            candypad_orange, candypad_yellow, sadporo, sadporo_spin, burntporo, riverbmp, riverbmp_candy,
-            restart, home, shop, play, more, leftarrow, maxrange, indicator, bubble, border,
-            bulletbmp, explosion, lock, gradient, stats, video, flash, flash2;
+    static Bitmap poro, poro_black, scuttler, scuttler_candy, titlescreen, porosnax, porosnax_count,
+            snaptrap, snarefx, hook_classic, hook_iblitz, hook_arcade, icon_classic, icon_iblitz,
+            icon_arcade, icon_river, icon_candy, blitzwithporo, iblitzwithporo, arcadewithporo,
+            lilypad, lilypadlotus, candypad_red, candypad_orange, candypad_yellow, sadporo,
+            sadporo_spin, burntporo, riverbmp, riverbmp_candy, restart, home, shop, play, more,
+            leftarrow, maxrange, indicator, bubble, border, bulletbmp, explosion, lock, gradient,
+            stats, video, flash, flash2;
     static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
@@ -48,7 +50,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private int blitzskins_cost[] = {0, 50, 50};
     private int nBlitz = blitzskins.length;
     private RectF blitzskins_rectf[] = new RectF[nBlitz];
-    private float ICON_WIDTH, BLITZSKINS_Y;
+    private int ICON_WIDTH;
+    private float BLITZSKINS_Y;
     private boolean blitzskins_owned[];
     private String blitzskin_used;
 
@@ -154,60 +157,125 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         //initialize bitmaps
         Resources res = getResources();
-        poro = BitmapFactory.decodeResource(res, R.drawable.poro_lowres);
-        poro_black = BitmapFactory.decodeResource(res, R.drawable.poro_black);
-        scuttler = BitmapFactory.decodeResource(res, R.drawable.scuttler_lowres);
-        scuttler_candy = BitmapFactory.decodeResource(res, R.drawable.scuttler_candy_lowres);
-        titlescreen = BitmapFactory.decodeResource(res, R.drawable.titlescreen_lowres);
-        porosnax = BitmapFactory.decodeResource(res, R.drawable.porosnax);
-        snaptrap = BitmapFactory.decodeResource(res, R.drawable.snaptrap);
-        snarefx = BitmapFactory.decodeResource(res, R.drawable.snarefx);
-        hook_classic = BitmapFactory.decodeResource(res, R.drawable.hook_classic);
-        hook_iblitz = BitmapFactory.decodeResource(res, R.drawable.hook_iblitz);
-        hook_arcade = BitmapFactory.decodeResource(res, R.drawable.hook_arcade);
-        icon_classic = BitmapFactory.decodeResource(res, R.drawable.icon_classic);
-        icon_iblitz = BitmapFactory.decodeResource(res, R.drawable.icon_iblitz);
-        icon_arcade = BitmapFactory.decodeResource(res, R.drawable.icon_arcade);
-        blitzwithporo = BitmapFactory.decodeResource(res, R.drawable.blitzwithporo);
-        iblitzwithporo = BitmapFactory.decodeResource(res, R.drawable.iblitzwithporo);
-        arcadewithporo = BitmapFactory.decodeResource(res, R.drawable.arcadewithporo);
-        lilypad = BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus_lowres);
-        lilypadlotus = BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres);
-        candypad_red = BitmapFactory.decodeResource(res, R.drawable.candypad_red);
-        candypad_orange = BitmapFactory.decodeResource(res, R.drawable.candypad_orange);
-        candypad_yellow = BitmapFactory.decodeResource(res, R.drawable.candypad_yellow);
-        sadporo = BitmapFactory.decodeResource(res, R.drawable.sadporo);
-        sadporo_spin = BitmapFactory.decodeResource(res, R.drawable.sadporo_spin);
-        burntporo = BitmapFactory.decodeResource(res, R.drawable.burntporo);
-        riverbmp = BitmapFactory.decodeResource(res, R.drawable.river_mediumres);
-        riverbmp_candy = BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed);
+        poro = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro_lowres),
+                Math.round(w()/8),Math.round(w()/8),false);
+        poro_black = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro_black),
+                poro.getWidth(),poro.getHeight(),false);
+        flash = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.flash),
+                poro.getWidth(),poro.getHeight(),false);
+        flash2 = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.flash2),
+                poro.getWidth(),poro.getHeight(),false);
+
+        int pw = Math.round(w()/5); //platform width
+        scuttler = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_lowres),
+                pw,pw,false);
+        scuttler_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_candy_lowres),
+                pw,pw,false);
+        lilypad = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus_lowres),
+                pw,pw,false);
+        lilypadlotus = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres),
+                pw,pw,false);
+        candypad_red = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_red),
+                pw,pw,false);
+        candypad_orange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_orange),
+                pw,pw,false);
+        candypad_yellow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_yellow),
+                pw,pw,false);
+        
+        Bitmap tmp = BitmapFactory.decodeResource(res, R.drawable.titlescreen);
+        if (h()/w() > 4./3) { //thinner
+            int w = Math.round(h() * tmp.getWidth() / tmp.getHeight());
+            titlescreen = Bitmap.createScaledBitmap(tmp,w,Math.round(h()),false);
+        } else { //thicker
+            int h = Math.round(w() * tmp.getHeight() / tmp.getWidth());
+            titlescreen = Bitmap.createScaledBitmap(tmp,Math.round(w()),h,false);
+        }
+        tmp.recycle();
+        
+        porosnax = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
+                poro.getWidth()/3,poro.getWidth()/3,false);
+        porosnax_count = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
+                Math.round(c854(50)),Math.round(c854(50)),false);
+        snaptrap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snaptrap),
+                poro.getWidth()/3,poro.getWidth()/3,false);
+        snarefx = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snarefx),
+                poro.getWidth()*4/3,poro.getWidth()*4/3,false);
+        
+        int hw = Math.round(w()/6); //hook width
+        hook_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_classic),
+                hw,hw*3,false);
+        hook_iblitz = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_iblitz),
+                hw,hw*3,false);
+        hook_arcade = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_arcade),
+                hw,hw*3,false);
+        
+        ICON_WIDTH = Math.round(c854(100));
+        int ih = ICON_WIDTH; //icon height
+        icon_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_classic),
+                ICON_WIDTH,ih,false);
+        icon_iblitz = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_iblitz),
+                ICON_WIDTH,ih,false);
+        icon_arcade = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_arcade),
+                ICON_WIDTH,ih,false);
+        icon_river = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres),
+                ICON_WIDTH,ih,false);
+        icon_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_red),
+                ICON_WIDTH,ih,false);
+
+        blitzwithporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.blitzwithporo),
+                Math.round(w()),Math.round(w()),false);
+        iblitzwithporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.iblitzwithporo),
+                Math.round(w()),Math.round(w()),false);
+        arcadewithporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.arcadewithporo),
+                Math.round(w()),Math.round(w()),false);
+        sadporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.sadporo),
+                Math.round(w()),Math.round(w()),false);
+        sadporo_spin = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.sadporo_spin),
+                Math.round(w()),Math.round(w()),false);
+        burntporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.burntporo),
+                Math.round(w()),Math.round(w()),false);
+
+        riverbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_mediumres),
+                Math.round(w()),Math.round(w()*3),false);
+        riverbmp_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed),
+                Math.round(w()),Math.round(w()*3),false);
+
         restart = BitmapFactory.decodeResource(res, R.drawable.restart_lowres);
         home = BitmapFactory.decodeResource(res, R.drawable.home_lowres);
         shop = BitmapFactory.decodeResource(res, R.drawable.shop);
         play = BitmapFactory.decodeResource(res, R.drawable.play);
         more = BitmapFactory.decodeResource(res, R.drawable.more);
-        leftarrow = BitmapFactory.decodeResource(res, R.drawable.leftarrow);
-        maxrange = BitmapFactory.decodeResource(res, R.drawable.maxrange_lowres);
-        indicator = BitmapFactory.decodeResource(res, R.drawable.indicator_lowres);
+        leftarrow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.leftarrow),
+                Math.round(c854(80)),Math.round(c854(80)),false);
+        maxrange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.maxrange_lowres),
+                Math.round(h()/2),Math.round(h()/2),false);
+        indicator = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.indicator_lowres),
+                poro.getWidth(),poro.getHeight(),false);
         bubble = BitmapFactory.decodeResource(res, R.drawable.bubble);
-        border = BitmapFactory.decodeResource(res, R.drawable.border);
-        bulletbmp = BitmapFactory.decodeResource(res, R.drawable.bullet_thin);
+        border = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.border),
+                ICON_WIDTH*5/4,ICON_WIDTH*5/4,false);
+        bulletbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.bullet_thin),
+                Math.round(w()/24),Math.round(w()/3),false);
         explosion = BitmapFactory.decodeResource(res, R.drawable.explosion_lowres);
-        lock = BitmapFactory.decodeResource(res, R.drawable.lock);
-        gradient = BitmapFactory.decodeResource(res, R.drawable.gradient);
-        stats = BitmapFactory.decodeResource(res, R.drawable.stats);
-        video = BitmapFactory.decodeResource(res, R.drawable.video);
-        flash = BitmapFactory.decodeResource(res, R.drawable.flash);
-        flash2 = BitmapFactory.decodeResource(res, R.drawable.flash2);
+        lock = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lock),
+                ICON_WIDTH/3,ICON_WIDTH/3,false);
+        gradient = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.gradient),
+                Math.round(w()),Math.round(c854(150)),false);
+        stats = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.stats),
+                Math.round(c854(60)),Math.round(c854(60)),false);
+        video = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.video),
+                Math.round(c854(50)),Math.round(c854(50)),false);
 
-        medals = new Bitmap[]{BitmapFactory.decodeResource(res, R.drawable.medal_bronze),
-                BitmapFactory.decodeResource(res, R.drawable.medal_silver),
-                BitmapFactory.decodeResource(res, R.drawable.medal_gold),
-                BitmapFactory.decodeResource(res, R.drawable.medal_blank)};
+        int mw = Math.round(c854(50)); //medal width
+        medals = new Bitmap[]{Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_bronze), mw, mw, false),
+                Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_silver), mw, mw, false),
+                Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_gold), mw, mw, false),
+                Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_blank), mw, mw, false)};
 
         sinking = new Bitmap[15];
         for (int i = 0; i < sinking.length; i++)
-            sinking[i] = BitmapFactory.decodeResource(res, R.drawable.poro01+i);
+            sinking[i] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro01+i),
+                    poro.getWidth(),poro.getHeight(),false);
 
         //initializes SharedPreferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -292,7 +360,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         rrbs_pressed = new boolean[rrbs.length];
 
         //blitz skins
-        ICON_WIDTH = c854(100);
         BLITZSKINS_Y = c854(275);
         float totalWidth = ICON_WIDTH*nBlitz + ICON_WIDTH*(nBlitz-1)/4;
         for (int i = 0; i < nBlitz; i++) {
@@ -322,7 +389,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             public void run() {
                 //draw loop
                 while (!menu.equals("quit")) {
-                    long startTime = System.nanoTime();
+                    final long startTime = System.nanoTime();
 
                     handler.post(new Runnable() {
                         @Override
@@ -462,7 +529,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
                 //draw loop
                 while (!menu.equals("quit")) {
-                    long startTime = System.nanoTime();
+                    final long startTime = System.nanoTime();
 
                     handler.post(new Runnable() {
                         @Override
@@ -511,9 +578,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             }
 
                                             //back
-                                            drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                            canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
                                             //stats
-                                            drawBmp(stats, new RectF(w()-c854(80),h()-c854(80),w()-c854(20),h()-c854(20)));
+                                            canvas.drawBitmap(stats,w()-c854(80),h()-c854(80),null);
                                         }
                                     } else if (menu.equals("stats")) {
                                         if (update) {
@@ -534,9 +601,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
                                                 int nextMedal = -1;
                                                 for (int m = 0; m < 3; m++) {
-                                                    drawBmp((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
-                                                            new RectF(c480(460)-c854(120-m*40),tmp-c854(15),
-                                                                    c480(460)-c854(70-m*40),tmp+c854(35)));
+                                                    canvas.drawBitmap((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
+                                                            c480(460)-c854(120-m*40),tmp-c854(15),null);
                                                     if (nextMedal == -1 && getHighScore(modeCodes[i]) < medal_scores[i][m])
                                                         nextMedal = medal_scores[i][m];
                                                 }
@@ -545,7 +611,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             }
 
                                             //back
-                                            drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                            canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
                                         }
                                     } else if (menu.equals("shop")) {
                                         //check for updates
@@ -580,17 +646,15 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             //blitzcrank skins
                                             canvas.drawText("BLITZ SKINS", w()/2, BLITZSKINS_Y-ICON_WIDTH/2, title);
                                             for (int i = 0; i < nBlitz; i++) {
-                                                drawBmp(getIconBmp(blitzskins[i]), blitzskins_rectf[i]);
+                                                canvas.drawBitmap(getIconBmp(blitzskins[i]),blitzskins_rectf[i].left,blitzskins_rectf[i].top,null);
                                                 if (getBlitzSkin().equals(blitzskins[i])) {
                                                     RectF rf = blitzskins_rectf[i];
-                                                    drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
-                                                            rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                                    canvas.drawBitmap(border,rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,null);
                                                 }
                                                 if (!hasSkin(blitzskins[i])) {
                                                     RectF rf = blitzskins_rectf[i];
                                                     canvas.drawRect(rf, river_fade);
-                                                    drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
-                                                            rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                                    canvas.drawBitmap(lock,rf.left+rf.width()/3,rf.top+rf.width()/3,null);
                                                     canvas.drawText(blitzskins_cost[i]+"", rf.centerX(),
                                                             rf.bottom-rf.width()/10, priceText);
                                                 }
@@ -598,31 +662,30 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             //river skins
                                             canvas.drawText("RIVER SKINS", w()/2, RIVERSKINS_Y-ICON_WIDTH/2, title);
                                             for (int i = 0; i < nRiver; i++) {
-                                                drawBmp(getIconBmp(riverskins[i]), riverskins_rectf[i]);
+                                                canvas.drawBitmap(getIconBmp(riverskins[i]),
+                                                        riverskins_rectf[i].left,riverskins_rectf[i].top,null);
                                                 if (getRiverSkin().equals(riverskins[i])) {
                                                     RectF rf = riverskins_rectf[i];
-                                                    drawBmp(border, new RectF(rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,
-                                                            rf.right+ICON_WIDTH/8,rf.bottom+ICON_WIDTH/8));
+                                                    canvas.drawBitmap(border,rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,null);
                                                 }
                                                 if (!hasSkin(riverskins[i])) {
                                                     RectF rf = riverskins_rectf[i];
                                                     canvas.drawRect(rf, river_fade);
-                                                    drawBmp(lock, new RectF(rf.left+rf.width()/3,rf.top+rf.width()/3,
-                                                            rf.right-rf.width()/3,rf.bottom-rf.width()/3));
+                                                    canvas.drawBitmap(lock,rf.left+rf.width()/3,rf.top+rf.width()/3,null);
                                                     canvas.drawText(riverskins_cost[i]+"", rf.centerX(),
                                                             rf.bottom-rf.width()/10, priceText);
                                                 }
                                             }
 
                                             //porosnax count
-                                            drawBmp(porosnax, new RectF(w()-c854(75),h()-c854(75),w()-c854(25),h()-c854(25)));
+                                            canvas.drawBitmap(porosnax_count,w()-c854(75),h()-c854(75),null);
                                             title.setTextAlign(Paint.Align.RIGHT);
                                             canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
                                             title.setTextAlign(Paint.Align.CENTER);
 
                                             //video ad
                                             if (rva.isLoaded()) {
-                                                drawBmp(video, new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)));
+                                                canvas.drawBitmap(video,w()-c854(75),c854(25),null);
                                                 adText.setAlpha(255);
                                             } else {
                                                 canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
@@ -632,7 +695,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                             canvas.drawText("+10", w()-c854(50), c854(100), adText);
 
                                             //back
-                                            drawBmp(leftarrow, new RectF(c854(10),h()-c854(90),c854(90),h()-c854(10)));
+                                            canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
                                         }
                                     } else if (menu.equals("game")) {
                                         update = true;
@@ -693,13 +756,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         if (hookAnimation < hookDuration / 2) {
                                             //hook enters screen
                                             float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
-                                            drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth/2, hookY - hookWidth*3,
-                                                    player.getX() + hookWidth/2, hookY));
+                                            canvas.drawBitmap(getHookBmp(),player.getX()-hookWidth/2,hookY-hookWidth*3,null);
                                         } else {
                                             //hook exits screen w/ poro
                                             float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
-                                            drawBmp(getHookBmp(), new RectF(player.getX() - hookWidth / 2, hookY - hookWidth * 3,
-                                                    player.getX() + hookWidth / 2, hookY));
+                                            canvas.drawBitmap(getHookBmp(),player.getX()-hookWidth/2,hookY-hookWidth*3,null);
                                         }
 
                                         drawScores();
@@ -791,7 +852,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                     });
 
                     //wait until frame is done
-                    adjustFPS(System.nanoTime() - startTime);
+                    //adjustFPS(System.nanoTime() - startTime);
                     while (System.nanoTime() - startTime < nanosecondsPerFrame);
                 }
             }
@@ -1120,9 +1181,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private Bitmap getIconBmp(String s) {
         switch(s) {
             case "candy":
-                return candypad_red;
+                return icon_candy;
             case "river":
-                return lilypadlotus;
+                return icon_river;
             case "iblitz":
                 return icon_iblitz;
             case "arcade":
@@ -1154,7 +1215,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     static double distance(float x1, float y1, float x2, float y2) {
         return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
-
+    
     //draw a bitmap w/o cropping
     private void drawBmp(Bitmap bmp, RectF rectF) {
         canvas.drawBitmap(bmp, null, rectF, null);
@@ -1226,11 +1287,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     private void drawTitleMenu() {
         if (h()/w() > 4./3) { //thinner
-            float w = h() * titlescreen.getWidth() / titlescreen.getHeight();
-            drawBmp(titlescreen, new RectF(w() / 2 - w / 2, 0, w() / 2 + w / 2, h()));
+            canvas.drawBitmap(titlescreen,w()/2-titlescreen.getWidth()/2,0,null);
         } else { //thicker
-            float h = w() * titlescreen.getHeight() / titlescreen.getWidth();
-            drawBmp(titlescreen, new RectF(0, 0, w(), h));
+            canvas.drawBitmap(titlescreen,0,0,null);
         }
 
         //mini tutorial
@@ -1292,7 +1351,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         canvas.drawColor(river);
 
         float tmp = Math.max(h()-w(), middle.getY()+middle.getR()+c854(5));
-        drawBmp(gameoverBmp, new RectF(0,tmp,w(),tmp+w()));
+        canvas.drawBitmap(gameoverBmp,0,tmp,null);
 
         title_bold.setTextSize(c854(60));
         canvas.drawText("GAME OVER", w()/2, c854(125), title_bold);
@@ -1353,7 +1412,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     private void drawScores() {
         if (getRiverSkin().equals("candy") && !gamemode.equals("light") && !gamemode.equals("rr")) {
-            drawBmp(gradient, new RectF(0,0,w(),c854(150)));
+            canvas.drawBitmap(gradient,0,0,null);
             scoreTitle.setColor(Color.BLACK);
             scoreText.setColor(Color.BLACK);
         } else {
