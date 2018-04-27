@@ -182,8 +182,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 pw,pw,false);
         candypad_yellow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_yellow),
                 pw,pw,false);
-        
-        Bitmap tmp = BitmapFactory.decodeResource(res, R.drawable.titlescreen);
+
+        BitmapFactory.Options rgb565 = new BitmapFactory.Options();
+        rgb565.inPreferredConfig = Bitmap.Config.RGB_565;
+        Bitmap tmp = BitmapFactory.decodeResource(res, R.drawable.titlescreen, rgb565);
         if (h()/w() > 4./3) { //thinner
             int w = Math.round(h() * tmp.getWidth() / tmp.getHeight());
             titlescreen = Bitmap.createScaledBitmap(tmp,w,Math.round(h()),false);
@@ -236,9 +238,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         burntporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.burntporo),
                 Math.round(w()),Math.round(w()),false);
 
-        riverbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_mediumres),
+        riverbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_mediumres, rgb565),
                 Math.round(w()),Math.round(w()*3),false);
-        riverbmp_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed),
+        riverbmp_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed, rgb565),
                 Math.round(w()),Math.round(w()*3),false);
 
         restart = BitmapFactory.decodeResource(res, R.drawable.restart);
