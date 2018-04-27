@@ -158,7 +158,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         //initialize bitmaps
         Resources res = getResources();
-        poro = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro_lowres),
+        poro = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro),
                 Math.round(w()/8),Math.round(w()/8),false);
         poro_black = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro_black),
                 poro.getWidth(),poro.getHeight(),false);
@@ -168,13 +168,13 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 poro.getWidth(),poro.getHeight(),false);
 
         int pw = Math.round(w()/5); //platform width
-        scuttler = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_lowres),
+        scuttler = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler),
                 Math.round(pw*2/1.7f),Math.round(pw*2/1.7f),false);
-        scuttler_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_candy_lowres),
+        scuttler_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_candy),
                 Math.round(pw*2/1.7f),Math.round(pw*2/1.7f),false);
-        lilypad = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus_lowres),
+        lilypad = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus),
                 pw,pw,false);
-        lilypadlotus = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres),
+        lilypadlotus = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus),
                 pw,pw,false);
         candypad_red = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_red),
                 pw,pw,false);
@@ -218,7 +218,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 ICON_WIDTH,ih,false);
         icon_arcade = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_arcade),
                 ICON_WIDTH,ih,false);
-        icon_river = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus_lowres),
+        icon_river = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus),
                 ICON_WIDTH,ih,false);
         icon_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_red),
                 ICON_WIDTH,ih,false);
@@ -241,23 +241,23 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         riverbmp_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed),
                 Math.round(w()),Math.round(w()*3),false);
 
-        restart = BitmapFactory.decodeResource(res, R.drawable.restart_lowres);
-        home = BitmapFactory.decodeResource(res, R.drawable.home_lowres);
+        restart = BitmapFactory.decodeResource(res, R.drawable.restart);
+        home = BitmapFactory.decodeResource(res, R.drawable.home);
         shop = BitmapFactory.decodeResource(res, R.drawable.shop);
         play = BitmapFactory.decodeResource(res, R.drawable.play);
         more = BitmapFactory.decodeResource(res, R.drawable.more);
         leftarrow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.leftarrow),
                 Math.round(c854(80)),Math.round(c854(80)),false);
-        maxrange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.maxrange_lowres),
+        maxrange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.maxrange),
                 Math.round(h()/2),Math.round(h()/2),false);
-        indicator = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.indicator_lowres),
+        indicator = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.indicator),
                 poro.getWidth(),poro.getHeight(),false);
         bubble = BitmapFactory.decodeResource(res, R.drawable.bubble);
         border = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.border),
                 ICON_WIDTH*5/4,ICON_WIDTH*5/4,false);
         bulletbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.bullet_thin),
                 Math.round(w()/24),Math.round(w()/3),false);
-        explosion = BitmapFactory.decodeResource(res, R.drawable.explosion_lowres);
+        explosion = BitmapFactory.decodeResource(res, R.drawable.explosion);
         lock = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lock),
                 ICON_WIDTH/3,ICON_WIDTH/3,false);
         gradient = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.gradient),
