@@ -404,6 +404,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                     } else if (menu.equals("stats")) {
                                     } else if (menu.equals("shop")) {
                                     } else if (menu.equals("game")) {
+                                        shiftSpeed = c854(0.75f + 0.02f * frameCount / FRAMES_PER_SECOND);
+
                                         if (!waitingForTap) {
                                             if (transition == 0) movePlatforms();
                                             generatePlatforms();
@@ -446,7 +448,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                                 hookAnimation = 0;
                                             }
 
-                                            shiftSpeed = c854(0.75f + 0.02f * frameCount / FRAMES_PER_SECOND);
                                             if (gamemode.equals("spin") || gamemode.equals("rr"))
                                                 shiftSpeed *= 0.75;
                                             if (transition == 0) {
