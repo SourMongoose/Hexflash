@@ -148,7 +148,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         //note: Star 4.5 is 480x854
         bmp = Bitmap.createBitmap(Resources.getSystem().getDisplayMetrics().widthPixels,
                 Resources.getSystem().getDisplayMetrics().heightPixels,
-                Bitmap.Config.ARGB_8888);
+                Bitmap.Config.RGB_565);
 
         //creates canvas
         canvas = new Canvas(bmp);
