@@ -1552,10 +1552,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 editor.apply();
             }
         }
-
-        for (PoroSnax ps : snaxlist) {
-            if (ps.visible(shift) && (gamemode.equals("spin") || gamemode.equals("rr"))) ps.addSpin();
-        }
     }
 
     private void clearSnapTraps() {
@@ -1577,10 +1573,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 snaptraps.remove(i);
                 player.snare();
             }
-        }
-
-        for (SnapTrap st : snaptraps) {
-            if (st.visible(shift) && (gamemode.equals("spin") || gamemode.equals("rr"))) st.addSpin();
         }
     }
 
