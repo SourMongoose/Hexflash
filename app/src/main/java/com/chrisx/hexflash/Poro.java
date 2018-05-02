@@ -3,7 +3,7 @@ package com.chrisx.hexflash;
 import android.graphics.Bitmap;
 import android.opengl.Matrix;
 
-class Poro {
+class Poro implements Image {
     private float
             x, y, targetX, targetY, w,
             maxRange, currRange, secToMaxRange;
@@ -150,7 +150,7 @@ class Poro {
         return burned;
     }
 
-    void draw(float[] m) {
+    public void draw(float[] m) {
         float[] mtx = m.clone();
         Matrix.translateM(mtx, 0, x, y, 0);
 

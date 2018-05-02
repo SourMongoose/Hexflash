@@ -3,7 +3,7 @@ package com.chrisx.hexflash;
 import android.graphics.Bitmap;
 import android.opengl.Matrix;
 
-abstract class Collectible {
+abstract class Collectible implements Image {
     private float dx, dy, w, width, height;
     protected Platform p;
 
@@ -43,7 +43,7 @@ abstract class Collectible {
         return getY()-shift+w/2 > 0 && getY()-shift-w/2 < height;
     }
 
-    void draw(float[] m) {
+    public void draw(float[] m) {
         float[] mtx = m.clone();
         Matrix.translateM(mtx, 0, getX(), getY(), 0);
 

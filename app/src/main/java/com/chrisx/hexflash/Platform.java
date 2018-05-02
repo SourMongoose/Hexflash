@@ -3,7 +3,7 @@ package com.chrisx.hexflash;
 import android.graphics.Bitmap;
 import android.opengl.Matrix;
 
-class Platform {
+class Platform implements Image {
     private float x, y, w;
     private float speed; //in x-direction
     private int angle;
@@ -81,7 +81,7 @@ class Platform {
         spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
     }
 
-    void draw(float[] m) {
+    public void draw(float[] m) {
         float[] mtx = m.clone();
         Matrix.translateM(mtx, 0, x, y, 0);
         Matrix.rotateM(mtx, 0, angle-90+spin, 0, 0, 1);

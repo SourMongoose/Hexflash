@@ -2,7 +2,7 @@ package com.chrisx.hexflash;
 
 import android.opengl.Matrix;
 
-class CircleButton {
+class CircleButton implements Image {
     private float x, y, r;
     private boolean pressed;
     private BitmapRect br;
@@ -49,7 +49,7 @@ class CircleButton {
         return pressed;
     }
 
-    void draw(float[] m) {
+    public void draw(float[] m) {
         float[] tmp = m.clone();
         Matrix.translateM(tmp, 0, x, y, 0);
 

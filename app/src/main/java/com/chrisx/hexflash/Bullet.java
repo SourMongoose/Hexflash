@@ -3,7 +3,7 @@ package com.chrisx.hexflash;
 import android.graphics.Bitmap;
 import android.opengl.Matrix;
 
-class Bullet {
+class Bullet implements Image {
     private float x, y, w, s, f, H;
     private double angle;
 
@@ -49,7 +49,7 @@ class Bullet {
         return y-shift+H > 0 && y-shift-H < height;
     }
 
-    void draw(float[] m) {
+    public void draw(float[] m) {
         float[] mtx = m.clone();
         Matrix.translateM(mtx, 0, x, y, 0);
         Matrix.rotateM(mtx, 0, (float)(angle * 180/Math.PI - 90), 0, 0, 1);
