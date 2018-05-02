@@ -9,7 +9,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 class OpenGLRenderer implements GLSurfaceView.Renderer {
-    private int width, height;
+    public int width, height;
 
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];

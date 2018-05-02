@@ -9,12 +9,10 @@ import android.graphics.Shader;
 
 class RoundRectButton {
     private RectF rectf;
-    private Canvas c;
     private Paint p, p2;
     private boolean pressed;
 
-    RoundRectButton(Canvas c, float x1, float y1, float x2, float y2, int color) {
-        this.c = c;
+    RoundRectButton(float x1, float y1, float x2, float y2, int color) {
         this.rectf = new RectF(x1,y1,x2,y2);
 
         int tmp = Color.rgb((255+Color.red(color))/2,(255+Color.green(color))/2,(255+Color.blue(color))/2);
@@ -46,8 +44,10 @@ class RoundRectButton {
     }
 
     void draw() {
+        /*
         float r = MainActivity.c854(15);
         if (pressed) c.drawRoundRect(rectf, r, r, p2);
         else c.drawRoundRect(rectf, r, r, p);
+        */
     }
 }

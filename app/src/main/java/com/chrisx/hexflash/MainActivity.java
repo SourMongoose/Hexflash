@@ -6,18 +6,15 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -30,11 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements RewardedVideoAdListener {
-    private OpenGLSurfaceView mGLView;
-
-    private Bitmap bmp;
-    static Canvas canvas;
-    private LinearLayout ll;
+    private static OpenGLSurfaceView mGLView;
 
     private RewardedVideoAd rva;
 
@@ -148,18 +141,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         rva = MobileAds.getRewardedVideoAdInstance(this);
         rva.setRewardedVideoAdListener(this);
         loadRewardedVideoAd();
-
-        //creates the bitmap
-        //note: Star 4.5 is 480x854
-        bmp = Bitmap.createBitmap(Resources.getSystem().getDisplayMetrics().widthPixels,
-                Resources.getSystem().getDisplayMetrics().heightPixels,
-                Bitmap.Config.RGB_565);
-
-        //creates canvas
-        canvas = new Canvas(bmp);
-
-        ll = (LinearLayout) findViewById(R.id.draw_area);
-        ll.setBackgroundDrawable(new BitmapDrawable(bmp));
 
         //initialize bitmaps
         Resources res = getResources();
@@ -297,9 +278,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         cd_i = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams_Italic.ttf");
         cd_bi = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams_BoldItalic.ttf");
 
-        //background
-        canvas.drawColor(river);
-
         //pre-defined paints
         title_bold = newPaint(Color.WHITE);
         title_bold.setTextAlign(Paint.Align.CENTER);
@@ -351,19 +329,19 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         offset = c854(125);
         MIDDLE_Y1 = c854(720);
         MIDDLE_Y2 = c854(290);
-        middle = new CircleButton(canvas,w()/2,MIDDLE_Y1,c854(70));
-        right = new CircleButton(canvas,w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
-        left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
+        middle = new CircleButton(w()/2,MIDDLE_Y1,c854(70));
+        right = new CircleButton(w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
+        left = new CircleButton(w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
         cbs = new CircleButton[]{middle, right, left};
         cbs_pressed = new boolean[cbs.length];
 
-        classic = new RoundRectButton(canvas,c480(48),c854(87),c480(432),c854(167),Color.BLACK);
-        light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
-        spin = new RoundRectButton(canvas,c480(48),c854(287),c480(432),c854(367),Color.rgb(255,140,0));
-        scuttle = new RoundRectButton(canvas,c480(48),c854(387),c480(432),c854(467),Color.rgb(54,173,31));
-        snare = new RoundRectButton(canvas,c480(48),c854(487),c480(432),c854(567),Color.rgb(80,163,215));
-        cc = new RoundRectButton(canvas,c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
-        rr = new RoundRectButton(canvas,c480(48),c854(687),c480(432),c854(767),Color.BLACK);
+        classic = new RoundRectButton(c480(48),c854(87),c480(432),c854(167),Color.BLACK);
+        light = new RoundRectButton(c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
+        spin = new RoundRectButton(c480(48),c854(287),c480(432),c854(367),Color.rgb(255,140,0));
+        scuttle = new RoundRectButton(c480(48),c854(387),c480(432),c854(467),Color.rgb(54,173,31));
+        snare = new RoundRectButton(c480(48),c854(487),c480(432),c854(567),Color.rgb(80,163,215));
+        cc = new RoundRectButton(c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
+        rr = new RoundRectButton(c480(48),c854(687),c480(432),c854(767),Color.BLACK);
         rrbs = new RoundRectButton[]{classic, light, spin, scuttle, snare, cc, rr};
         rrbs_pressed = new boolean[rrbs.length];
 
@@ -387,7 +365,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         riverskin_used = getRiverSkin();
 
         //player
-        player = new Poro(canvas);
+        player = new Poro(w(),h());
 
         final Handler handler = new Handler();
 
@@ -1109,10 +1087,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
     //shorthand for w() and h()
     static float w() {
-        return canvas.getWidth();
+        return mGLView.getMeasuredWidth();
     }
     static float h() {
-        return canvas.getHeight();
+        return mGLView.getMeasuredHeight();
     }
 
     //load video ad

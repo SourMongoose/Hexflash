@@ -12,7 +12,7 @@ class OpenGLSurfaceView extends GLSurfaceView {
         //Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(2);
 
-        mRenderer = new OpenGLRenderer(context);
+        mRenderer = new OpenGLRenderer();
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
