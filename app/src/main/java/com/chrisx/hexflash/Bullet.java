@@ -45,6 +45,7 @@ class Bullet {
     }
 
     void draw() {
+        BitmapRect br = new BitmapRect(bmp, x-w/2, y-H/2, x+w/2, y+H/2, 0.5f);
         c.save();
         c.translate(x, y);
         c.rotate((float)(angle * 180/Math.PI - 90));

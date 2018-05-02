@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements RewardedVideoAdListener {
+    private OpenGLSurfaceView mGLView;
+
     private Bitmap bmp;
     static Canvas canvas;
     private LinearLayout ll;
@@ -137,7 +139,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        // Create a GLSurfaceView instance and set it
+        // as the ContentView for this Activity.
+        mGLView = new OpenGLSurfaceView(this);
+        setContentView(mGLView);
 
         MobileAds.initialize(this, "ca-app-pub-2436690700589338~9070068520");
         rva = MobileAds.getRewardedVideoAdInstance(this);
@@ -194,7 +199,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             titlescreen = Bitmap.createScaledBitmap(tmp,Math.round(w()),h,false);
         }
         tmp.recycle();
-        
+
         porosnax = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
                 lilypad.getWidth()/3,lilypad.getWidth()/3,false);
         porosnax_count = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
@@ -203,7 +208,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 lilypad.getWidth()/3,lilypad.getWidth()/3,false);
         snarefx = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snarefx),
                 poro.getWidth()*4/3,poro.getWidth()*4/3,false);
-        
+
         int hw = Math.round(w()/6); //hook width
         hook_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_classic),
                 hw,hw*3,false);
@@ -211,7 +216,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 hw,hw*3,false);
         hook_arcade = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_arcade),
                 hw,hw*3,false);
-        
+
         ICON_WIDTH = Math.round(c854(100));
         int ih = ICON_WIDTH; //icon height
         icon_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_classic),

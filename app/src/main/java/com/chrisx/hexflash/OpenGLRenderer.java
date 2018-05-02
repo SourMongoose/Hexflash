@@ -1,4 +1,4 @@
-package com.chrisx.opengltest;
+package com.chrisx.hexflash;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,9 +14,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     private Context context;
 
     private int width, height;
-
-    private BitmapRect br;
-    private float angle = 0;
 
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
@@ -61,22 +58,17 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         //Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
+        /*
         //Set center of rotation at center of image
         Matrix.translateM(mMVPMatrix, 0, width/2, height/2, 0);
-
         //Create a rotation transformation for the triangle
         Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, 1);
-
-        //Combine the rotation matrix with the projection and camera view
-        //Note that the mMVPMatrix factor *must be first* in order
-        //for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
-
         //Undo previous translation
         Matrix.translateM(scratch, 0, -width/2, -height/2, 0);
+        */
 
-        //Draw bitmap
-        br.draw(scratch);
+
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -85,24 +77,5 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glViewport(0, 0, width, height);
         Matrix.orthoM(mProjectionMatrix, 0, 0, width, 0, height, 1000, -1000);
-
-        br = new BitmapRect(BitmapFactory.decodeResource(context.getResources(), R.drawable.kappa),
-                0, height/2+width/2, width, height/2-width/2, 0);
-    }
-
-    public static int loadShader(int type, String shaderCode){
-        //create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        //or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
-
-        //add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-
-        return shader;
-    }
-
-    public void rotate(float deg) {
-        angle += deg;
     }
 }

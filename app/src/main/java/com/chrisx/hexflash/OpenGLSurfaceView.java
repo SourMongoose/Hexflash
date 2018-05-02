@@ -1,4 +1,4 @@
-package com.chrisx.opengltest;
+package com.chrisx.hexflash;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -38,9 +38,6 @@ class OpenGLSurfaceView extends GLSurfaceView {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (touch) mRenderer.rotate(-2);
-                            else mRenderer.rotate(2);
-
                             requestRender();
                         }
                     });
