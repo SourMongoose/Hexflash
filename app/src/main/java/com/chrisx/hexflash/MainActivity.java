@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.Bundle;
 import android.util.Log;
@@ -694,23 +695,20 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         //background
                                         drawRiver();
 
-                                        canvas.save();
-                                        canvas.translate(0, -shift); //screen shift
+                                        float[] mtx = new float[16];
+                                        Matrix.translateM(mtx, 0, 0, -shift, 0);
 
-                                        drawPlatforms();
+                                        drawPlatforms(mtx);
 
-                                        drawPoroSnax();
+                                        drawPoroSnax(mtx);
 
-                                        drawSnapTraps();
+                                        drawSnapTraps(mtx);
 
-                                        player.draw();
-                                        //player.drawHitbox(); //debugging purposes
+                                        player.draw(mtx);
 
                                         if (!waitingForTap && (gamemode.equals("cc") || gamemode.equals("rr")))
                                             if (bullet != null && bullet.visible(shift))
-                                                bullet.draw();
-
-                                        canvas.restore();
+                                                bullet.draw(mtx);
 
                                         if (!waitingForTap && (gamemode.equals("light") || gamemode.equals("rr")))
                                             drawLightning();
@@ -730,17 +728,16 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         //background
                                         drawRiver();
 
-                                        canvas.save();
-                                        canvas.translate(0, -shift); //screen shift
-                                        drawPlatforms();
-                                        drawPoroSnax();
-                                        drawSnapTraps();
-                                        player.draw();
+                                        float[] mtx = new float[16];
+                                        Matrix.translateM(mtx, 0, 0, -shift, 0);
+                                        drawPlatforms(mtx);
+                                        drawPoroSnax(mtx);
+                                        drawSnapTraps(mtx);
+                                        player.draw(mtx);
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
                                                 && bullet != null && bullet.visible(shift)) {
-                                            bullet.draw();
+                                            bullet.draw(mtx);
                                         }
-                                        canvas.restore();
 
                                         int hookDuration = FRAMES_PER_SECOND * 2 / 3;
                                         float hookWidth = w() / 6;
@@ -761,21 +758,19 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         //background
                                         drawRiver();
 
-                                        canvas.save();
-                                        canvas.translate(0, -shift); //screen shift
+                                        float[] mtx = new float[16];
+                                        Matrix.translateM(mtx, 0, 0, -shift, 0);
 
-                                        drawPlatforms();
-                                        drawPoroSnax();
-                                        drawSnapTraps();
+                                        drawPlatforms(mtx);
+                                        drawPoroSnax(mtx);
+                                        drawSnapTraps(mtx);
 
-                                        player.draw();
+                                        player.draw(mtx);
 
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
                                                 && bullet != null && bullet.visible(shift)) {
-                                            bullet.draw();
+                                            bullet.draw(mtx);
                                         }
-
-                                        canvas.restore();
 
                                         drawScores();
                                     } else if (menu.equals("burned")) {
@@ -784,14 +779,14 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         //background
                                         drawRiver();
 
-                                        canvas.save();
-                                        canvas.translate(0, -shift); //screen shift
+                                        float[] mtx = new float[16];
+                                        Matrix.translateM(mtx, 0, 0, -shift, 0);
 
-                                        drawPlatforms();
-                                        drawPoroSnax();
-                                        drawSnapTraps();
+                                        drawPlatforms(mtx);
+                                        drawPoroSnax(mtx);
+                                        drawSnapTraps(mtx);
 
-                                        player.draw();
+                                        player.draw(mtx);
 
                                         int explodeDuration = FRAMES_PER_SECOND / 3;
                                         if (burnAnimation < explodeDuration) {
@@ -801,8 +796,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                                     player.getX()+player.getW()*f,
                                                     player.getY()+player.getW()*f));
                                         }
-
-                                        canvas.restore();
 
                                         drawScores();
                                     } else if (menu.equals("gameover")) {
@@ -837,7 +830,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                 }
 
                                 //update canvas
-                                if (update) ll.invalidate();
+                                if (update) mGLView.requestRender();
                             }
                         }
                     });
@@ -1191,11 +1184,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }
 
-    //draw a bitmap w/o cropping
-    private void drawBmp(Bitmap bmp, RectF rectF) {
-        canvas.drawBitmap(bmp, null, rectF, null);
-    }
-
     private void goToMenu(String s) {
         if (firstTime()) {
             editor.putBoolean("first_time", false);
@@ -1404,7 +1392,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     //delete all platforms and initialize one lilypad
     private void resetPlatforms() {
         platforms.clear();
-        platforms.add(new Platform(canvas, w() / 2, h() / 2));
+        platforms.add(new Platform(w(), h(), w()/2, h()/2));
         player.setPlatform(platforms.get(0));
     }
     private void generatePlatforms() {
@@ -1439,17 +1427,17 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/1.5);
 
                 if (rows > 0 && Math.random() < adjProb) {
-                    platforms.add(new Platform(canvas, newX, newY, (float) (1 + shiftSpeed + 0.5 * Math.random())));
+                    platforms.add(new Platform(w(), h(), newX, newY, (float) (1 + shiftSpeed + 0.5 * Math.random())));
                     num_scuttle++;
                 } else {
-                    platforms.add(new Platform(canvas, newX, newY));
+                    platforms.add(new Platform(w(), h(), newX, newY));
                 }
                 //add a porosnax?
                 double prob2 = 0.2;
                 ev_porosnax += prob2;
                 double adjProb2 = prob2 * (1 + (ev_porosnax-num_porosnax)/2);
                 if (Math.random() < adjProb2) {
-                    snaxlist.add(new PoroSnax(canvas, platforms.get(platforms.size() - 1)));
+                    snaxlist.add(new PoroSnax(w(), h(), platforms.get(platforms.size() - 1)));
                     num_porosnax++;
                 }
                 //add a snap trap?
@@ -1458,7 +1446,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 double adjProb3 = (gamemode.equals("snare") || gamemode.equals("rr"))
                         ? 1 : prob3 * (1 + (ev_snaptrap-num_snaptrap)/2);
                 if (Math.random() < adjProb3) {
-                    snaptraps.add(new SnapTrap(canvas, platforms.get(platforms.size() - 1)));
+                    snaptraps.add(new SnapTrap(w(), h(), platforms.get(platforms.size() - 1)));
                     num_snaptrap++;
                 }
             }
@@ -1481,9 +1469,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             }
         }
     }
-    private void drawPlatforms() {
+    private void drawPlatforms(float[] m) {
         for (Platform p : platforms)
-            if (p.visible(shift)) p.draw();
+            if (p.visible(shift)) p.draw(m);
     }
     private void movePlatforms() {
         for (Platform p : platforms)
@@ -1509,9 +1497,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private void clearPoroSnax() {
         snaxlist.clear();
     }
-    private void drawPoroSnax() {
+    private void drawPoroSnax(float[] m) {
         for (PoroSnax p : snaxlist)
-            if (p.visible(shift)) p.draw();
+            if (p.visible(shift)) p.draw(m);
     }
     private void updatePoroSnax() {
         //remove porosnax that have gone off the screen
@@ -1532,9 +1520,9 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private void clearSnapTraps() {
         snaptraps.clear();
     }
-    private void drawSnapTraps() {
+    private void drawSnapTraps(float[] m) {
         for (SnapTrap s : snaptraps)
-            if (s.visible(shift)) s.draw();
+            if (s.visible(shift)) s.draw(m);
     }
     private void updateSnapTraps() {
         //remove traps that have gone off the screen
@@ -1555,7 +1543,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         if (bullet != null) bullet.update();
 
         if (bulletCD <= 0) {
-            bullet = new Bullet(canvas, player, shift);
+            bullet = new Bullet(w(), h(), player, shift);
             bulletCD = 2 + Math.random();
         } else {
             bulletCD -= 1. / FRAMES_PER_SECOND;
