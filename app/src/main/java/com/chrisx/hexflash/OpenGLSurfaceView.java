@@ -2,17 +2,9 @@ package com.chrisx.hexflash;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.os.Handler;
-import android.view.MotionEvent;
 
 class OpenGLSurfaceView extends GLSurfaceView {
     private final OpenGLRenderer mRenderer;
-
-    //frame data
-    static int FRAMES_PER_SECOND = 60;
-    private long nanosecondsPerFrame;
-
-    private boolean touch = false;
 
     OpenGLSurfaceView(Context context){
         super(context);
@@ -22,49 +14,6 @@ class OpenGLSurfaceView extends GLSurfaceView {
 
         mRenderer = new OpenGLRenderer(context);
         setRenderer(mRenderer);
-        //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        nanosecondsPerFrame = (int)1e9 / FRAMES_PER_SECOND;
-
-        final Handler handler = new Handler();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //draw loop
-                while (true) {
-                    final long startTime = System.nanoTime();
-
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            requestRender();
-                        }
-                    });
-
-                    //wait until frame is done
-                    while (System.nanoTime() - startTime < nanosecondsPerFrame);
-                }
-            }
-        }).start();
-    }
-
-    private float prevX, prevY;
-
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        float x = e.getX();
-        float y = e.getY();
-        int action = e.getAction();
-
-        if (action == MotionEvent.ACTION_DOWN) {
-            touch = true;
-        } else if (action == MotionEvent.ACTION_UP) {
-            touch = false;
-        }
-
-        prevX = x;
-        prevY = y;
-        return true;
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 }

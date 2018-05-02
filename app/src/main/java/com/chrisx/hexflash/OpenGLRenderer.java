@@ -1,8 +1,6 @@
 package com.chrisx.hexflash;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -11,18 +9,12 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 class OpenGLRenderer implements GLSurfaceView.Renderer {
-    private Context context;
-
     private int width, height;
 
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private float[] mRotationMatrix = new float[16];
-
-    OpenGLRenderer(Context context) {
-        this.context = context;
-    }
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         //Set the background frame color
@@ -67,7 +59,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         //Undo previous translation
         Matrix.translateM(scratch, 0, -width/2, -height/2, 0);
         */
-
 
     }
 
