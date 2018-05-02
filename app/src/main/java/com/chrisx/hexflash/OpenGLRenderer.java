@@ -60,6 +60,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         Matrix.translateM(scratch, 0, -width/2, -height/2, 0);
         */
 
+        for (Image i : MainActivity.updateList_Image) {
+            float[] mtx = mMVPMatrix.clone();
+            Matrix.translateM(mtx, 0, 0, -MainActivity.shift, 0);
+            i.draw(mtx);
+        }
+        for (BitmapRect br : MainActivity.updateList_BitmapRect) {
+            br.draw(mMVPMatrix);
+        }
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

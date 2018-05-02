@@ -41,7 +41,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     static Bitmap[] sinking, medals;
     private Bitmap gameoverBmp;
 
-    static List<Image> updateList = new ArrayList<>();
+    static List<Image> updateList_Image = new ArrayList<>();
+    static List<BitmapRect> updateList_BitmapRect = new ArrayList<>();
 
     private String blitzskins[] = {"classic", "iblitz", "arcade"};
     private int blitzskins_cost[] = {0, 50, 50};
@@ -127,8 +128,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private Bullet bullet;
     private double bulletCD; //cooldown
 
-    private float shift, //pixels translated down
-        shiftSpeed = 0.75f;
+    static float shift; //pixels translated down
+    private float shiftSpeed = 0.75f;
     private int hookAnimation, sinkAnimation, burnAnimation;
 
     @Override
@@ -524,7 +525,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                         @Override
                         public void run() {
                             if (!paused) {
-                                updateList.clear();
+                                updateList_Image.clear();
+                                updateList_BitmapRect.clear();
                                 boolean update = false;
 
                                 if (prevTransition != transition) {
@@ -701,11 +703,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawPoroSnax();
                                         drawSnapTraps();
 
-                                        updateList.add(player);
+                                        updateList_Image.add(player);
 
                                         if (!waitingForTap && (gamemode.equals("cc") || gamemode.equals("rr")))
                                             if (bullet != null && bullet.visible(shift))
-                                                updateList.add(bullet);
+                                                updateList_Image.add(bullet);
 
                                         if (!waitingForTap && (gamemode.equals("light") || gamemode.equals("rr")))
                                             drawLightning();
@@ -728,10 +730,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawPlatforms();
                                         drawPoroSnax();
                                         drawSnapTraps();
-                                        updateList.add(player);
+                                        updateList_Image.add(player);
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
                                                 && bullet != null && bullet.visible(shift)) {
-                                            updateList.add(bullet);
+                                            updateList_Image.add(bullet);
                                         }
 
                                         int hookDuration = FRAMES_PER_SECOND * 2 / 3;
@@ -757,11 +759,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawPoroSnax();
                                         drawSnapTraps();
 
-                                        updateList.add(player);
+                                        updateList_Image.add(player);
 
                                         if ((gamemode.equals("cc") || gamemode.equals("rr"))
                                                 && bullet != null && bullet.visible(shift)) {
-                                            updateList.add(bullet);
+                                            updateList_Image.add(bullet);
                                         }
 
                                         drawScores();
@@ -775,7 +777,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                         drawPoroSnax();
                                         drawSnapTraps();
 
-                                        updateList.add(player);
+                                        updateList_Image.add(player);
 
                                         int explodeDuration = FRAMES_PER_SECOND / 3;
                                         if (burnAnimation < explodeDuration) {
@@ -1460,7 +1462,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
     private void drawPlatforms() {
         for (Platform p : platforms)
-            if (p.visible(shift)) updateList.add(p);
+            if (p.visible(shift)) updateList_Image.add(p);
     }
     private void movePlatforms() {
         for (Platform p : platforms)
@@ -1488,7 +1490,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
     private void drawPoroSnax() {
         for (PoroSnax p : snaxlist)
-            if (p.visible(shift)) updateList.add(p);
+            if (p.visible(shift)) updateList_Image.add(p);
     }
     private void updatePoroSnax() {
         //remove porosnax that have gone off the screen
@@ -1511,7 +1513,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     }
     private void drawSnapTraps() {
         for (SnapTrap s : snaptraps)
-            if (s.visible(shift)) updateList.add(s);
+            if (s.visible(shift)) updateList_Image.add(s);
     }
     private void updateSnapTraps() {
         //remove traps that have gone off the screen
