@@ -150,7 +150,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         int targetH = 854,
                 wpx = Resources.getSystem().getDisplayMetrics().widthPixels,
                 hpx = Resources.getSystem().getDisplayMetrics().heightPixels;
-        scaleFactor = (float)targetH/hpx;
+        scaleFactor = Math.min(1,(float)targetH/hpx);
         bmp = Bitmap.createBitmap(Math.round(wpx*scaleFactor),targetH,Bitmap.Config.RGB_565);
 
         //creates canvas
@@ -905,7 +905,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     public boolean onTouchEvent(MotionEvent event) {
         float X = event.getX(event.getActionIndex())*scaleFactor;
         float Y = event.getY(event.getActionIndex())*scaleFactor;
-        Log.i("Touch","("+X+", "+Y+")");
+        //Log.i("Touch","("+X+", "+Y+")");
 
         int action = event.getActionMasked();
 
