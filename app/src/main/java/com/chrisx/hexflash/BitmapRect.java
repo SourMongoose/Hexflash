@@ -79,7 +79,7 @@ public class BitmapRect {
         //Load the bitmap into the bound texture.
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0);
 
-        bmp.recycle();
+        //bmp.recycle();
     }
 
     void draw(float[] m) {

@@ -1,9 +1,7 @@
 package com.chrisx.hexflash;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.opengl.Matrix;
 
 class Poro {
     private float
@@ -22,35 +20,36 @@ class Poro {
     private float offsetX, offsetY; //distance away from center of platform
     private float offsetAngle;
 
-    private Canvas c;
-    private Bitmap bmp, snarefx, m_range, indicator; //max range
-    private Paint hitbox;
+    private float width, height;
+    private Bitmap bmp;
 
-    Poro(Canvas c) {
-        this.c = c;
+    private BitmapRect br, br_flash, br_flash2, br_snare, br_mrange, br_indicator;
 
-        maxRange = c.getHeight() / 4;
+    Poro(float width, float height) {
+        this.width = width;
+        this.height = height;
 
-        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
-        hitbox.setStyle(Paint.Style.STROKE);
-        hitbox.setColor(Color.WHITE);
+        maxRange = height / 4;
 
-        w = c.getWidth() / 8;
+        w = width / 8;
         reset();
+
+        br_flash = new BitmapRect(MainActivity.flash, -w/2, w/2, w/2, -w/2, 0.5f);
+        br_flash2 = new BitmapRect(MainActivity.flash2, -w/2, w/2, w/2, -w/2, 0.5f);
+        br_snare = new BitmapRect(MainActivity.snarefx, -w/1.5f, w/1.5f, w/1.5f, -w/1.5f, 0.5f);
+        br_mrange = new BitmapRect(MainActivity.maxrange, -maxRange, maxRange, maxRange, -maxRange, 0.5f);
+        br_indicator = new BitmapRect(MainActivity.indicator, -w/2, w/2, w/2, -w/2, 0.5f);
     }
 
     void reset() {
-        x = c.getWidth() / 2;
-        y = c.getHeight() / 2;
+        x = width / 2;
+        y = height / 2;
         angle = Math.PI / 2;
         spin = 0;
         channel = burned = false;
         flashAnimation = 0;
 
-        bmp = MainActivity.poro;
-        snarefx = MainActivity.snarefx;
-        m_range = MainActivity.maxrange;
-        indicator = MainActivity.indicator;
+        setBmp(MainActivity.poro);
     }
 
     float getW() {
@@ -77,6 +76,7 @@ class Poro {
 
     void setBmp(Bitmap bmp) {
         this.bmp = bmp;
+        br = new BitmapRect(bmp, -w/2, w/2, w/2, -w/2, 0.4f);
     }
 
     void setPlatform(Platform p) {
@@ -143,61 +143,54 @@ class Poro {
 
     void burn() {
         burned = true;
-        bmp = MainActivity.poro_black;
+        setBmp(MainActivity.poro_black);
         interruptChannel();
     }
     boolean isBurned() {
         return burned;
     }
 
-    void draw() {
-        c.save();
-        c.translate(x, y);
+    void draw(float[] m) {
+        float[] mtx = m.clone();
+        Matrix.translateM(mtx, 0, x, y, 0);
 
         if (channel) {
-            drawRange();
-            drawIndicator();
-        }
-        c.rotate((float)(angle * 180/Math.PI - 90) + spin); //convert to degrees and shift by 90deg
-        c.drawBitmap(bmp,-w/2,-w/2,null);
-        if (snared > 0) {
-            c.rotate((float)(-45 + 90 * (snared / MAX_SNARE)));
-            c.drawBitmap(snarefx,-w/1.5f,-w/1.5f,null);
+            br_mrange.draw(mtx);
+            drawIndicator(mtx);
         }
 
-        c.restore();
+        Matrix.rotateM(mtx, 0, (float)(angle * 180/Math.PI - 90) + spin, 0, 0, 1);
+
+        br.draw(mtx);
+        if (snared > 0) {
+            Matrix.rotateM(mtx, 0, (float)(-45 + 90 * (snared / MAX_SNARE)), 0, 0, 1);
+            br_snare.draw(mtx);
+        }
 
         if (flashAnimation > 0) {
-            c.save();
-            c.translate(prevX, prevY);
-            c.rotate((float) (angle * 180 / Math.PI - 90));
+            mtx = m.clone();
+            Matrix.translateM(mtx, 0, prevX, prevY, 0);
+            Matrix.rotateM(mtx, 0, (float) (angle * 180 / Math.PI - 90), 0, 0, 1);
+            /*
             Paint opacity = new Paint();
             opacity.setAlpha((int) (255 * flashAnimation / MAX_FLASH));
-            c.drawBitmap(MainActivity.flash,-w/2,-w/2,opacity);
-            c.restore();
+            */
+            br_flash.draw(mtx);
 
-            c.save();
-            c.translate(x, y);
-            c.drawBitmap(MainActivity.flash2,-w/2,-w/2,opacity);
-            c.restore();
+            mtx = m.clone();
+            Matrix.translateM(mtx, 0, x, y, 0);
+            br_flash2.draw(mtx);
         }
     }
 
-    void drawHitbox() {
-        c.drawCircle(x, y, w/2, hitbox);
-    }
+    void drawIndicator(float[] m) {
+        float[] mtx = m.clone();
 
-    void drawRange() {
-        float mr = maxRange;
-        c.drawBitmap(m_range,-mr,-mr,null);
-    }
-
-    void drawIndicator() {
         double tempAngle = Math.atan2(targetY - y, targetX - x) / Math.PI * 180;
         float cr = currRange;
 
-        c.rotate((float)tempAngle+spin);
-        c.drawBitmap(indicator,cr-w/2,-w/2,null);
-        c.rotate(-(float)tempAngle-spin);
+        Matrix.rotateM(mtx, 0, (float)tempAngle+spin, 0, 0, 1);
+        Matrix.translateM(mtx, 0, cr, 0, 0);
+        br_indicator.draw(mtx);
     }
 }

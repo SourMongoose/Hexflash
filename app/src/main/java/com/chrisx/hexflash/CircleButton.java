@@ -1,30 +1,18 @@
 package com.chrisx.hexflash;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
+import android.opengl.Matrix;
 
 class CircleButton {
     private float x, y, r;
-    private Canvas c;
-    private Paint p, p2;
     private boolean pressed;
+    private BitmapRect br;
 
-    CircleButton(Canvas c, float x, float y, float r) {
-        this.c = c;
+    CircleButton(float x, float y, float r) {
         this.x = x;
         this.y = y;
         this.r = r;
 
-        p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setStyle(Paint.Style.FILL);
-        p.setColor(Color.rgb(102,165,193));
-
-        p2 = new Paint(p);
-        p2.setColor(Color.rgb(62,125,153));
+        br = new BitmapRect(MainActivity.bubble, -r, r, r, -r, 0.5f);
     }
 
     float getX() {
@@ -61,9 +49,10 @@ class CircleButton {
         return pressed;
     }
 
-    void draw() {
-        Bitmap bmp = MainActivity.bubble;
-        c.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()),
-                new RectF(x-getR(),y-getR(),x+getR(),y+getR()), null);
+    void draw(float[] m) {
+        float[] tmp = m.clone();
+        Matrix.translateM(tmp, 0, x, y, 0);
+
+        br.draw(tmp);
     }
 }

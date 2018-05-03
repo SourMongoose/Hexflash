@@ -2,8 +2,6 @@ package com.chrisx.hexflash;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.os.Handler;
-import android.view.MotionEvent;
 
 class OpenGLSurfaceView extends GLSurfaceView {
     private final OpenGLRenderer r;

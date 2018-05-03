@@ -1,17 +1,18 @@
 package com.chrisx.hexflash;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.opengl.Matrix;
 
 abstract class Collectible {
-    float dx, dy, w;
+    private float dx, dy, w, width, height;
     protected Platform p;
 
-    Canvas c;
-    Bitmap bmp;
+    private Bitmap bmp;
+    private BitmapRect br;
 
-    Collectible(Canvas c, Platform p) {
-        this.c = c;
+    Collectible(float width, float height, Platform p) {
+        this.width = width;
+        this.height = height;
         this.p = p;
 
         w = p.getW()/3;
@@ -21,6 +22,11 @@ abstract class Collectible {
 
         dx = (float)(r*Math.cos(theta));
         dy = (float)(r*Math.sin(theta));
+    }
+
+    void setBmp(Bitmap bmp) {
+        this.bmp = bmp;
+        br = new BitmapRect(bmp, -w/2, w/2, w/2, -w/2, 0.3f);
     }
 
     float getX() {
@@ -34,15 +40,13 @@ abstract class Collectible {
     }
 
     boolean visible(float shift) {
-        return getY()-shift+w/2 > 0 && getY()-shift-w/2 < c.getHeight();
+        return getY()-shift+w/2 > 0 && getY()-shift-w/2 < height;
     }
 
-    void draw() {
-        c.save();
-        c.translate(getX(), getY());
+    void draw(float[] m) {
+        float[] mtx = m.clone();
+        Matrix.translateM(mtx, 0, getX(), getY(), 0);
 
-        c.drawBitmap(bmp,-w/2,-w/2,null);
-
-        c.restore();
+        br.draw(mtx);
     }
 }

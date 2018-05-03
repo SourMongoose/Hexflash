@@ -1,11 +1,7 @@
 package com.chrisx.hexflash;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
+import android.opengl.Matrix;
 
 class Platform {
     private float x, y, w;
@@ -13,47 +9,43 @@ class Platform {
     private int angle;
     private int spin;
 
-    private Canvas c;
-    private Bitmap bmp;
-
-    private Paint hitbox;
+    private float width, height;
+    private BitmapRect br;
 
     //constructor for lilypad
-    Platform(Canvas c, float x, float y) {
-        this.c = c;
+    Platform(float width, float height, float x, float y) {
+        this.width = width;
+        this.height = height;
 
         this.x = x;
         this.y = y;
-        w = c.getWidth() / 5;
+        w = width / 5;
         speed = 0;
         spin = 0;
 
         angle = (int)(Math.random()*360);
         if (MainActivity.getRiverSkin().equals("candy"))
-            bmp = Math.random() < 0.333 ? MainActivity.candypad_red :
-                    Math.random() < 0.5 ? MainActivity.candypad_orange : MainActivity.candypad_yellow;
+            setBmp(Math.random() < 0.333 ? MainActivity.candypad_red :
+                    Math.random() < 0.5 ? MainActivity.candypad_orange : MainActivity.candypad_yellow);
         else
-            bmp = Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus;
-
-        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
-        hitbox.setStyle(Paint.Style.STROKE);
-        hitbox.setColor(Color.WHITE);
+            setBmp(Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus);
     }
     //constructor for scuttle
-    Platform(Canvas c, float x, float y, float speed) {
-        this.c = c;
+    Platform(float width, float height, float x, float y, float speed) {
+        this.width = width;
+        this.height = height;
 
         this.x = x;
         this.y = y;
-        this.w = c.getWidth() / 5;
+        this.w = width / 5;
         this.speed = speed;
 
         angle = Math.random() < 0.5 ? 90 : 270;
-        bmp = MainActivity.getRiverSkin().equals("candy") ? MainActivity.scuttler_candy : MainActivity.scuttler;
+        setBmp(MainActivity.getRiverSkin().equals("candy") ? MainActivity.scuttler_candy : MainActivity.scuttler);
+    }
 
-        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
-        hitbox.setStyle(Paint.Style.STROKE);
-        hitbox.setColor(Color.WHITE);
+    void setBmp(Bitmap bmp) {
+        br = new BitmapRect(bmp, -w/2, w/2, w/2, -w/2, 0);
     }
 
     float getX() {
@@ -73,12 +65,12 @@ class Platform {
     }
 
     boolean visible(float shift) {
-        return y-shift+w/2 > 0 && y-shift-w/2 < c.getHeight();
+        return y-shift+w/2 > 0 && y-shift-w/2 < height;
     }
 
     void update() {
         if (speed > 0) {
-            if (x + w / 2 > c.getWidth() || x - w / 2 < 0)
+            if (x + w / 2 > width || x - w / 2 < 0)
                 angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND * 2) % 360;
 
             if (angle == 90) x += speed;
@@ -89,18 +81,11 @@ class Platform {
         spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
     }
 
-    void draw() {
-        c.save();
-        c.translate(x, y);
+    void draw(float[] m) {
+        float[] mtx = m.clone();
+        Matrix.translateM(mtx, 0, x, y, 0);
+        Matrix.rotateM(mtx, 0, angle-90+spin, 0, 0, 1);
 
-        c.rotate(angle - 90 + spin); //shift by 90deg
-        if (speed == 0) c.drawBitmap(bmp,-w/2,-w/2,null);
-        else c.drawBitmap(bmp,-w/1.7f,-w/1.7f,null);
-
-        c.restore();
-    }
-
-    void drawHitbox() {
-        c.drawCircle(x, y, w/2, hitbox);
+        br.draw(mtx);
     }
 }
