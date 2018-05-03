@@ -33,6 +33,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private Bitmap bmp;
     static Canvas canvas;
     private LinearLayout ll;
+    private float scaleFactor;
 
     private RewardedVideoAd rva;
 
@@ -146,9 +147,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         //creates the bitmap
         //note: Star 4.5 is 480x854
-        bmp = Bitmap.createBitmap(Resources.getSystem().getDisplayMetrics().widthPixels,
-                Resources.getSystem().getDisplayMetrics().heightPixels,
-                Bitmap.Config.RGB_565);
+        int targetH = 854,
+                wpx = Resources.getSystem().getDisplayMetrics().widthPixels,
+                hpx = Resources.getSystem().getDisplayMetrics().heightPixels;
+        scaleFactor = (float)targetH/hpx;
+        bmp = Bitmap.createBitmap(Math.round(wpx*scaleFactor),targetH,Bitmap.Config.RGB_565);
 
         //creates canvas
         canvas = new Canvas(bmp);
@@ -900,8 +903,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     @Override
     //handles touch events
     public boolean onTouchEvent(MotionEvent event) {
-        float X = event.getX(event.getActionIndex());
-        float Y = event.getY(event.getActionIndex());
+        float X = event.getX(event.getActionIndex())*scaleFactor;
+        float Y = event.getY(event.getActionIndex())*scaleFactor;
+        Log.i("Touch","("+X+", "+Y+")");
+
         int action = event.getActionMasked();
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -1025,7 +1030,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             if (action == MotionEvent.ACTION_DOWN && !channeling) {
                 //start channeling with a speed dependent on screen-shift speed
                 waitingForTap = false;
-                float sec = (float) Math.min(2.5, player.getMaxRange() / Math.max(1.25,shiftSpeed) / FRAMES_PER_SECOND - 0.5);
+                float sec = (float) Math.min(2.5, player.getMaxRange() / Math.max(c854(1.25f),shiftSpeed) / FRAMES_PER_SECOND - 0.5);
                 if (gamemode.equals("scuttle")) sec *= 0.8;
                 else if (gamemode.equals("cc") || gamemode.equals("rr")) sec *= 0.5;
                 player.startChannel(sec);
