@@ -15,6 +15,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+@SuppressWarnings("all")
 class OpenGLRenderer implements GLSurfaceView.Renderer {
     private Context context;
 
@@ -388,13 +390,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
         //player
         player = new Poro(w(),h());
-    }
-
-    public void onDrawFrame(GL10 unused) {
-        float[] scratch = new float[16];
-
-        //Redraw background color
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         //Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 1, 0, 0, -1, 0, 1, 0);
@@ -402,8 +397,136 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         //Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
+        drawTitleMenu(mMVPMatrix);
+    }
+
+    public void onDrawFrame(GL10 unused) {
+        //Redraw background color
+        GLES20.glClearColor(Color.red(river)/255f,Color.green(river)/255f,Color.blue(river)/255f,1);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        Log.i("Menu",menu);
+
+        if (transition < TRANSITION_MAX / 2) {
+            if (menu.equals("start")) {
+            } else if (menu.equals("more")) {
+            } else if (menu.equals("stats")) {
+            } else if (menu.equals("shop")) {
+            } else if (menu.equals("game")) {
+                shiftSpeed = c854(0.75f + 0.02f * frameCount / FRAMES_PER_SECOND);
+
+                if (!waitingForTap) {
+                    if (transition == 0) movePlatforms();
+                    generatePlatforms();
+
+                    updatePoroSnax();
+
+                    updateSnapTraps();
+
+                    if (gamemode.equals("cc") || gamemode.equals("rr"))
+                        updateBullet();
+
+                    //mid-channel
+                    if (player.isChanneling()) {
+                        channeling = true;
+                        player.update(lastX, lastY + shift);
+                    }
+
+                    //just hexflashed
+                    if (channeling && !player.isChanneling()) {
+                        //if the player doesn't land on a platform
+                        if (!checkForPlatform(player)) {
+                            goToMenu("sink");
+                            gameoverBmp = (gamemode.equals("spin") || gamemode.equals("rr")) ? sadporo_spin : sadporo;
+                            sinkAnimation = 0;
+                        }
+                        channeling = false;
+                    } else {
+                        player.update(); //moving platform
+                        if (gamemode.equals("spin") || gamemode.equals("rr"))
+                            player.addSpin();
+                    }
+
+                    //reaches top of screen
+                    if (menu.equals("game") && player.getY() - shift < h() / 10) {
+                        player.interruptChannel();
+                        playerY = player.getY();
+
+                        goToMenu("hook");
+                        gameoverBmp = getHookGameoverBmp();
+                        hookAnimation = 0;
+                    }
+
+                    if (gamemode.equals("spin") || gamemode.equals("rr"))
+                        shiftSpeed *= 0.75;
+                    if (transition == 0) {
+                        if (gamemode.equals("light") || gamemode.equals("rr"))
+                            shift += shiftSpeed *= 0.75;
+                        else
+                            shift += shiftSpeed;
+                    }
+                }
+            } else if (menu.equals("hook")) {
+                player.updateAnimations();
+                if ((gamemode.equals("cc") || gamemode.equals("rr"))
+                        && bullet != null && bullet.visible(shift)) {
+                    bullet.update();
+                }
+
+                int hookDuration = FRAMES_PER_SECOND * 2 / 3;
+                if (hookAnimation < hookDuration / 2) {
+                } else {
+                    //hook exits screen w/ poro
+                    float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
+                    player.setY(hookY - player.getW() + shift);
+                }
+
+                if (hookAnimation > hookDuration + FRAMES_PER_SECOND / 3)
+                    goToMenu("gameover");
+
+                hookAnimation++;
+            } else if (menu.equals("sink")) {
+                player.updateAnimations();
+
+                //fade effect over poro
+                int sinkDuration = FRAMES_PER_SECOND;
+                player.setBmp(sinking[Math.min(sinking.length-1,
+                        sinkAnimation/(sinkDuration/sinking.length))]);
+
+                if ((gamemode.equals("cc") || gamemode.equals("rr"))
+                        && bullet != null && bullet.visible(shift)) {
+                    bullet.update();
+                }
+
+                if (sinkAnimation > sinkDuration + FRAMES_PER_SECOND / 3)
+                    goToMenu("gameover");
+
+                sinkAnimation++;
+            } else if (menu.equals("burned")) {
+                player.updateAnimations();
+
+                int burnDuration = FRAMES_PER_SECOND / 2;
+                if (burnAnimation > burnDuration + FRAMES_PER_SECOND / 3) {
+                    goToMenu("gameover");
+                    gameoverBmp = burntporo;
+                }
+
+                burnAnimation++;
+            } else if (menu.equals("gameover")) {
+                if (transition == 0) goToMenu("limbo");
+            } else if (menu.equals("limbo")) {
+            }
+        }
+
+        //fading transition effect
+        if (transition > 0) {
+            transition--;
+        }
+
+        if (!waitingForTap) frameCount++;
         
-        boolean update = false;
+        
+        boolean update = true;
 
         if (prevTransition != transition) {
             update = true;
@@ -432,8 +555,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 }
 
                 if (update) {
-                    //canvas.drawColor(river);
-
                     title_bold.setTextSize(c854(60));
                     //canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
@@ -452,8 +573,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 }
             } else if (menu.equals("stats")) {
                 if (update) {
-                    //canvas.drawColor(river);
-
                     title_bold.setTextSize(c854(50));
                     //canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
 
@@ -512,8 +631,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 }
 
                 if (update) {
-                    //canvas.drawColor(river);
-
                     title_bold.setTextSize(c854(60));
                     //canvas.drawText("SHOP", w()/2, c854(80), title_bold);
 
@@ -715,8 +832,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             } else {
                 alpha = 255 - 255*(t-transition)/t;
             }
-            //canvas.drawColor(Color.argb(alpha,
-            //        Color.red(river), Color.green(river), Color.blue(river)));
+            GLES20.glClearColor(Color.red(river)/255f,Color.green(river)/255f,Color.blue(river)/255f,alpha/255f);
         }
     }
 
@@ -907,7 +1023,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
         //mini tutorial
         if (firstTime()) {
-            //canvas.drawARGB(100,0,0,0);
+            GLES20.glClearColor(0,0,0,100f/255);
 
             //canvas.drawLine(left.getX(),left.getY(),left.getX(),h()*2/3,white);
             //canvas.drawText("SHOP",left.getX(),h()*2/3-c854(10),tutorialText);
@@ -961,8 +1077,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         drawBmp(home, tmp);
     }
     public void drawGameoverScreen(float[] m) {
-        //canvas.drawColor(river);
-
         float tmp = Math.max(h()-w(), middle.getY()+middle.getR()+c854(5));
         //canvas.drawBitmap(gameoverBmp,0,tmp,null);
 
@@ -1009,7 +1123,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         int dark = Color.argb(alpha,0,0,0);
         //lightning
         int light = Color.argb(240-alpha,255,255,255);
-        //canvas.drawColor(blend(dark, light));
+        int newColor = blend(dark, light);
+        GLES20.glClearColor(Color.red(newColor)/255f,Color.green(newColor)/255f,
+                Color.blue(newColor)/255f,Color.alpha(newColor)/255f);
 
         if (wait <= 0) {
             lightning = (.8+.2*Math.random())*MAX_LIGHTNING;
