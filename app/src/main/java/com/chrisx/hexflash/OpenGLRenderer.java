@@ -2,6 +2,8 @@ package com.chrisx.hexflash;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -12,6 +14,7 @@ import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +22,8 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-@SuppressWarnings("all")
 class OpenGLRenderer implements GLSurfaceView.Renderer {
-    public Context context;
+    private Context context;
 
     static int width, height;
 
@@ -159,6 +161,233 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glViewport(0, 0, width, height);
         Matrix.orthoM(mProjectionMatrix, 0, 0, width, 0, height, 1000, -1000);
+
+        //initialize bitmaps
+        Resources res = context.getResources();
+        poro = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro),
+                Math.round(w()/8),Math.round(w()/8),false);
+        poro_black = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro_black),
+                poro.getWidth(),poro.getHeight(),false);
+        flash = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.flash),
+                poro.getWidth(),poro.getHeight(),false);
+        flash2 = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.flash2),
+                poro.getWidth(),poro.getHeight(),false);
+
+        int pw = Math.round(w()/5); //platform width
+        scuttler = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler),
+                Math.round(pw*2/1.7f),Math.round(pw*2/1.7f),false);
+        scuttler_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.scuttler_candy),
+                Math.round(pw*2/1.7f),Math.round(pw*2/1.7f),false);
+        lilypad = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_nolotus),
+                pw,pw,false);
+        lilypadlotus = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus),
+                pw,pw,false);
+        candypad_red = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_red),
+                pw,pw,false);
+        candypad_orange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_orange),
+                pw,pw,false);
+        candypad_yellow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_yellow),
+                pw,pw,false);
+
+        BitmapFactory.Options rgb565 = new BitmapFactory.Options();
+        rgb565.inPreferredConfig = Bitmap.Config.RGB_565;
+        Bitmap tmp = BitmapFactory.decodeResource(res, R.drawable.titlescreen, rgb565);
+        if (h()/w() > 4./3) { //thinner
+            int w = Math.round(h() * tmp.getWidth() / tmp.getHeight());
+            titlescreen = Bitmap.createScaledBitmap(tmp,w,Math.round(h()),false);
+        } else { //thicker
+            int h = Math.round(w() * tmp.getHeight() / tmp.getWidth());
+            titlescreen = Bitmap.createScaledBitmap(tmp,Math.round(w()),h,false);
+        }
+        tmp.recycle();
+
+        porosnax = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
+                lilypad.getWidth()/3,lilypad.getWidth()/3,false);
+        porosnax_count = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
+                Math.round(c854(50)),Math.round(c854(50)),false);
+        snaptrap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snaptrap),
+                lilypad.getWidth()/3,lilypad.getWidth()/3,false);
+        snarefx = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.snarefx),
+                poro.getWidth()*4/3,poro.getWidth()*4/3,false);
+
+        int hw = Math.round(w()/6); //hook width
+        hook_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_classic),
+                hw,hw*3,false);
+        hook_iblitz = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_iblitz),
+                hw,hw*3,false);
+        hook_arcade = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.hook_arcade),
+                hw,hw*3,false);
+
+        ICON_WIDTH = Math.round(c854(100));
+        int ih = ICON_WIDTH; //icon height
+        icon_classic = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_classic),
+                ICON_WIDTH,ih,false);
+        icon_iblitz = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_iblitz),
+                ICON_WIDTH,ih,false);
+        icon_arcade = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.icon_arcade),
+                ICON_WIDTH,ih,false);
+        icon_river = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lilypad_lotus),
+                ICON_WIDTH,ih,false);
+        icon_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.candypad_red),
+                ICON_WIDTH,ih,false);
+
+        blitzwithporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.blitzwithporo),
+                Math.round(w()),Math.round(w()),false);
+        iblitzwithporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.iblitzwithporo),
+                Math.round(w()),Math.round(w()),false);
+        arcadewithporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.arcadewithporo),
+                Math.round(w()),Math.round(w()),false);
+        sadporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.sadporo),
+                Math.round(w()),Math.round(w()),false);
+        sadporo_spin = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.sadporo_spin),
+                Math.round(w()),Math.round(w()),false);
+        burntporo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.burntporo),
+                Math.round(w()),Math.round(w()),false);
+
+        riverbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_mediumres, rgb565),
+                Math.round(w()),Math.round(w()*3),false);
+        riverbmp_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed, rgb565),
+                Math.round(w()),Math.round(w()*3),false);
+
+        restart = BitmapFactory.decodeResource(res, R.drawable.restart);
+        home = BitmapFactory.decodeResource(res, R.drawable.home);
+        shop = BitmapFactory.decodeResource(res, R.drawable.shop);
+        play = BitmapFactory.decodeResource(res, R.drawable.play);
+        more = BitmapFactory.decodeResource(res, R.drawable.more);
+        leftarrow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.leftarrow),
+                Math.round(c854(80)),Math.round(c854(80)),false);
+        maxrange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.maxrange),
+                Math.round(h()/2),Math.round(h()/2),false);
+        indicator = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.indicator),
+                poro.getWidth(),poro.getHeight(),false);
+        bubble = BitmapFactory.decodeResource(res, R.drawable.bubble);
+        border = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.border),
+                ICON_WIDTH*5/4,ICON_WIDTH*5/4,false);
+        bulletbmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.bullet_thin),
+                Math.round(w()/24),Math.round(w()/3),false);
+        explosion = BitmapFactory.decodeResource(res, R.drawable.explosion);
+        lock = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.lock),
+                ICON_WIDTH/3,ICON_WIDTH/3,false);
+        gradient = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.gradient),
+                Math.round(w()),Math.round(c854(150)),false);
+        stats = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.stats),
+                Math.round(c854(60)),Math.round(c854(60)),false);
+        video = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.video),
+                Math.round(c854(50)),Math.round(c854(50)),false);
+
+        int mw = Math.round(c854(50)); //medal width
+        medals = new Bitmap[]{Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_bronze), mw, mw, false),
+                Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_silver), mw, mw, false),
+                Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_gold), mw, mw, false),
+                Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.medal_blank), mw, mw, false)};
+
+        sinking = new Bitmap[15];
+        for (int i = 0; i < sinking.length; i++)
+            sinking[i] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.poro01+i),
+                    poro.getWidth(),poro.getHeight(),false);
+
+        //initializes SharedPreferences
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        //sharedPref = context.getSharedPreferences("placeholder", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+
+        nanosecondsPerFrame = (long)1e9 / FRAMES_PER_SECOND;
+
+        //initialize fonts
+        AssetManager assets = context.getAssets();
+        cd = Typeface.createFromAsset(assets, "fonts/CaviarDreams.ttf");
+        cd_b = Typeface.createFromAsset(assets, "fonts/CaviarDreams_Bold.ttf");
+        cd_i = Typeface.createFromAsset(assets, "fonts/CaviarDreams_Italic.ttf");
+        cd_bi = Typeface.createFromAsset(assets, "fonts/CaviarDreams_BoldItalic.ttf");
+
+        //pre-defined paints
+        title_bold = newPaint(Color.WHITE);
+        title_bold.setTextAlign(Paint.Align.CENTER);
+        title_bold.setTextSize(c854(80));
+        title_bold.setTypeface(cd_b);
+
+        title = new Paint(title_bold);
+        title.setTextSize(c854(40));
+        title.setTypeface(cd);
+
+        mode = new Paint(title);
+        mode.setTextSize(c854(35));
+
+        scoreTitle = newPaint(Color.WHITE);
+        scoreTitle.setTextSize(c854(20));
+        scoreText = newPaint(Color.WHITE);
+        scoreText.setTextSize(c854(30));
+
+        river_fade = newPaint(river);
+        river_fade.setStyle(Paint.Style.FILL);
+        river_fade.setAlpha(150);
+
+        quarter = new Paint();
+        quarter.setAlpha(64);
+
+        adText = newPaint(Color.WHITE);
+        adText.setTextAlign(Paint.Align.CENTER);
+        adText.setTextSize(c854(20));
+        adText.setTypeface(cd_b);
+
+        priceText = new Paint(adText);
+
+        medalText = new Paint(scoreTitle);
+        medalText.setTextAlign(Paint.Align.RIGHT);
+        medalText.setTextSize(c854(15));
+
+        tutorialText = newPaint(Color.WHITE);
+        tutorialText.setTypeface(cd_b);
+        tutorialText.setTextSize(c480(25));
+        tutorialText.setTextAlign(Paint.Align.CENTER);
+
+        white = newPaint(Color.WHITE);
+        white.setStyle(Paint.Style.STROKE);
+        white.setStrokeWidth(c480(2));
+
+        startText = new Paint(mode);
+
+        //buttons
+        offset = c854(125);
+        MIDDLE_Y1 = c854(720);
+        MIDDLE_Y2 = c854(290);
+        middle = new CircleButton(w()/2,MIDDLE_Y1,c854(70));
+        right = new CircleButton(w()/2+offset,MIDDLE_Y1+c854(30),c854(40));
+        left = new CircleButton(w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
+        cbs = new CircleButton[]{middle, right, left};
+        cbs_pressed = new boolean[cbs.length];
+
+        classic = new RoundRectButton(c480(48),c854(87),c480(432),c854(167),Color.BLACK);
+        light = new RoundRectButton(c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
+        spin = new RoundRectButton(c480(48),c854(287),c480(432),c854(367),Color.rgb(255,140,0));
+        scuttle = new RoundRectButton(c480(48),c854(387),c480(432),c854(467),Color.rgb(54,173,31));
+        snare = new RoundRectButton(c480(48),c854(487),c480(432),c854(567),Color.rgb(80,163,215));
+        cc = new RoundRectButton(c480(48),c854(587),c480(432),c854(667),Color.rgb(178,55,170));
+        rr = new RoundRectButton(c480(48),c854(687),c480(432),c854(767),Color.BLACK);
+        rrbs = new RoundRectButton[]{classic, light, spin, scuttle, snare, cc, rr};
+        rrbs_pressed = new boolean[rrbs.length];
+
+        //blitz skins
+        BLITZSKINS_Y = c854(275);
+        float totalWidth = ICON_WIDTH*nBlitz + ICON_WIDTH*(nBlitz-1)/4;
+        for (int i = 0; i < nBlitz; i++) {
+            float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
+            blitzskins_rectf[i] = new RectF(x,BLITZSKINS_Y,x+ICON_WIDTH,BLITZSKINS_Y+ICON_WIDTH);
+        }
+        blitzskins_owned = new boolean[nBlitz];
+        blitzskin_used = getBlitzSkin();
+        //river skins
+        RIVERSKINS_Y = c854(550);
+        totalWidth = ICON_WIDTH*nRiver + ICON_WIDTH*(nRiver-1)/4;
+        for (int i = 0; i < nRiver; i++) {
+            float x = w()/2 - totalWidth/2 + i * (ICON_WIDTH*1.25f);
+            riverskins_rectf[i] = new RectF(x,RIVERSKINS_Y,x+ICON_WIDTH,RIVERSKINS_Y+ICON_WIDTH);
+        }
+        riverskins_owned = new boolean[nRiver];
+        riverskin_used = getRiverSkin();
+
+        //player
+        player = new Poro(w(),h());
     }
 
     public void onDrawFrame(GL10 unused) {
