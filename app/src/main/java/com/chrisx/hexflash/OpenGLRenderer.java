@@ -124,8 +124,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             shiftSpeed = 0.75f;
     public int hookAnimation, sinkAnimation, burnAnimation;
     
-    public BitmapRect br;
-    public float angle = 0;
 
     public final float[] mMVPMatrix = new float[16];
     public final float[] mProjectionMatrix = new float[16];
@@ -155,6 +153,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glUseProgram(GraphicTools.sp_Image);
     }
 
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+        this.width = width;
+        this.height = height;
+
+        GLES20.glViewport(0, 0, width, height);
+        Matrix.orthoM(mProjectionMatrix, 0, 0, width, 0, height, 1000, -1000);
+    }
+
     public void onDrawFrame(GL10 unused) {
         float[] scratch = new float[16];
 
@@ -166,19 +172,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
         //Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
-        /*
-        //Set center of rotation at center of image
-        Matrix.translateM(mMVPMatrix, 0, width/2, height/2, 0);
-        //Create a rotation transformation for the triangle
-        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, 1);
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
-        //Undo previous translation
-        Matrix.translateM(scratch, 0, -width/2, -height/2, 0);
-        */
-
-        //Draw bitmap
-        br.draw(scratch);
 
         
         boolean update = false;
@@ -357,23 +350,20 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 //background
                 drawRiver();
 
-                canvas.save();
-                canvas.translate(0, -shift); //screen shift
+                float[] mtx = mMVPMatrix.clone();
+                Matrix.translateM(mtx, 0, 0, -shift, 0); //screen shift
 
-                drawPlatforms();
+                drawPlatforms(mtx);
+                drawPoroSnax(mtx);
+                drawSnapTraps(mtx);
 
-                drawPoroSnax();
-
-                drawSnapTraps();
-
-                player.draw();
-                //player.drawHitbox(); //debugging purposes
+                player.draw(mtx);
 
                 if (!waitingForTap && (gamemode.equals("cc") || gamemode.equals("rr")))
                     if (bullet != null && bullet.visible(shift))
-                        bullet.draw();
+                        bullet.draw(mtx);
 
-                canvas.restore();
+                //stop using mtx
 
                 if (!waitingForTap && (gamemode.equals("light") || gamemode.equals("rr")))
                     drawLightning();
@@ -393,17 +383,18 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 //background
                 drawRiver();
 
-                canvas.save();
-                canvas.translate(0, -shift); //screen shift
-                drawPlatforms();
-                drawPoroSnax();
-                drawSnapTraps();
-                player.draw();
+                float[] mtx = mMVPMatrix.clone();
+                Matrix.translateM(mtx, 0, 0, -shift, 0); //screen shift
+
+                drawPlatforms(mtx);
+                drawPoroSnax(mtx);
+                drawSnapTraps(mtx);
+                player.draw(mtx);
                 if ((gamemode.equals("cc") || gamemode.equals("rr"))
                         && bullet != null && bullet.visible(shift)) {
-                    bullet.draw();
+                    bullet.draw(mtx);
                 }
-                canvas.restore();
+                //stop using mtx
 
                 int hookDuration = FRAMES_PER_SECOND * 2 / 3;
                 float hookWidth = w() / 6;
@@ -424,21 +415,21 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 //background
                 drawRiver();
 
-                canvas.save();
-                canvas.translate(0, -shift); //screen shift
+                float[] mtx = mMVPMatrix.clone();
+                Matrix.translateM(mtx, 0, 0, -shift, 0); //screen shift
 
-                drawPlatforms();
-                drawPoroSnax();
-                drawSnapTraps();
+                drawPlatforms(mtx);
+                drawPoroSnax(mtx);
+                drawSnapTraps(mtx);
 
-                player.draw();
+                player.draw(mtx);
 
                 if ((gamemode.equals("cc") || gamemode.equals("rr"))
                         && bullet != null && bullet.visible(shift)) {
-                    bullet.draw();
+                    bullet.draw(mtx);
                 }
 
-                canvas.restore();
+                //stop using mtx
 
                 drawScores();
             } else if (menu.equals("burned")) {
@@ -447,14 +438,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 //background
                 drawRiver();
 
-                canvas.save();
-                canvas.translate(0, -shift); //screen shift
+                float[] mtx = mMVPMatrix.clone();
+                Matrix.translateM(mtx, 0, 0, -shift, 0); //screen shift
 
-                drawPlatforms();
-                drawPoroSnax();
-                drawSnapTraps();
+                drawPlatforms(mtx);
+                drawPoroSnax(mtx);
+                drawSnapTraps(mtx);
 
-                player.draw();
+                player.draw(mtx);
 
                 int explodeDuration = FRAMES_PER_SECOND / 3;
                 if (burnAnimation < explodeDuration) {
@@ -465,7 +456,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                             player.getY()+player.getW()*f));
                 }
 
-                canvas.restore();
+                //stop using mtx
 
                 drawScores();
             } else if (menu.equals("gameover")) {
@@ -498,17 +489,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             canvas.drawColor(Color.argb(alpha,
                     Color.red(river), Color.green(river), Color.blue(river)));
         }
-    }
-
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-        this.width = width;
-        this.height = height;
-
-        GLES20.glViewport(0, 0, width, height);
-        Matrix.orthoM(mProjectionMatrix, 0, 0, width, 0, height, 1000, -1000);
-
-        br = new BitmapRect(BitmapFactory.decodeResource(context.getResources(), R.drawable.blitzwithporo),
-                0, height/2+width/2, width, height/2-width/2, 0);
     }
 
     public float w() {
@@ -841,7 +821,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     //delete all platforms and initialize one lilypad
     public void resetPlatforms() {
         platforms.clear();
-        platforms.add(new Platform(canvas, w() / 2, h() / 2));
+        platforms.add(new Platform(w(), h(), w() / 2, h() / 2));
         player.setPlatform(platforms.get(0));
     }
     public void generatePlatforms() {
@@ -876,17 +856,17 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 double adjProb = prob * (1 + (ev_scuttle-num_scuttle)/1.5);
 
                 if (rows > 0 && Math.random() < adjProb) {
-                    platforms.add(new Platform(canvas, newX, newY, (float) (1 + shiftSpeed + 0.5 * Math.random())));
+                    platforms.add(new Platform(w(), h(), newX, newY, (float) (1 + shiftSpeed + 0.5 * Math.random())));
                     num_scuttle++;
                 } else {
-                    platforms.add(new Platform(canvas, newX, newY));
+                    platforms.add(new Platform(w(), h(), newX, newY));
                 }
                 //add a porosnax?
                 double prob2 = 0.2;
                 ev_porosnax += prob2;
                 double adjProb2 = prob2 * (1 + (ev_porosnax-num_porosnax)/2);
                 if (Math.random() < adjProb2) {
-                    snaxlist.add(new PoroSnax(canvas, platforms.get(platforms.size() - 1)));
+                    snaxlist.add(new PoroSnax(w(), h(), platforms.get(platforms.size() - 1)));
                     num_porosnax++;
                 }
                 //add a snap trap?
@@ -895,7 +875,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 double adjProb3 = (gamemode.equals("snare") || gamemode.equals("rr"))
                         ? 1 : prob3 * (1 + (ev_snaptrap-num_snaptrap)/2);
                 if (Math.random() < adjProb3) {
-                    snaptraps.add(new SnapTrap(canvas, platforms.get(platforms.size() - 1)));
+                    snaptraps.add(new SnapTrap(w(), h(), platforms.get(platforms.size() - 1)));
                     num_snaptrap++;
                 }
             }
@@ -918,9 +898,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             }
         }
     }
-    public void drawPlatforms() {
+    public void drawPlatforms(float[] m) {
         for (Platform p : platforms)
-            if (p.visible(shift)) p.draw();
+            if (p.visible(shift)) p.draw(m);
     }
     public void movePlatforms() {
         for (Platform p : platforms)
@@ -946,9 +926,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     public void clearPoroSnax() {
         snaxlist.clear();
     }
-    public void drawPoroSnax() {
+    public void drawPoroSnax(float[] m) {
         for (PoroSnax p : snaxlist)
-            if (p.visible(shift)) p.draw();
+            if (p.visible(shift)) p.draw(m);
     }
     public void updatePoroSnax() {
         //remove porosnax that have gone off the screen
@@ -969,9 +949,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     public void clearSnapTraps() {
         snaptraps.clear();
     }
-    public void drawSnapTraps() {
+    public void drawSnapTraps(float[] m) {
         for (SnapTrap s : snaptraps)
-            if (s.visible(shift)) s.draw();
+            if (s.visible(shift)) s.draw(m);
     }
     public void updateSnapTraps() {
         //remove traps that have gone off the screen
@@ -992,7 +972,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         if (bullet != null) bullet.update();
 
         if (bulletCD <= 0) {
-            bullet = new Bullet(canvas, player, shift);
+            bullet = new Bullet(w(), h(), player, shift);
             bulletCD = 2 + Math.random();
         } else {
             bulletCD -= 1. / FRAMES_PER_SECOND;
