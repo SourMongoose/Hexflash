@@ -19,6 +19,7 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+@SuppressWarnings("all")
 class OpenGLRenderer implements GLSurfaceView.Renderer {
     public Context context;
 
@@ -273,10 +274,12 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                     update = true;
                     prevPorosnax = getPoroSnax();
                 }
+                /*
                 if (adLoaded != rva.isLoaded()) {
                     update = true;
                     adLoaded = rva.isLoaded();
                 }
+                */
                 for (int i = 0; i < nBlitz; i++) {
                     if (blitzskins_owned[i] != hasSkin(blitzskins[i])) {
                         update = true;
@@ -336,6 +339,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                     canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
                     title.setTextAlign(Paint.Align.CENTER);
 
+                    /*
                     //video ad
                     if (rva.isLoaded()) {
                         canvas.drawBitmap(video,w()-c854(75),c854(25),null);
@@ -346,6 +350,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                         adText.setAlpha(64);
                     }
                     canvas.drawText("+10", w()-c854(50), c854(100), adText);
+                    */
 
                     //back
                     canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
@@ -641,7 +646,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 || (s.equals("limbo") && (menu.equals("shop") || menu.equals("start"))))
             transition = TRANSITION_MAX;
 
-        if (s.equals("shop") && !rva.isLoaded()) loadRewardedVideoAd();
+        //if (s.equals("shop") && !rva.isLoaded()) loadRewardedVideoAd();
 
         if (s.equals("burned")) burnAnimation = 0;
 
