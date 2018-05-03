@@ -22,9 +22,9 @@ class Bullet {
         y = (float)(-width/2/Math.tan(5*Math.PI/12)) + shift;
         angle = Math.atan2(p.getY()-y,p.getX()-x);
         w = width / 24;
-        s = width * 1.7f / MainActivity.FRAMES_PER_SECOND; //pixels per frame
+        s = width * 1.7f / OpenGLRenderer.FRAMES_PER_SECOND; //pixels per frame
 
-        bmp = MainActivity.bulletbmp;
+        bmp = OpenGLRenderer.bulletbmp;
 
         f = 225f/800; //fraction of bmp that is part of hitbox
         H = bmp.getHeight() / bmp.getWidth() * w;
@@ -61,7 +61,7 @@ class Bullet {
     void update() {
         float[][] corners = new float[][]{{-w/2,-f*H/2},{-w/2,f*H/2},{w/2,-f*H/2},{w/2,f*H/2}};
         for (float[] pt : corners) {
-            if (MainActivity.distance(x+pt[0]*(float)Math.cos(angle+Math.PI/2)+pt[1]*(float)(Math.cos(angle)),
+            if (OpenGLRenderer.distance(x+pt[0]*(float)Math.cos(angle+Math.PI/2)+pt[1]*(float)(Math.cos(angle)),
                     y+pt[0]*(float)Math.sin(angle+Math.PI/2)+pt[1]*(float)Math.sin(angle),
                     p.getX(),p.getY()) < p.getW()/2) {
                 y += height;

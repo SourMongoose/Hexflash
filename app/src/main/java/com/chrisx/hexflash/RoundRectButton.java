@@ -45,7 +45,7 @@ class RoundRectButton {
 
     void draw() {
         /*
-        float r = MainActivity.c854(15);
+        float r = OpenGLRenderer.c854(15);
         if (pressed) c.drawRoundRect(rectf, r, r, p2);
         else c.drawRoundRect(rectf, r, r, p);
         */

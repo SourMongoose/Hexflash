@@ -24,11 +24,11 @@ class Platform {
         spin = 0;
 
         angle = (int)(Math.random()*360);
-        if (MainActivity.getRiverSkin().equals("candy"))
-            setBmp(Math.random() < 0.333 ? MainActivity.candypad_red :
-                    Math.random() < 0.5 ? MainActivity.candypad_orange : MainActivity.candypad_yellow);
+        if (OpenGLRenderer.getRiverSkin().equals("candy"))
+            setBmp(Math.random() < 0.333 ? OpenGLRenderer.candypad_red :
+                    Math.random() < 0.5 ? OpenGLRenderer.candypad_orange : OpenGLRenderer.candypad_yellow);
         else
-            setBmp(Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus);
+            setBmp(Math.random() > 0.2 ? OpenGLRenderer.lilypad : OpenGLRenderer.lilypadlotus);
     }
     //constructor for scuttle
     Platform(float width, float height, float x, float y, float speed) {
@@ -41,7 +41,7 @@ class Platform {
         this.speed = speed;
 
         angle = Math.random() < 0.5 ? 90 : 270;
-        setBmp(MainActivity.getRiverSkin().equals("candy") ? MainActivity.scuttler_candy : MainActivity.scuttler);
+        setBmp(OpenGLRenderer.getRiverSkin().equals("candy") ? OpenGLRenderer.scuttler_candy : OpenGLRenderer.scuttler);
     }
 
     void setBmp(Bitmap bmp) {
@@ -71,14 +71,14 @@ class Platform {
     void update() {
         if (speed > 0) {
             if (x + w / 2 > width || x - w / 2 < 0)
-                angle = (angle + 360 / MainActivity.FRAMES_PER_SECOND * 2) % 360;
+                angle = (angle + 360 / OpenGLRenderer.FRAMES_PER_SECOND * 2) % 360;
 
             if (angle == 90) x += speed;
             if (angle == 270) x -= speed;
         }
     }
     void addSpin() {
-        spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND) % 360;
+        spin = (spin + 360 / OpenGLRenderer.FRAMES_PER_SECOND) % 360;
     }
 
     void draw(float[] m) {

@@ -12,7 +12,7 @@ class CircleButton {
         this.y = y;
         this.r = r;
 
-        br = new BitmapRect(MainActivity.bubble, -r, r, r, -r, 0.5f);
+        br = new BitmapRect(OpenGLRenderer.bubble, -r, r, r, -r, 0.5f);
     }
 
     float getX() {
@@ -43,7 +43,7 @@ class CircleButton {
     }
 
     boolean contains(float x, float y) {
-        return MainActivity.distance(x,y,this.x,this.y) <= r;
+        return OpenGLRenderer.distance(x,y,this.x,this.y) <= r;
     }
     boolean isPressed() {
         return pressed;

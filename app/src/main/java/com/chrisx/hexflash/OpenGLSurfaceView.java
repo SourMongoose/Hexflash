@@ -2,6 +2,8 @@ package com.chrisx.hexflash;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Handler;
+import android.view.MotionEvent;
 
 class OpenGLSurfaceView extends GLSurfaceView {
     private final OpenGLRenderer r;
@@ -9,7 +11,7 @@ class OpenGLSurfaceView extends GLSurfaceView {
     private boolean paused = false;
 
     //frame data
-    static int FRAMES_PER_SECOND = 60;
+    final int FRAMES_PER_SECOND = 60;
     private long nanosecondsPerFrame;
 
     private boolean touch = false;
@@ -141,7 +143,7 @@ class OpenGLSurfaceView extends GLSurfaceView {
                                         int burnDuration = FRAMES_PER_SECOND / 2;
                                         if (r.burnAnimation > burnDuration + FRAMES_PER_SECOND / 3) {
                                             r.goToMenu("gameover");
-                                            r.gameoverBmp = MainActivity.burntporo;
+                                            r.gameoverBmp = r.burntporo;
                                         }
 
                                         r.burnAnimation++;

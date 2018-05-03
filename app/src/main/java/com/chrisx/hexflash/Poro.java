@@ -34,11 +34,11 @@ class Poro {
         w = width / 8;
         reset();
 
-        br_flash = new BitmapRect(MainActivity.flash, -w/2, w/2, w/2, -w/2, 0.5f);
-        br_flash2 = new BitmapRect(MainActivity.flash2, -w/2, w/2, w/2, -w/2, 0.5f);
-        br_snare = new BitmapRect(MainActivity.snarefx, -w/1.5f, w/1.5f, w/1.5f, -w/1.5f, 0.5f);
-        br_mrange = new BitmapRect(MainActivity.maxrange, -maxRange, maxRange, maxRange, -maxRange, 0.5f);
-        br_indicator = new BitmapRect(MainActivity.indicator, -w/2, w/2, w/2, -w/2, 0.5f);
+        br_flash = new BitmapRect(OpenGLRenderer.flash, -w/2, w/2, w/2, -w/2, 0.5f);
+        br_flash2 = new BitmapRect(OpenGLRenderer.flash2, -w/2, w/2, w/2, -w/2, 0.5f);
+        br_snare = new BitmapRect(OpenGLRenderer.snarefx, -w/1.5f, w/1.5f, w/1.5f, -w/1.5f, 0.5f);
+        br_mrange = new BitmapRect(OpenGLRenderer.maxrange, -maxRange, maxRange, maxRange, -maxRange, 0.5f);
+        br_indicator = new BitmapRect(OpenGLRenderer.indicator, -w/2, w/2, w/2, -w/2, 0.5f);
     }
 
     void reset() {
@@ -49,7 +49,7 @@ class Poro {
         channel = burned = false;
         flashAnimation = 0;
 
-        setBmp(MainActivity.poro);
+        setBmp(OpenGLRenderer.poro);
     }
 
     float getW() {
@@ -112,7 +112,7 @@ class Poro {
     void update(float x, float y) {
         this.targetX = x;
         this.targetY = y;
-        currRange += maxRange / secToMaxRange / MainActivity.FRAMES_PER_SECOND;
+        currRange += maxRange / secToMaxRange / OpenGLRenderer.FRAMES_PER_SECOND;
 
         //hits max range
         if (currRange >= maxRange) {
@@ -129,12 +129,12 @@ class Poro {
     }
     void updateAnimations() {
         if (snared > 0)
-            snared = Math.max(snared - 1. / MainActivity.FRAMES_PER_SECOND, 0);
+            snared = Math.max(snared - 1. / OpenGLRenderer.FRAMES_PER_SECOND, 0);
         if (flashAnimation > 0)
-            flashAnimation = Math.max(flashAnimation - 1. / MainActivity.FRAMES_PER_SECOND, 0);
+            flashAnimation = Math.max(flashAnimation - 1. / OpenGLRenderer.FRAMES_PER_SECOND, 0);
     }
     void addSpin() {
-        spin = (spin + 360 / MainActivity.FRAMES_PER_SECOND * 3 / 2) % 360;
+        spin = (spin + 360 / OpenGLRenderer.FRAMES_PER_SECOND * 3 / 2) % 360;
     }
 
     void snare() {
@@ -143,7 +143,7 @@ class Poro {
 
     void burn() {
         burned = true;
-        setBmp(MainActivity.poro_black);
+        setBmp(OpenGLRenderer.poro_black);
         interruptChannel();
     }
     boolean isBurned() {
