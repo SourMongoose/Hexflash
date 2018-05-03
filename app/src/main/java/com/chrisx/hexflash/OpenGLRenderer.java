@@ -23,7 +23,7 @@ import javax.microedition.khronos.opengles.GL10;
 class OpenGLRenderer implements GLSurfaceView.Renderer {
     public Context context;
 
-    public int width, height;
+    static int width, height;
 
 
     static Bitmap poro, poro_black, scuttler, scuttler_candy, titlescreen, porosnax, porosnax_count,
@@ -192,7 +192,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 }
 
                 //title screen
-                if (update) drawTitleMenu();
+                if (update) drawTitleMenu(mMVPMatrix);
             } else if (menu.equals("more")) {
                 //check for updates (button presses)
                 for (int i = 1; i < rrbs.length-1; i++) {
@@ -203,30 +203,30 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 }
 
                 if (update) {
-                    canvas.drawColor(river);
+                    //canvas.drawColor(river);
 
                     title_bold.setTextSize(c854(60));
-                    canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
+                    //canvas.drawText("GAMEMODES", w()/2, c854(80), title_bold);
 
                     mode.setTextAlign(Paint.Align.CENTER);
                     float tmp = (mode.ascent() + mode.descent()) / 2;
                     for (int i = 1; i < modeNames.length-1; i++) {
                         rrbs[i].draw();
-                        canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
-                                rrbs[i].getRectF().centerY()-tmp, mode);
+                        //canvas.drawText(modeNames[i], rrbs[i].getRectF().centerX(),
+                        //        rrbs[i].getRectF().centerY()-tmp, mode);
                     }
 
                     //back
-                    canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
+                    //canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
                     //stats
-                    canvas.drawBitmap(stats,w()-c854(80),h()-c854(80),null);
+                    //canvas.drawBitmap(stats,w()-c854(80),h()-c854(80),null);
                 }
             } else if (menu.equals("stats")) {
                 if (update) {
-                    canvas.drawColor(river);
+                    //canvas.drawColor(river);
 
                     title_bold.setTextSize(c854(50));
-                    canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
+                    //canvas.drawText("HIGH SCORES", w()/2, c854(70), title_bold);
 
                     mode.setTextAlign(Paint.Align.LEFT);
                     for (int i = 0; i < modeNames.length; i++) {
@@ -234,23 +234,23 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                         tmp = h()/2+(tmp-h()/2)*0.9f;
 
                         mode.setTextSize(c854(25));
-                        canvas.drawText(modeNames[i], c480(20), tmp, mode);
+                        //canvas.drawText(modeNames[i], c480(20), tmp, mode);
                         mode.setTextSize(c854(35));
-                        canvas.drawText(getHighScore(modeCodes[i])+"", c480(20), tmp+c854(35), mode);
+                        //canvas.drawText(getHighScore(modeCodes[i])+"", c480(20), tmp+c854(35), mode);
 
                         int nextMedal = -1;
                         for (int m = 0; m < 3; m++) {
-                            canvas.drawBitmap((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
-                                    c480(460)-c854(120-m*40),tmp-c854(15),null);
+                            //canvas.drawBitmap((getHighScore(modeCodes[i]) >= medal_scores[i][m] ? medals[m] : medals[3]),
+                            //        c480(460)-c854(120-m*40),tmp-c854(15),null);
                             if (nextMedal == -1 && getHighScore(modeCodes[i]) < medal_scores[i][m])
                                 nextMedal = medal_scores[i][m];
                         }
-                        if (nextMedal != -1)
-                            canvas.drawText("Next medal: " + nextMedal, w()-c480(20), tmp+c854(50), medalText);
+                        //if (nextMedal != -1)
+                            //canvas.drawText("Next medal: " + nextMedal, w()-c480(20), tmp+c854(50), medalText);
                     }
 
                     //back
-                    canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
+                    //canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
                 }
             } else if (menu.equals("shop")) {
                 //check for updates
@@ -283,66 +283,66 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 }
 
                 if (update) {
-                    canvas.drawColor(river);
+                    //canvas.drawColor(river);
 
                     title_bold.setTextSize(c854(60));
-                    canvas.drawText("SHOP", w()/2, c854(80), title_bold);
+                    //canvas.drawText("SHOP", w()/2, c854(80), title_bold);
 
                     //blitzcrank skins
-                    canvas.drawText("BLITZ SKINS", w()/2, BLITZSKINS_Y-ICON_WIDTH/2, title);
+                    //canvas.drawText("BLITZ SKINS", w()/2, BLITZSKINS_Y-ICON_WIDTH/2, title);
                     for (int i = 0; i < nBlitz; i++) {
-                        canvas.drawBitmap(getIconBmp(blitzskins[i]),blitzskins_rectf[i].left,blitzskins_rectf[i].top,null);
+                        //canvas.drawBitmap(getIconBmp(blitzskins[i]),blitzskins_rectf[i].left,blitzskins_rectf[i].top,null);
                         if (getBlitzSkin().equals(blitzskins[i])) {
                             RectF rf = blitzskins_rectf[i];
-                            canvas.drawBitmap(border,rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,null);
+                            //canvas.drawBitmap(border,rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,null);
                         }
                         if (!hasSkin(blitzskins[i])) {
                             RectF rf = blitzskins_rectf[i];
-                            canvas.drawRect(rf, river_fade);
-                            canvas.drawBitmap(lock,rf.left+rf.width()/3,rf.top+rf.width()/3,null);
-                            canvas.drawText(blitzskins_cost[i]+"", rf.centerX(),
-                                    rf.bottom-rf.width()/10, priceText);
+                            //canvas.drawRect(rf, river_fade);
+                            //canvas.drawBitmap(lock,rf.left+rf.width()/3,rf.top+rf.width()/3,null);
+                            //canvas.drawText(blitzskins_cost[i]+"", rf.centerX(),
+                            //        rf.bottom-rf.width()/10, priceText);
                         }
                     }
                     //river skins
-                    canvas.drawText("RIVER SKINS", w()/2, RIVERSKINS_Y-ICON_WIDTH/2, title);
+                    //canvas.drawText("RIVER SKINS", w()/2, RIVERSKINS_Y-ICON_WIDTH/2, title);
                     for (int i = 0; i < nRiver; i++) {
-                        canvas.drawBitmap(getIconBmp(riverskins[i]),
-                                riverskins_rectf[i].left,riverskins_rectf[i].top,null);
+                        //canvas.drawBitmap(getIconBmp(riverskins[i]),
+                        //        riverskins_rectf[i].left,riverskins_rectf[i].top,null);
                         if (getRiverSkin().equals(riverskins[i])) {
                             RectF rf = riverskins_rectf[i];
-                            canvas.drawBitmap(border,rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,null);
+                            //canvas.drawBitmap(border,rf.left-ICON_WIDTH/8,rf.top-ICON_WIDTH/8,null);
                         }
                         if (!hasSkin(riverskins[i])) {
                             RectF rf = riverskins_rectf[i];
-                            canvas.drawRect(rf, river_fade);
-                            canvas.drawBitmap(lock,rf.left+rf.width()/3,rf.top+rf.width()/3,null);
-                            canvas.drawText(riverskins_cost[i]+"", rf.centerX(),
-                                    rf.bottom-rf.width()/10, priceText);
+                            //canvas.drawRect(rf, river_fade);
+                            //canvas.drawBitmap(lock,rf.left+rf.width()/3,rf.top+rf.width()/3,null);
+                            //canvas.drawText(riverskins_cost[i]+"", rf.centerX(),
+                            //        rf.bottom-rf.width()/10, priceText);
                         }
                     }
 
                     //porosnax count
-                    canvas.drawBitmap(porosnax_count,w()-c854(75),h()-c854(75),null);
+                    //canvas.drawBitmap(porosnax_count,w()-c854(75),h()-c854(75),null);
                     title.setTextAlign(Paint.Align.RIGHT);
-                    canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
+                    //canvas.drawText(getPoroSnax()+"", w()-c854(85), h()-c854(50)-(title.ascent()+title.descent())/2, title);
                     title.setTextAlign(Paint.Align.CENTER);
 
                     /*
                     //video ad
                     if (rva.isLoaded()) {
-                        canvas.drawBitmap(video,w()-c854(75),c854(25),null);
+                        //canvas.drawBitmap(video,w()-c854(75),c854(25),null);
                         adText.setAlpha(255);
                     } else {
-                        canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
+                        //canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
                                 new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)), quarter);
                         adText.setAlpha(64);
                     }
-                    canvas.drawText("+10", w()-c854(50), c854(100), adText);
+                    //canvas.drawText("+10", w()-c854(50), c854(100), adText);
                     */
 
                     //back
-                    canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
+                    //canvas.drawBitmap(leftarrow,c854(10),h()-c854(90),null);
                 }
             } else if (menu.equals("game")) {
                 update = true;
@@ -375,7 +375,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                         startText.setColor(Color.BLACK);
                     else startText.setColor(Color.WHITE);
                     float y = platforms.get(0).getY() - platforms.get(0).getW();
-                    canvas.drawText("tap to start", w() / 2, y, startText);
+                    //canvas.drawText("tap to start", w() / 2, y, startText);
                 }
             } else if (menu.equals("hook")) {
                 update = true;
@@ -401,11 +401,11 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 if (hookAnimation < hookDuration / 2) {
                     //hook enters screen
                     float hookY = (playerY + player.getW() - shift) * (hookAnimation / (hookDuration / 2f));
-                    canvas.drawBitmap(getHookBmp(),player.getX()-hookWidth/2,hookY-hookWidth*3,null);
+                    //canvas.drawBitmap(getHookBmp(),player.getX()-hookWidth/2,hookY-hookWidth*3,null);
                 } else {
                     //hook exits screen w/ poro
                     float hookY = (playerY + player.getW() - shift) * ((hookDuration - hookAnimation) / (hookDuration / 2f));
-                    canvas.drawBitmap(getHookBmp(),player.getX()-hookWidth/2,hookY-hookWidth*3,null);
+                    //canvas.drawBitmap(getHookBmp(),player.getX()-hookWidth/2,hookY-hookWidth*3,null);
                 }
 
                 drawScores();
@@ -462,7 +462,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             } else if (menu.equals("gameover")) {
                 update = true;
 
-                drawGameoverScreen();
+                drawGameoverScreen(mMVPMatrix);
 
                 if (transition == 0) goToMenu("limbo");
             } else if (menu.equals("limbo")) {
@@ -474,7 +474,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                     }
                 }
 
-                if (update) drawGameoverScreen();
+                if (update) drawGameoverScreen(mMVPMatrix);
             }
         }
 
@@ -486,15 +486,15 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             } else {
                 alpha = 255 - 255*(t-transition)/t;
             }
-            canvas.drawColor(Color.argb(alpha,
-                    Color.red(river), Color.green(river), Color.blue(river)));
+            //canvas.drawColor(Color.argb(alpha,
+            //        Color.red(river), Color.green(river), Color.blue(river)));
         }
     }
 
-    public float w() {
+    static float w() {
         return width;
     }
-    public float h() {
+    static float h() {
         return height;
     }
     
@@ -602,7 +602,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     //draw a bitmap w/o cropping
     public void drawBmp(Bitmap bmp, RectF rectF) {
-        canvas.drawBitmap(bmp, null, rectF, null);
+        //canvas.drawBitmap(bmp, null, rectF, null);
     }
 
     public void goToMenu(String s) {
@@ -669,79 +669,79 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         menu = s;
     }
 
-    public void drawTitleMenu() {
+    public void drawTitleMenu(float[] m) {
         if (h()/w() > 4./3) { //thinner
-            canvas.drawBitmap(titlescreen,w()/2-titlescreen.getWidth()/2,0,null);
+            //canvas.drawBitmap(titlescreen,w()/2-titlescreen.getWidth()/2,0,null);
         } else { //thicker
-            canvas.drawBitmap(titlescreen,0,0,null);
+            //canvas.drawBitmap(titlescreen,0,0,null);
         }
 
         //mini tutorial
         if (firstTime()) {
-            canvas.drawARGB(100,0,0,0);
+            //canvas.drawARGB(100,0,0,0);
 
-            canvas.drawLine(left.getX(),left.getY(),left.getX(),h()*2/3,white);
-            canvas.drawText("SHOP",left.getX(),h()*2/3-c854(10),tutorialText);
+            //canvas.drawLine(left.getX(),left.getY(),left.getX(),h()*2/3,white);
+            //canvas.drawText("SHOP",left.getX(),h()*2/3-c854(10),tutorialText);
 
-            canvas.drawLine(middle.getX(),middle.getY(),middle.getX(),h()/3,white);
-            canvas.drawText("PLAY",middle.getX(),h()/3-c854(10),tutorialText);
+            //canvas.drawLine(middle.getX(),middle.getY(),middle.getX(),h()/3,white);
+            //canvas.drawText("PLAY",middle.getX(),h()/3-c854(10),tutorialText);
 
-            canvas.drawLine(right.getX(),right.getY(),right.getX(),h()*2/3,white);
-            canvas.drawText("MORE",right.getX(),h()*2/3-c854(10)-c480(25),tutorialText);
-            canvas.drawText("GAMEMODES",right.getX(),h()*2/3-c854(10),tutorialText);
+            //canvas.drawLine(right.getX(),right.getY(),right.getX(),h()*2/3,white);
+            //canvas.drawText("MORE",right.getX(),h()*2/3-c854(10)-c480(25),tutorialText);
+            //canvas.drawText("GAMEMODES",right.getX(),h()*2/3-c854(10),tutorialText);
         }
 
         //play button
-        middle.draw();
+        middle.draw(m);
         RectF tmp = new RectF(middle.getX()-middle.getR()/2f, middle.getY()-middle.getR()/1.8f,
                 middle.getX()+middle.getR()/1.6f, middle.getY()+middle.getR()/1.8f);
         drawBmp(play, tmp);
 
         //shop
-        left.draw();
+        left.draw(m);
         tmp = new RectF(left.getX()-left.getR()/1.414f, left.getY()-left.getR()/1.414f,
                 left.getX()+left.getR()/1.414f, left.getY()+left.getR()/1.414f);
         drawBmp(shop, tmp);
 
         //more gamemodes
-        right.draw();
+        right.draw(m);
         tmp = new RectF(right.getX()-right.getR()/1.9f, right.getY()-right.getR()/1.9f,
                 right.getX()+right.getR()/1.9f, right.getY()+right.getR()/1.9f);
         drawBmp(more, tmp);
     }
 
-    public void drawGameoverButtons() {
-        canvas.drawRect(0,middle.getY()-middle.getR()-c854(5),w(),middle.getY()+middle.getR()+c854(5),newPaint(river));
+    public void drawGameoverButtons(float[] m) {
+        //canvas.drawRect(0,middle.getY()-middle.getR()-c854(5),w(),middle.getY()+middle.getR()+c854(5),newPaint(river));
 
         //restart button
-        middle.draw();
+        middle.draw(m);
         RectF tmp = new RectF(middle.getX()-middle.getR()/1.8f, middle.getY()-middle.getR()/1.8f,
                 middle.getX()+middle.getR()/1.8f, middle.getY()+middle.getR()/1.8f);
         drawBmp(restart, tmp);
 
         //shop
-        left.draw();
+        left.draw(m);
         tmp = new RectF(left.getX()-left.getR()/1.414f, left.getY()-left.getR()/1.414f,
                 left.getX()+left.getR()/1.414f, left.getY()+left.getR()/1.414f);
         drawBmp(shop, tmp);
 
         //back to home
-        right.draw();
+        right.draw(m);
         tmp = new RectF(right.getX()-right.getR()/1.9f, right.getY()-right.getR()/1.9f,
                 right.getX()+right.getR()/1.9f, right.getY()+right.getR()/1.9f);
         drawBmp(home, tmp);
     }
-    public void drawGameoverScreen() {
-        canvas.drawColor(river);
+    public void drawGameoverScreen(float[] m) {
+        //canvas.drawColor(river);
 
         float tmp = Math.max(h()-w(), middle.getY()+middle.getR()+c854(5));
-        canvas.drawBitmap(gameoverBmp,0,tmp,null);
+        //canvas.drawBitmap(gameoverBmp,0,tmp,null);
 
         title_bold.setTextSize(c854(60));
-        canvas.drawText("GAME OVER", w()/2, c854(125), title_bold);
-        canvas.drawText("you scored: " + score, w()/2, c854(170), title);
+        //canvas.drawText("GAME OVER", w()/2, c854(125), title_bold);
+        //canvas.drawText("you scored: " + score, w()/2, c854(170), title);
 
-        drawGameoverButtons();
+        drawGameoverButtons(m);
     }
 
     public void drawRiver() {
@@ -752,14 +752,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         Bitmap bmp = getRiverBmp();
         /*
         int topY = (int)(bmp.getHeight() * (w()*3 - tmp) / (w()*3) - 1);
-        canvas.drawBitmap(bmp, new Rect(0,topY,bmp.getWidth(),bmp.getHeight()),
+        //canvas.drawBitmap(bmp, new Rect(0,topY,bmp.getWidth(),bmp.getHeight()),
                 new RectF(0,0,w(),tmp), null);
         int botY = (int)(bmp.getHeight() * (h() - tmp) / (w()*3) + 1);
-        if (tmp <= h()) canvas.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),botY),
+        if (tmp <= h()) //canvas.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),botY),
                 new RectF(0,tmp,w(),h()), null);
         */
-        canvas.drawBitmap(bmp,0,tmp-bmp.getHeight(),null);
-        if (tmp <= h()) canvas.drawBitmap(bmp,0,tmp,null);
+        //canvas.drawBitmap(bmp,0,tmp-bmp.getHeight(),null);
+        //if (tmp <= h()) canvas.drawBitmap(bmp,0,tmp,null);
     }
 
     public int blend(int a, int b) {
@@ -780,7 +780,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         int dark = Color.argb(alpha,0,0,0);
         //lightning
         int light = Color.argb(240-alpha,255,255,255);
-        canvas.drawColor(blend(dark, light));
+        //canvas.drawColor(blend(dark, light));
 
         if (wait <= 0) {
             lightning = (.8+.2*Math.random())*MAX_LIGHTNING;
@@ -800,7 +800,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     public void drawScores() {
         if (getRiverSkin().equals("candy") && !gamemode.equals("light") && !gamemode.equals("rr")) {
-            canvas.drawBitmap(gradient,0,0,null);
+            //canvas.drawBitmap(gradient,0,0,null);
             scoreTitle.setColor(Color.BLACK);
             scoreText.setColor(Color.BLACK);
         } else {
@@ -809,13 +809,13 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         }
 
         scoreTitle.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("score", c480(10), c854(25), scoreTitle);
+        //canvas.drawText("score", c480(10), c854(25), scoreTitle);
         scoreTitle.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText("high", w()-c480(10), c854(25), scoreTitle);
+        //canvas.drawText("high", w()-c480(10), c854(25), scoreTitle);
         scoreText.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText(score+"", c480(10), c854(60), scoreText);
+        //canvas.drawText(score+"", c480(10), c854(60), scoreText);
         scoreText.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText(getHighScore(gamemode)+"", w()-c480(10), c854(60), scoreText);
+        //canvas.drawText(getHighScore(gamemode)+"", w()-c480(10), c854(60), scoreText);
     }
 
     //delete all platforms and initialize one lilypad
