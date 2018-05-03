@@ -41,24 +41,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused) {
         float[] scratch = new float[16];
 
-        //Redraw background color
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //Background color
+        GLES20.glClearColor(35f/255, 66f/255, 94f/255, 1f);
 
         //Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 1, 0, 0, -1, 0, 1, 0);
 
         //Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
-        /*
-        //Set center of rotation at center of image
-        Matrix.translateM(mMVPMatrix, 0, width/2, height/2, 0);
-        //Create a rotation transformation for the triangle
-        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, 1);
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
-        //Undo previous translation
-        Matrix.translateM(scratch, 0, -width/2, -height/2, 0);
-        */
 
         for (Image i : MainActivity.updateList_Image) {
             float[] mtx = mMVPMatrix.clone();

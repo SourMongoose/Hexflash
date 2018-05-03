@@ -50,9 +50,10 @@ class CircleButton implements Image {
     }
 
     public void draw(float[] m) {
-        float[] tmp = m.clone();
-        Matrix.translateM(tmp, 0, x, y, 0);
+        float[] mtx = m.clone();
+        Matrix.translateM(mtx, 0, x, y, 0);
+        Matrix.scaleM(mtx, 0, getR()/r, getR()/r, 1);
 
-        br.draw(tmp);
+        br.draw(mtx);
     }
 }
