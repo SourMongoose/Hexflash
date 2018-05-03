@@ -1,4 +1,4 @@
-package com.chrisx.opengltest;
+package com.chrisx.hexflash;
 
 import android.opengl.GLES20;
 

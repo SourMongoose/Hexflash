@@ -6,6 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/draw_area"
-    tools:context="com.chrisx.hexflash.MainActivity">
+    tools:context="com.chrisx.hexflash.OpenGLActivity">
 
 </LinearLayout>

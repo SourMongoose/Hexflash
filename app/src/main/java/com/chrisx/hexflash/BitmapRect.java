@@ -1,4 +1,4 @@
-package com.chrisx.opengltest;
+package com.chrisx.hexflash;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;

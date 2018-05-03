@@ -1,4 +1,4 @@
-package com.chrisx.opengltest;
+package com.chrisx.hexflash;
 
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
@@ -27,5 +27,10 @@ public class OpenGLActivity extends Activity {
     protected void onResume() {
         super.onResume();
         mGLView.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+        mGLView.buildLayer();
     }
 }
