@@ -151,7 +151,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                 wpx = Resources.getSystem().getDisplayMetrics().widthPixels,
                 hpx = Resources.getSystem().getDisplayMetrics().heightPixels;
         scaleFactor = Math.min(1,(float)targetH/hpx);
-        bmp = Bitmap.createBitmap(Math.round(wpx*scaleFactor),targetH,Bitmap.Config.RGB_565);
+        bmp = Bitmap.createBitmap(Math.round(wpx*scaleFactor),Math.round(hpx*scaleFactor),Bitmap.Config.RGB_565);
 
         //creates canvas
         canvas = new Canvas(bmp);
