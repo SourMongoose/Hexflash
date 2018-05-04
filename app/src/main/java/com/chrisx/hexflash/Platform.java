@@ -2,8 +2,6 @@ package com.chrisx.hexflash;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 
 class Platform {
     private float x, y, w;
@@ -13,8 +11,6 @@ class Platform {
 
     private Canvas c;
     private Bitmap bmp;
-
-    private Paint hitbox;
 
     //constructor for lilypad
     Platform(Canvas c, float x, float y) {
@@ -32,10 +28,6 @@ class Platform {
                     Math.random() < 0.5 ? MainActivity.candypad_orange : MainActivity.candypad_yellow;
         else
             bmp = Math.random() > 0.2 ? MainActivity.lilypad : MainActivity.lilypadlotus;
-
-        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
-        hitbox.setStyle(Paint.Style.STROKE);
-        hitbox.setColor(Color.WHITE);
     }
     //constructor for scuttle
     Platform(Canvas c, float x, float y, float speed) {
@@ -48,10 +40,6 @@ class Platform {
 
         angle = Math.random() < 0.5 ? 90 : 270;
         bmp = MainActivity.getRiverSkin().equals("candy") ? MainActivity.scuttler_candy : MainActivity.scuttler;
-
-        hitbox = new Paint(Paint.ANTI_ALIAS_FLAG);
-        hitbox.setStyle(Paint.Style.STROKE);
-        hitbox.setColor(Color.WHITE);
     }
 
     float getX() {
@@ -96,9 +84,5 @@ class Platform {
         else c.drawBitmap(bmp,-w/1.7f,-w/1.7f,null);
 
         c.restore();
-    }
-
-    void drawHitbox() {
-        c.drawCircle(x, y, w/2, hitbox);
     }
 }
