@@ -9,13 +9,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -147,8 +150,8 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         //creates the bitmap
         //note: Star 4.5 is 480x854
         int targetH = 854,
-                wpx = Resources.getSystem().getDisplayMetrics().widthPixels,
-                hpx = Resources.getSystem().getDisplayMetrics().heightPixels;
+                wpx = getAppUsableScreenSize(this).x,
+                hpx = getAppUsableScreenSize(this).y;
         scaleFactor = Math.min(1,(float)targetH/hpx);
         bmp = Bitmap.createBitmap(Math.round(wpx*scaleFactor),Math.round(hpx*scaleFactor),Bitmap.Config.RGB_565);
 
@@ -1111,6 +1114,14 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     public void onRewardedVideoStarted() {}
     @Override
     public void onRewardedVideoCompleted() {}
+
+    private Point getAppUsableScreenSize(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
+    }
 
     //shorthand for w() and h()
     static float w() {
