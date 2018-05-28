@@ -6,8 +6,8 @@ android {
         applicationId "com.chrisx.hexflash"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 9
-        versionName "1.8"
+        versionCode 12
+        versionName "1.11"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

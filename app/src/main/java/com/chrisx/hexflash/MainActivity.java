@@ -9,14 +9,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -33,6 +35,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     private Bitmap bmp;
     static Canvas canvas;
     private LinearLayout ll;
+    private float scaleFactor;
 
     private RewardedVideoAd rva;
 
@@ -146,9 +149,11 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         //creates the bitmap
         //note: Star 4.5 is 480x854
-        bmp = Bitmap.createBitmap(Resources.getSystem().getDisplayMetrics().widthPixels,
-                Resources.getSystem().getDisplayMetrics().heightPixels,
-                Bitmap.Config.RGB_565);
+        int targetH = 854,
+                wpx = getAppUsableScreenSize(this).x,
+                hpx = getAppUsableScreenSize(this).y;
+        scaleFactor = Math.min(1,(float)targetH/hpx);
+        bmp = Bitmap.createBitmap(Math.round(wpx*scaleFactor),Math.round(hpx*scaleFactor),Bitmap.Config.RGB_565);
 
         //creates canvas
         canvas = new Canvas(bmp);
@@ -243,11 +248,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         riverbmp_candy = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.river_candy_mediumres_compressed, rgb565),
                 Math.round(w()),Math.round(w()*3),false);
 
-        restart = BitmapFactory.decodeResource(res, R.drawable.restart);
-        home = BitmapFactory.decodeResource(res, R.drawable.home);
-        shop = BitmapFactory.decodeResource(res, R.drawable.shop);
-        play = BitmapFactory.decodeResource(res, R.drawable.play);
-        more = BitmapFactory.decodeResource(res, R.drawable.more);
         leftarrow = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.leftarrow),
                 Math.round(c854(80)),Math.round(c854(80)),false);
         maxrange = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.maxrange),
@@ -351,6 +351,18 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
         left = new CircleButton(canvas,w()/2-offset,MIDDLE_Y1+c854(30),c854(40));
         cbs = new CircleButton[]{middle, right, left};
         cbs_pressed = new boolean[cbs.length];
+
+        restart = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.restart),
+                Math.round(middle.getR()*2/1.8f),Math.round(middle.getR()*2/1.8f),false);
+        home = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.home),
+                Math.round(right.getR()*2/1.9f),Math.round(right.getR()*2/1.9f),false);
+        shop = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.shop),
+                Math.round(left.getR()*2/1.414f),Math.round(left.getR()*2/1.414f),false);
+        play = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.play),
+                Math.round(middle.getR()/2+middle.getR()/1.6f),
+                Math.round(middle.getR()*2/1.8f),false);
+        more = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.more),
+                Math.round(right.getR()*2/1.9f),Math.round(right.getR()*2/1.9f),false);
 
         classic = new RoundRectButton(canvas,c480(48),c854(87),c480(432),c854(167),Color.BLACK);
         light = new RoundRectButton(canvas,c480(48),c854(187),c480(432),c854(267),Color.rgb(255,68,68));
@@ -696,8 +708,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
                                                 canvas.drawBitmap(video,w()-c854(75),c854(25),null);
                                                 adText.setAlpha(255);
                                             } else {
-                                                canvas.drawBitmap(video, new Rect(0,0,video.getWidth(),video.getHeight()),
-                                                        new RectF(w()-c854(75),c854(25),w()-c854(25),c854(75)), quarter);
+                                                canvas.drawBitmap(video,w()-c854(75),c854(25),quarter);
                                                 adText.setAlpha(64);
                                             }
                                             canvas.drawText("+10", w()-c854(50), c854(100), adText);
@@ -900,8 +911,10 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     @Override
     //handles touch events
     public boolean onTouchEvent(MotionEvent event) {
-        float X = event.getX(event.getActionIndex());
-        float Y = event.getY(event.getActionIndex());
+        float X = event.getX(event.getActionIndex())*scaleFactor;
+        float Y = event.getY(event.getActionIndex())*scaleFactor;
+        //Log.i("Touch","("+X+", "+Y+")");
+
         int action = event.getActionMasked();
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -1025,7 +1038,7 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             if (action == MotionEvent.ACTION_DOWN && !channeling) {
                 //start channeling with a speed dependent on screen-shift speed
                 waitingForTap = false;
-                float sec = (float) Math.min(2.5, player.getMaxRange() / Math.max(1.25,shiftSpeed) / FRAMES_PER_SECOND - 0.5);
+                float sec = (float) Math.min(2.5, player.getMaxRange() / Math.max(c854(1.25f),shiftSpeed) / FRAMES_PER_SECOND - 0.5);
                 if (gamemode.equals("scuttle")) sec *= 0.8;
                 else if (gamemode.equals("cc") || gamemode.equals("rr")) sec *= 0.5;
                 player.startChannel(sec);
@@ -1101,6 +1114,14 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
     public void onRewardedVideoStarted() {}
     @Override
     public void onRewardedVideoCompleted() {}
+
+    private Point getAppUsableScreenSize(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
+    }
 
     //shorthand for w() and h()
     static float w() {
@@ -1301,21 +1322,27 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         //play button
         middle.draw();
-        RectF tmp = new RectF(middle.getX()-middle.getR()/2f, middle.getY()-middle.getR()/1.8f,
-                middle.getX()+middle.getR()/1.6f, middle.getY()+middle.getR()/1.8f);
-        drawBmp(play, tmp);
+        canvas.save();
+        canvas.translate(middle.getX(),middle.getY());
+        if (middle.isPressed()) canvas.scale(0.9f,0.9f);
+        canvas.drawBitmap(play,-middle.getR()/2f,-middle.getR()/1.8f,null);
+        canvas.restore();
 
         //shop
         left.draw();
-        tmp = new RectF(left.getX()-left.getR()/1.414f, left.getY()-left.getR()/1.414f,
-                left.getX()+left.getR()/1.414f, left.getY()+left.getR()/1.414f);
-        drawBmp(shop, tmp);
+        canvas.save();
+        canvas.translate(left.getX(),left.getY());
+        if (left.isPressed()) canvas.scale(0.9f,0.9f);
+        canvas.drawBitmap(shop,-left.getR()/1.414f,-left.getR()/1.414f,null);
+        canvas.restore();
 
         //more gamemodes
         right.draw();
-        tmp = new RectF(right.getX()-right.getR()/1.9f, right.getY()-right.getR()/1.9f,
-                right.getX()+right.getR()/1.9f, right.getY()+right.getR()/1.9f);
-        drawBmp(more, tmp);
+        canvas.save();
+        canvas.translate(right.getX(),right.getY());
+        if (right.isPressed()) canvas.scale(0.9f,0.9f);
+        canvas.drawBitmap(home,-right.getR()/1.9f,-right.getR()/1.9f,null);
+        canvas.restore();
     }
 
     private void drawGameoverButtons() {
@@ -1323,21 +1350,27 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
 
         //restart button
         middle.draw();
-        RectF tmp = new RectF(middle.getX()-middle.getR()/1.8f, middle.getY()-middle.getR()/1.8f,
-                middle.getX()+middle.getR()/1.8f, middle.getY()+middle.getR()/1.8f);
-        drawBmp(restart, tmp);
+        canvas.save();
+        canvas.translate(middle.getX(),middle.getY());
+        if (middle.isPressed()) canvas.scale(0.9f,0.9f);
+        canvas.drawBitmap(restart,-middle.getR()/1.8f,-middle.getR()/1.8f,null);
+        canvas.restore();
 
         //shop
         left.draw();
-        tmp = new RectF(left.getX()-left.getR()/1.414f, left.getY()-left.getR()/1.414f,
-                left.getX()+left.getR()/1.414f, left.getY()+left.getR()/1.414f);
-        drawBmp(shop, tmp);
+        canvas.save();
+        canvas.translate(left.getX(),left.getY());
+        if (left.isPressed()) canvas.scale(0.9f,0.9f);
+        canvas.drawBitmap(shop,-left.getR()/1.414f,-left.getR()/1.414f,null);
+        canvas.restore();
 
         //back to home
         right.draw();
-        tmp = new RectF(right.getX()-right.getR()/1.9f, right.getY()-right.getR()/1.9f,
-                right.getX()+right.getR()/1.9f, right.getY()+right.getR()/1.9f);
-        drawBmp(home, tmp);
+        canvas.save();
+        canvas.translate(right.getX(),right.getY());
+        if (right.isPressed()) canvas.scale(0.9f,0.9f);
+        canvas.drawBitmap(home,-right.getR()/1.9f,-right.getR()/1.9f,null);
+        canvas.restore();
     }
     private void drawGameoverScreen() {
         canvas.drawColor(river);
