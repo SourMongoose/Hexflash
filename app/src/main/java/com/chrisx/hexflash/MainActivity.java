@@ -198,7 +198,6 @@ public class MainActivity extends Activity implements RewardedVideoAdListener {
             int h = Math.round(w() * tmp.getHeight() / tmp.getWidth());
             titlescreen = Bitmap.createScaledBitmap(tmp,Math.round(w()),h,false);
         }
-        tmp.recycle();
         
         porosnax = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, R.drawable.porosnax),
                 lilypad.getWidth()/3,lilypad.getWidth()/3,false);
